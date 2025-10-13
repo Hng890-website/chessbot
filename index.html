@@ -1,12 +1,60 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>mychess.org · Play chess free on web</title> 
+    <script type="text/javascript">
+        (function() {
+            let currentPath = window.location.pathname;
+            if (currentPath.endsWith('/') && !currentPath.toLowerCase().includes('index.html')) {
+                let newUrl = window.location.href + 'index.html';
+                window.location.replace(newUrl);
+            }
+        })();
+
+        // HÀM JS THỰC HIỆN ẨN THANH CÔNG CỤ (Phương pháp xóa mạnh mẽ)
+        function hideGoogleTranslateToolbar() {
+            // Iframe chính của thanh công cụ luôn có class này.
+            const toolbar = document.querySelector('.goog-te-banner-frame'); 
+            const body = document.body;
+
+            if (toolbar) {
+                // Xóa hẳn iframe khỏi DOM
+                toolbar.remove(); 
+                
+                // Đặt lại body để tránh khoảng trống
+                body.style.top = '0px';
+                body.style.marginTop = '0px';
+                body.style.paddingTop = '0px';
+                
+                // Dọn dẹp bất kỳ div skiptranslate nào khác mà Google thêm vào
+                const skipTranslateDiv = document.querySelector('.skiptranslate');
+                if (skipTranslateDiv) {
+                    skipTranslateDiv.remove();
+                }
+                
+                // Dừng việc kiểm tra liên tục sau khi đã ẩn thành công
+                clearInterval(window.translateIntervalId);
+                return true; // Đã ẩn
+            }
+            return false; // Chưa ẩn
+        }
+
+        // Hàm khởi tạo Google Translate Widget
+        function googleTranslateElementInit() {
+          new google.translate.TranslateElement({
+            pageLanguage: 'vi', 
+            includedLanguages: 'vi,en,es,fr,zh-CN', 
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false
+          }, 'google_translate_element');
+          
+          // **CAN THIỆP MẠNH NHẤT: Bắt đầu vòng lặp xóa liên tục**
+          // Vòng lặp này sẽ chạy mỗi 500ms để đảm bảo xóa thanh công cụ
+          // ngay sau khi Google Dịch cố gắng tạo nó.
+          window.translateIntervalId = setInterval(hideGoogleTranslateToolbar, 500);
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <link rel="stylesheet" href="style.css">
-    
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♞</text></svg>">
 </head>
 <body>
     <div class="container">
@@ -31,6 +79,9 @@
                 </div>
                 </nav>
         </header>
+
+        <div id="google_translate_element" style="display: none;"></div>
+
 
         <section id="home-screen" class="screen active">
             <h1>Chào mừng đến với mychess.org</h1>
