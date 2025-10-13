@@ -1,18 +1,47 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chess Bot Arena</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♞</text></svg>">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js"></script>
+    
     <script type="text/javascript">
+        
+        // **KHẮC PHỤC LỖI DỊCH (Quan trọng nhất): Đảm bảo URL luôn sạch và trỏ đúng file**
         (function() {
             let currentPath = window.location.pathname;
-            if (currentPath.endsWith('/') && !currentPath.toLowerCase().includes('index.html')) {
-                let newUrl = window.location.href + 'index.html';
+            let currentSearch = window.location.search;
+            let needsRedirect = false;
+            let newUrl = window.location.origin + currentPath;
+
+            // 1. Khắc phục 404 trên GitHub Pages (Đảm bảo URL kết thúc bằng index.html)
+            if (currentPath.endsWith('/') || !currentPath.toLowerCase().includes('index.html')) {
+                newUrl = newUrl.replace(/\/$/, '') + '/index.html';
+                needsRedirect = true;
+            }
+
+            // 2. Khắc phục lỗi "Can't translate": Xóa tất cả tham số dịch thuật Google Dịch
+            // Các tham số này gây lỗi: ?_x_tr_sl=vi&_x_tr_tl=en
+            if (currentSearch.includes('_x_tr_')) {
+                // Giữ nguyên path, chỉ xóa tham số dịch thuật
+                newUrl = newUrl.split('?')[0]; 
+                needsRedirect = true;
+            }
+            
+            // Nếu có thay đổi, chuyển hướng bằng replace() để tránh lịch sử lặp
+            if (needsRedirect) {
                 window.location.replace(newUrl);
             }
         })();
 
-        // HÀM JS THỰC HIỆN ẨN THANH CÔNG CỤ (Phương pháp xóa mạnh mẽ)
+        // HÀM JS THỰC HIỆN XÓA THANH CÔNG CỤ (Phương pháp xóa mạnh mẽ)
+        let translateIntervalId = null;
         function hideGoogleTranslateToolbar() {
-            // Iframe chính của thanh công cụ luôn có class này.
+            // Iframe chính của thanh công cụ
             const toolbar = document.querySelector('.goog-te-banner-frame'); 
             const body = document.body;
 
@@ -25,33 +54,32 @@
                 body.style.marginTop = '0px';
                 body.style.paddingTop = '0px';
                 
-                // Dọn dẹp bất kỳ div skiptranslate nào khác mà Google thêm vào
+                // Dọn dẹp div skiptranslate (chứa widget gốc)
                 const skipTranslateDiv = document.querySelector('.skiptranslate');
                 if (skipTranslateDiv) {
                     skipTranslateDiv.remove();
                 }
                 
                 // Dừng việc kiểm tra liên tục sau khi đã ẩn thành công
-                clearInterval(window.translateIntervalId);
-                return true; // Đã ẩn
+                clearInterval(translateIntervalId);
+                return true; 
             }
-            return false; // Chưa ẩn
+            return false; 
         }
 
         // Hàm khởi tạo Google Translate Widget
         function googleTranslateElementInit() {
           new google.translate.TranslateElement({
-            pageLanguage: 'vi', 
-            includedLanguages: 'vi,en,es,fr,zh-CN', 
+            pageLanguage: 'vi', // Ngôn ngữ gốc
+            includedLanguages: 'vi,en,es,fr,zh-CN', // Các ngôn ngữ hỗ trợ
             layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
             autoDisplay: false
           }, 'google_translate_element');
           
           // **CAN THIỆP MẠNH NHẤT: Bắt đầu vòng lặp xóa liên tục**
-          // Vòng lặp này sẽ chạy mỗi 500ms để đảm bảo xóa thanh công cụ
-          // ngay sau khi Google Dịch cố gắng tạo nó.
-          window.translateIntervalId = setInterval(hideGoogleTranslateToolbar, 500);
+          translateIntervalId = setInterval(hideGoogleTranslateToolbar, 500);
         }
+        
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     <link rel="stylesheet" href="style.css">
@@ -60,56 +88,64 @@
     <div class="container">
         
         <header class="main-menu">
-            <div class="logo">mychess.org</div>
+            <div class="logo">Chess Bot Arena</div>
             <nav>
-                <a href="#" onclick="showScreen('home'); return false;">Home</a>
-                <a href="#" onclick="showScreen('play'); return false;">Play</a>
-                <a href="#" onclick="showScreen('analyze'); return false;">Analyze</a>
-                <a href="#" onclick="showScreen('news'); return false;">News</a>
-
+                <a onclick="showScreen('home')">Trang chủ</a>
+                <a onclick="showScreen('add-news')">Thêm tin tức</a>
+                
                 <div class="dropdown">
-                    <button class="dropbtn">Language</button>
+                    <button class="dropbtn">Ngôn ngữ</button>
                     <div class="dropdown-content">
-                        <a href="#" onclick="translatePage('vi'); return false;" data-lang="vi">🇻🇳 Tiếng Việt</a>
-                        <a href="#" onclick="translatePage('en'); return false;" data-lang="en">🇺🇸 English</a>
-                        <a href="#" onclick="translatePage('es'); return false;" data-lang="es">🇪🇸 Español</a>
-                        <a href="#" onclick="translatePage('fr'); return false;" data-lang="fr">🇫🇷 Français</a>
-                        <a href="#" onclick="translatePage('zh-CN'); return false;" data-lang="zh">🇨🇳 中文 (Zhōngwén)</a>
+                        <div id="google_translate_element"></div>
+                        
+                        <a onclick="translatePage('vi')">Tiếng Việt</a>
+                        <a onclick="translatePage('en')">English</a>
+                        <a onclick="translatePage('es')">Español</a>
+                        <a onclick="translatePage('fr')">Français</a>
+                        <a onclick="translatePage('zh-CN')">简体中文</a>
                     </div>
                 </div>
-                </nav>
+            </nav>
         </header>
 
-        <div id="google_translate_element" style="display: none;"></div>
-
-
         <section id="home-screen" class="screen active">
-            <h1>Chào mừng đến với mychess.org</h1>
+            <h2>Chào mừng đến với Chess Bot Arena!</h2>
+            <p>Chọn đối thủ Bot của bạn hoặc bắt đầu một trận đấu với bạn bè.</p>
+            
             <div class="main-content-area">
                 
-                <div class="battle-column">
-                    <h2>Bắt đầu ván đấu</h2>
-                    <p>Hãy chọn chế độ chơi của bạn:</p>
-                    <div class="battle-actions">
-                        <button class="action-btn">Play Online (Chưa phát triển)</button>
-                        <button class="action-btn green-doit-btn" onclick="openBotSelection()">Play vs Bot</button>
+                <div class="news-column">
+                    <h3>Tin tức cờ vua (Mô phỏng)</h3>
+                    <div id="news-feed">
+                        <p><strong>25/10/2025:</strong> Magnus Carlsen vô địch giải Blitz Chess World Championship.</p>
+                        <p><strong>10/10/2025:</strong> Công nghệ AI mới hứa hẹn Bot cờ vua cấp độ 2000 Elo sắp ra mắt!</p>
+                        <p><strong>01/10/2025:</strong> Giải đấu Online Bot Arena thu hút 1 triệu người xem.</p>
                     </div>
                 </div>
 
-                <div class="news-column">
-                    <h2>Tin tức & Sự kiện</h2>
-                    <p><strong>01/01/2025:</strong> Ra mắt mychess.org Beta.</p>
-                    <p><strong>15/01/2025:</strong> Tích hợp Bot Engine Stockfish Level 1-5.</p>
-                    <a href="#" onclick="showScreen('news'); return false;">Xem thêm...</a>
+                <div class="battle-column">
+                    <h3>Bắt đầu trận đấu</h3>
+                    <p>Chọn chế độ chơi của bạn:</p>
+                    <div class="battle-actions">
+                        <button class="action-btn" onclick="showScreen('play')">Chơi với bạn bè (Local)</button>
+                        <button class="action-btn green-doit-btn" onclick="openBotSelection()">Chơi với Bot</button>
+                    </div>
+                    
+                    <p>Hoặc luyện tập chiến thuật:</p>
+                    <div class="battle-actions">
+                         <button class="action-btn" disabled>Giải câu đố (Sắp ra mắt)</button>
+                         <button class="action-btn" disabled>Phân tích game (Sắp ra mắt)</button>
+                    </div>
                 </div>
-
             </div>
         </section>
 
         <section id="play-screen" class="screen">
             <div class="game-header">
-                <h2>You (White) vs Bot Level 1 (Black)</h2>
-                <button class="action-btn" onclick="openBotSelection()">Chơi lại</button>
+                <h2>Bạn vs Bot (Level 1)</h2>
+                <div>
+                    <button class="action-btn" onclick="showScreen('home')">Kết thúc game</button>
+                </div>
             </div>
             
             <div class="game-layout">
@@ -120,62 +156,61 @@
                 </div>
 
                 <div class="game-chat-news">
+                    <h3>Chat với Bot</h3>
                     <div class="chat-room">
-                        <h3>Chat</h3>
-                        <p><strong>System:</strong> Bàn cờ đã sẵn sàng!</p>
+                        <p><strong>Bot Level 1:</strong> Chào mừng, chúc bạn một trận đấu hay!</p>
+                        
                         <div class="chat-input-area">
-                            <input type="text" placeholder="Nhập tin nhắn..." id="chat-input">
-                            <button class="action-btn send-btn">Gửi</button>
+                            <input type="text" placeholder="Gõ tin nhắn..." />
+                            <button class="send-btn action-btn">Gửi</button>
                         </div>
+                    </div>
+                    
+                    <div class="game-info">
+                        <h3>Thông tin</h3>
+                        <p><strong>Lượt đi:</strong> Trắng</p>
+                        <p><strong>Thời gian:</strong> 00:00</p>
                     </div>
                 </div>
             </div>
         </section>
-        
-        <section id="analyze-screen" class="screen">
-            <h2>Phân tích Ván cờ (Analyze)</h2>
-            <p>Tính năng này đang được phát triển.</p>
-        </section>
 
-        <section id="news-screen" class="screen">
-            <h2>Tin tức & Cập nhật</h2>
-            <p>Đây là trang tin tức chi tiết. Tính năng này đang được phát triển.</p>
+        <section id="add-news-screen" class="screen">
+            <h2>Thêm Tin Tức Mới</h2>
+            <p>Đây là khu vực giả lập để thêm nội dung (chỉ mang tính minh họa).</p>
+            <textarea style="width: 80%; height: 150px; padding: 10px;" placeholder="Nhập nội dung tin tức mới..."></textarea><br>
+            <button class="action-btn">Hoàn tất và trở về Trang chủ</button>
         </section>
         
-        <div id="modal-overlay">
-            <div class="select-option-popup">
-                <a href="#" class="close-btn" onclick="closeBotSelection(); return false;">&times;</a>
-                <h3>Chọn đối thủ</h3>
-                
-                <label>Tên Bot (Tùy chọn):</label>
-                <input type="text" id="bot-name" placeholder="Ví dụ: Stockfish L5" style="width: 90%; padding: 5px; margin-bottom: 15px;">
-                
-                <label>Cấp độ Bot:</label>
-                <div class="level-selection" id="level-selection">
-                    <button class="level-btn" data-level="1">Level 1</button>
-                    <button class="level-btn" data-level="2">Level 2</button>
-                    <button class="level-btn" data-level="3">Level 3</button>
-                    <button class="level-btn" data-level="4">Level 4</button>
-                    <button class="level-btn" data-level="5">Level 5</button>
-                    <button class="level-btn" data-level="6">Level 6</button>
-                    <button class="level-btn" data-level="7">Level 7</button>
-                    <button class="level-btn" data-level="8">Level 8</button>
-                    <button class="level-btn" data-level="9">Level 9</button>
-                    <button class="level-btn" data-level="10">Level 10</button>
-                </div>
-                
-                <label>Quân cờ của bạn:</label>
-                <div class="color-selection" id="color-selection">
-                    <button class="color-btn" data-color="Trắng">♔</button>
-                    <button class="color-btn" data-color="Đen">♚</button>
-                </div>
-                
-                <button class="action-btn start-btn green-doit-btn" onclick="startBotMatch()">Bắt đầu Ván đấu!</button>
+    </div>
+
+    <div id="modal-overlay">
+        <div class="select-option-popup">
+            <a class="close-btn" onclick="closeBotSelection()">&times;</a>
+            <h3>Chọn Bot và Màu cờ</h3>
+            
+            <label>Cấp độ Bot:</label>
+            <div id="level-selection" class="level-selection">
+                <button class="level-btn" data-level="1">Lvl 1</button>
+                <button class="level-btn" data-level="3">Lvl 3</button>
+                <button class="level-btn" data-level="5">Lvl 5</button>
+                <button class="level-btn" data-level="7">Lvl 7</button>
+                <button class="level-btn" data-level="10">Lvl 10</button>
             </div>
+            
+            <label>Màu cờ của bạn:</label>
+            <div id="color-selection" class="color-selection">
+                <button class="color-btn" data-color="Trắng">♔</button>
+                <button class="color-btn" data-color="Đen">♚</button>
+            </div>
+            
+            <label>Tên Bot (tùy chọn):</label>
+            <input type="text" id="bot-name" placeholder="Ví dụ: Deep Blue Lite" style="width: 90%; margin-bottom: 15px; padding: 8px;">
+
+            <button class="action-btn start-btn" onclick="startBotMatch()">Bắt đầu trận đấu</button>
         </div>
     </div>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
