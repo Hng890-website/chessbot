@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mychess.org · Play chess free on web</title> 
+    <link rel="stylesheet" href="style.css">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>♞</text></svg>">
+</head>
+<body>
+    <div class="container">
+        
+        <header class="main-menu">
+            <div class="logo">mychess.org</div>
+            <nav>
+                <a href="#" onclick="showScreen('home'); return false;">Home</a>
+                <a href="#" onclick="showScreen('play'); return false;">Play</a>
+                <a href="#" onclick="showScreen('analyze'); return false;">Analyze</a>
+                <a href="#" onclick="showScreen('news'); return false;">News</a>
+
+                <div class="dropdown">
+                    <button class="dropbtn">Language</button>
+                    <div class="dropdown-content">
+                        <a href="#" onclick="translatePage('vi'); return false;" data-lang="vi">🇻🇳 Tiếng Việt</a>
+                        <a href="#" onclick="translatePage('en'); return false;" data-lang="en">🇺🇸 English</a>
+                        <a href="#" onclick="translatePage('es'); return false;" data-lang="es">🇪🇸 Español</a>
+                        <a href="#" onclick="translatePage('fr'); return false;" data-lang="fr">🇫🇷 Français</a>
+                        <a href="#" onclick="translatePage('zh-CN'); return false;" data-lang="zh">🇨🇳 中文 (Zhōngwén)</a>
+                    </div>
+                </div>
+                </nav>
+        </header>
+
+        <section id="home-screen" class="screen active">
+            <h1>Chào mừng đến với mychess.org</h1>
+            <div class="main-content-area">
+                
+                <div class="battle-column">
+                    <h2>Bắt đầu ván đấu</h2>
+                    <p>Hãy chọn chế độ chơi của bạn:</p>
+                    <div class="battle-actions">
+                        <button class="action-btn">Play Online (Chưa phát triển)</button>
+                        <button class="action-btn green-doit-btn" onclick="openBotSelection()">Play vs Bot</button>
+                    </div>
+                </div>
+
+                <div class="news-column">
+                    <h2>Tin tức & Sự kiện</h2>
+                    <p><strong>01/01/2025:</strong> Ra mắt mychess.org Beta.</p>
+                    <p><strong>15/01/2025:</strong> Tích hợp Bot Engine Stockfish Level 1-5.</p>
+                    <a href="#" onclick="showScreen('news'); return false;">Xem thêm...</a>
+                </div>
+
+            </div>
+        </section>
+
+        <section id="play-screen" class="screen">
+            <div class="game-header">
+                <h2>You (White) vs Bot Level 1 (Black)</h2>
+                <button class="action-btn" onclick="openBotSelection()">Chơi lại</button>
+            </div>
+            
+            <div class="game-layout">
+                
+                <div id="chessboard-container">
+                    <div id="chessboard">
+                        </div>
+                </div>
+
+                <div class="game-chat-news">
+                    <div class="chat-room">
+                        <h3>Chat</h3>
+                        <p><strong>System:</strong> Bàn cờ đã sẵn sàng!</p>
+                        <div class="chat-input-area">
+                            <input type="text" placeholder="Nhập tin nhắn..." id="chat-input">
+                            <button class="action-btn send-btn">Gửi</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="analyze-screen" class="screen">
+            <h2>Phân tích Ván cờ (Analyze)</h2>
+            <p>Tính năng này đang được phát triển.</p>
+        </section>
+
+        <section id="news-screen" class="screen">
+            <h2>Tin tức & Cập nhật</h2>
+            <p>Đây là trang tin tức chi tiết. Tính năng này đang được phát triển.</p>
+        </section>
+        
+        <div id="modal-overlay">
+            <div class="select-option-popup">
+                <a href="#" class="close-btn" onclick="closeBotSelection(); return false;">&times;</a>
+                <h3>Chọn đối thủ</h3>
+                
+                <label>Tên Bot (Tùy chọn):</label>
+                <input type="text" id="bot-name" placeholder="Ví dụ: Stockfish L5" style="width: 90%; padding: 5px; margin-bottom: 15px;">
+                
+                <label>Cấp độ Bot:</label>
+                <div class="level-selection" id="level-selection">
+                    <button class="level-btn" data-level="1">Level 1</button>
+                    <button class="level-btn" data-level="2">Level 2</button>
+                    <button class="level-btn" data-level="3">Level 3</button>
+                    <button class="level-btn" data-level="4">Level 4</button>
+                    <button class="level-btn" data-level="5">Level 5</button>
+                    <button class="level-btn" data-level="6">Level 6</button>
+                    <button class="level-btn" data-level="7">Level 7</button>
+                    <button class="level-btn" data-level="8">Level 8</button>
+                    <button class="level-btn" data-level="9">Level 9</button>
+                    <button class="level-btn" data-level="10">Level 10</button>
+                </div>
+                
+                <label>Quân cờ của bạn:</label>
+                <div class="color-selection" id="color-selection">
+                    <button class="color-btn" data-color="Trắng">♔</button>
+                    <button class="color-btn" data-color="Đen">♚</button>
+                </div>
+                
+                <button class="action-btn start-btn green-doit-btn" onclick="startBotMatch()">Bắt đầu Ván đấu!</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
