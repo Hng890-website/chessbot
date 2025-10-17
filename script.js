@@ -55,16 +55,22 @@ function formatTime(seconds) {
 
 /**
  * TÌM VỊ TRÍ VUA CỦA MỘT MÀU QUÂN TRÊN BÀN CỜ
+ * 🚨 ĐÃ SỬA: Đảm bảo logic lặp qua mảng 8x8 (flat array)
  * @param {string} color 'w' hoặc 'b'
  * @returns {string|null} Tọa độ ô cờ (ví dụ: 'e1') hoặc null nếu không tìm thấy.
  */
 function findKingSquare(color) {
     if (!game) return null;
-    const board = game.board().flat();
-    for (let i = 0; i < board.length; i++) {
-        const piece = board[i];
-        if (piece && piece.type === 'k' && piece.color === color) {
-            return indexToSquare(i);
+    const board = game.board(); // Lấy mảng 8x8
+    
+    for (let r = 0; r < 8; r++) {
+        for (let c = 0; c < 8; c++) {
+            const piece = board[r][c];
+            if (piece && piece.type === 'k' && piece.color === color) {
+                // Chuyển đổi tọa độ mảng [r][c] thành tọa độ cờ vua (a1-h8)
+                const index = r * 8 + c;
+                return indexToSquare(index);
+            }
         }
     }
     return null;
@@ -572,7 +578,6 @@ function checkGameStatus() {
 
 /**
  * Hàm hỗ trợ để áp dụng/xóa hiệu ứng glow cho Vua bị chiếu
- * 🚨 ĐÃ SỬA LỖI LOGIC: Dùng findKingSquare(color) thay vì game.king_square(color)
  */
 function highlightCheckState() {
     // 1. Xóa tất cả các hiệu ứng cũ
@@ -582,7 +587,8 @@ function highlightCheckState() {
 
     // 2. Nếu game đang bị chiếu, tìm Vua của bên đang bị chiếu và thêm hiệu ứng
      if (game && game.in_check()) {
-         const checkedKingSquare = findKingSquare(game.turn()); // SỬA LỖI Ở ĐÂY
+         // Sử dụng hàm đã sửa lỗi findKingSquare
+         const checkedKingSquare = findKingSquare(game.turn()); 
          
          if (checkedKingSquare) {
              const kingElement = document.querySelector(`[data-square="${checkedKingSquare}"]`);
