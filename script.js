@@ -107,7 +107,7 @@ function startBotMatch() {
     const botOppositeColor = selectedBotColor === "Trắng" ? "Đen" : "Trắng";
     
     document.querySelector('#play-screen .game-header h2').textContent = 
-        `You (${userColor}) vs ${botName} (Level ${selectedBotLevel}) (${botOppositeColor})`;
+        `Bạn (${userColor}) vs ${botName} (Cấp độ ${selectedBotLevel}) (${botOppositeColor})`;
 
     const chatRoom = document.querySelector('.chat-room');
     if (chatRoom) {
@@ -173,6 +173,7 @@ function createBoardStructure() {
 
 /**
  * Đặt quân cờ vào các ô tương ứng. Dùng cho render lần đầu và cập nhật sau khi animation kết thúc.
+ * Đã thêm logic hiệu ứng Vua bị chiếu.
  */
 function positionPieces(boardState) {
     const pieceSymbols = { 'k': '♔', 'q': '♕', 'r': '♖', 'b': '♗', 'n': '♘', 'p': '♙' };
@@ -182,8 +183,9 @@ function positionPieces(boardState) {
         const index = squareToIndex(squareName);
         const pieceData = boardState[index];
         
-        // Xóa quân cờ cũ
+        // Xóa quân cờ cũ và hiệu ứng glow
         squareElement.innerHTML = ''; 
+        squareElement.classList.remove('king-in-check');
 
         if (pieceData) {
             const isWhite = pieceData.color === 'w';
@@ -195,6 +197,14 @@ function positionPieces(boardState) {
             pieceSpan.dataset.piece = pieceData.color + pieceData.type; // Thêm data để dễ dàng nhận dạng
             
             squareElement.appendChild(pieceSpan);
+
+            // 🚨 LOGIC MỚI: Thêm hiệu ứng glow cho Vua nếu bị chiếu
+            if (pieceData.type === 'k' && game.in_check()) {
+                const kingColor = pieceData.color;
+                if (game.turn() === kingColor) { // Chỉ hiển thị glow cho Vua của lượt đi hiện tại đang bị chiếu
+                    squareElement.classList.add('king-in-check');
+                }
+            }
         }
     });
 }
@@ -259,12 +269,10 @@ function animateMove(fromSquare, toSquare, move) {
 
         if (moveResult) {
             
-            // 🚨 LOGIC MỚI: Ghi lại nước đi vào Chat/Log (Bao gồm O-O và O-O-O)
+            // 🚨 ĐÃ SỬA: Ghi lại nước đi vào Chat/Log (Không có "System")
             const moveNotation = moveResult.san;
-            const isWhite = moveResult.color === 'w';
-            const player = isWhite ? 'Trắng' : 'Đen';
-            const logMessage = `Nước đi của ${player}: ${moveNotation}`;
-            addMessageToChat('System', logMessage); 
+            const player = moveResult.color === 'w' ? 'Bạn' : 'Bot'; // Xác định người chơi thực hiện nước đi
+            addMessageToChat(player, `Nước đi: ${moveNotation}`); 
             
             // 2.2. Dọn dẹp và đặt lại vị trí
             fromElement.innerHTML = ''; // Xóa quân cờ khỏi ô cũ
@@ -365,12 +373,22 @@ function tryMove(fromSquare, toSquare) {
 // --- 5. FUNCTION: GAME LOGIC & BOT (CÓ MÔ PHỎNG LEVEL) ---
 
 function checkGameStatus() {
+    // Xóa hiệu ứng glow đỏ trước khi kiểm tra trạng thái mới
+    document.querySelectorAll('.square.king-in-check').forEach(sq => {
+        sq.classList.remove('king-in-check');
+    });
+
     if (game.in_checkmate()) {
         const winner = game.turn() === 'w' ? 'Đen' : 'Trắng';
         addMessageToChat('System', `Game Over! ${winner} thắng bằng Chiếu hết.`);
     } else if (game.in_draw()) {
         addMessageToChat('System', `Game Over! Hòa cờ.`);
     } else if (game.in_check()) {
+        const checkedKingSquare = game.king_square(game.turn()); // Lấy ô Vua bị chiếu
+        const kingElement = document.querySelector(`[data-square="${checkedKingSquare}"]`);
+        if (kingElement) {
+            kingElement.classList.add('king-in-check'); // Thêm hiệu ứng glow đỏ
+        }
         addMessageToChat('System', `${game.turn() === 'w' ? 'Trắng' : 'Đen'} đang bị chiếu!`);
     }
 }
@@ -494,12 +512,12 @@ function handleSendMessage(inputElement) {
     const message = inputElement.value.trim();
     if (message === "") return;
 
-    addMessageToChat('You', message);
+    addMessageToChat('Bạn', message); // 🚨 ĐÃ SỬA: Tin nhắn của bạn cũng không có "System"
     inputElement.value = '';
 
     const headerText = document.querySelector('#play-screen .game-header h2').textContent;
-    const botNameMatch = headerText.match(/vs (.*?) \(Level/);
-    const botName = botNameMatch ? botNameMatch[1].trim() : `Bot Level ${selectedBotLevel}`;
+    const botNameMatch = headerText.match(/vs (.*?) \(Cấp độ/); // Đã sửa "Level" thành "Cấp độ"
+    const botName = botNameMatch ? botNameMatch[1].trim() : `Bot Cấp độ ${selectedBotLevel}`;
     
     botResponse(message, botName, selectedBotLevel);
 }
