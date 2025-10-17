@@ -53,6 +53,23 @@ function formatTime(seconds) {
     return `${formattedMinutes}:${formattedSeconds}`;
 }
 
+/**
+ * TÌM VỊ TRÍ VUA CỦA MỘT MÀU QUÂN TRÊN BÀN CỜ
+ * @param {string} color 'w' hoặc 'b'
+ * @returns {string|null} Tọa độ ô cờ (ví dụ: 'e1') hoặc null nếu không tìm thấy.
+ */
+function findKingSquare(color) {
+    if (!game) return null;
+    const board = game.board().flat();
+    for (let i = 0; i < board.length; i++) {
+        const piece = board[i];
+        if (piece && piece.type === 'k' && piece.color === color) {
+            return indexToSquare(i);
+        }
+    }
+    return null;
+}
+
 // --- TIMER LOGIC ---
 
 /**
@@ -345,7 +362,6 @@ function createBoardStructure() {
 
 /**
  * Đặt quân cờ vào các ô tương ứng.
- * 🚨 LƯU Ý: Đã xóa logic kiểm tra check khỏi đây. Check sẽ được xử lý riêng bởi highlightCheckState()
  */
 function positionPieces(boardState) {
     if (!game) return; 
@@ -358,7 +374,7 @@ function positionPieces(boardState) {
         // Xóa quân cờ cũ và hiệu ứng highlight/glow
         squareElement.innerHTML = ''; 
         squareElement.classList.remove('selected', 'highlight-move');
-        // Giữ lại lớp 'king-in-check' nếu có (sẽ được cập nhật ở highlightCheckState)
+        // Lưu ý: KHÔNG xóa 'king-in-check' ở đây, để nó được kiểm soát bởi highlightCheckState
 
         if (pieceData) {
             const isWhite = pieceData.color === 'w';
@@ -470,7 +486,6 @@ function handleSquareClick(event) {
     const isPlayerTurn = game.turn() === playerColorChar;
     
     if (!isPlayerTurn) {
-        // Không phải lượt của người chơi, bỏ qua
         return; 
     }
 
@@ -557,7 +572,7 @@ function checkGameStatus() {
 
 /**
  * Hàm hỗ trợ để áp dụng/xóa hiệu ứng glow cho Vua bị chiếu
- * 🚨 ĐÃ SỬA LỖI LOGIC ĐỂ CHỈ KIỂM TRA LƯỢT ĐI HIỆN TẠI
+ * 🚨 ĐÃ SỬA LỖI LOGIC: Dùng findKingSquare(color) thay vì game.king_square(color)
  */
 function highlightCheckState() {
     // 1. Xóa tất cả các hiệu ứng cũ
@@ -567,10 +582,13 @@ function highlightCheckState() {
 
     // 2. Nếu game đang bị chiếu, tìm Vua của bên đang bị chiếu và thêm hiệu ứng
      if (game && game.in_check()) {
-         const checkedKingSquare = game.king_square(game.turn()); 
-         const kingElement = document.querySelector(`[data-square="${checkedKingSquare}"]`);
-         if (kingElement) {
-             kingElement.classList.add('king-in-check'); 
+         const checkedKingSquare = findKingSquare(game.turn()); // SỬA LỖI Ở ĐÂY
+         
+         if (checkedKingSquare) {
+             const kingElement = document.querySelector(`[data-square="${checkedKingSquare}"]`);
+             if (kingElement) {
+                 kingElement.classList.add('king-in-check'); 
+             }
          }
      }
 }
@@ -697,7 +715,7 @@ function handleSendMessage(inputElement) {
 
     const headerText = document.querySelector('#play-screen .game-header h2').textContent;
     const botNameMatch = headerText.match(/vs (.*?) \(Cấp độ/); 
-    const botName = botNameMatch ? botName[1].trim() : `Bot Cấp độ ${selectedBotLevel}`;
+    const botName = botNameMatch ? botNameMatch[1].trim() : `Bot Cấp độ ${selectedBotLevel}`;
     
     botResponse(message, botName, selectedBotLevel);
 }
