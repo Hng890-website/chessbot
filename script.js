@@ -13,7 +13,6 @@ let whiteTime = INITIAL_TIME_SECONDS;
 let blackTime = INITIAL_TIME_SECONDS;
 let timerInterval = null; // Đồng hồ đếm ngược của người chơi
 
-// Thêm biến cho tổng thời gian chơi
 let totalTimeSeconds = 0; 
 let totalTimeInterval = null; // Đồng hồ tổng thời gian
 
@@ -144,7 +143,7 @@ function startTimer() {
 }
 
 /**
- * Dừng đồng hồ.
+ * Dừng đồng hồ đếm ngược.
  */
 function stopTimer() {
     if (timerInterval) clearInterval(timerInterval);
@@ -195,7 +194,7 @@ function showScreen(screenName) {
     }
     
     if (screenName !== 'play') {
-        stopAllTimers(); // Dừng tất cả đồng hồ khi rời màn hình chơi
+        stopAllTimers(); 
     }
 
     if (screenName === 'play') {
@@ -285,7 +284,7 @@ function startBotMatch() {
         // 5. Bắt đầu game và logic lượt đi
         switchTurnDisplay(game.turn());
         startTimer(); 
-        startTotalTimer(); // BẮT ĐẦU ĐỒNG HỒ TỔNG THỜI GIAN
+        startTotalTimer(); 
 
         // 6. Nếu người chơi chọn Đen (Bot là Trắng), Bot đi trước
         if (userColorChar !== game.turn()) {
@@ -311,7 +310,7 @@ function initializeChessboard() {
     
     createBoardStructure();
     positionPieces(game.board().flat());
-    checkGameStatus();
+    checkGameStatus(); // Kiểm tra trạng thái ngay sau khi khởi tạo (dùng để highlight)
 }
 
 /**
@@ -345,24 +344,21 @@ function createBoardStructure() {
 }
 
 /**
- * Đặt quân cờ vào các ô tương ứng VÀ áp dụng hiệu ứng glow.
+ * Đặt quân cờ vào các ô tương ứng.
+ * 🚨 LƯU Ý: Đã xóa logic kiểm tra check khỏi đây. Check sẽ được xử lý riêng bởi highlightCheckState()
  */
 function positionPieces(boardState) {
     if (!game) return; 
     const pieceSymbols = { 'k': '♔', 'q': '♕', 'r': '♖', 'b': '♗', 'n': '♘', 'p': '♙' };
     
-    let checkedKingSquare = null;
-    if (game.in_check() && !game.in_checkmate()) {
-        checkedKingSquare = game.king_square(game.turn()); 
-    }
-    
     document.querySelectorAll('.square').forEach(squareElement => {
         const squareName = squareElement.dataset.square;
         const pieceData = game.get(squareName); 
         
-        // Xóa quân cờ cũ và hiệu ứng glow
+        // Xóa quân cờ cũ và hiệu ứng highlight/glow
         squareElement.innerHTML = ''; 
-        squareElement.classList.remove('king-in-check', 'selected', 'highlight-move');
+        squareElement.classList.remove('selected', 'highlight-move');
+        // Giữ lại lớp 'king-in-check' nếu có (sẽ được cập nhật ở highlightCheckState)
 
         if (pieceData) {
             const isWhite = pieceData.color === 'w';
@@ -374,13 +370,11 @@ function positionPieces(boardState) {
             pieceSpan.dataset.piece = pieceData.color + pieceData.type; 
             
             squareElement.appendChild(pieceSpan);
-
-            // Áp dụng glow
-            if (checkedKingSquare && squareName === checkedKingSquare) {
-                squareElement.classList.add('king-in-check');
-            }
         }
     });
+    
+    // Gọi hàm highlight sau khi đã đặt quân cờ mới
+    highlightCheckState();
 }
 
 /**
@@ -390,7 +384,6 @@ function animateMove(fromSquare, toSquare, move) {
     if (!game) return;
     
     const fromElement = document.querySelector(`[data-square="${fromSquare}"]`);
-    const toElement = document.querySelector(`[data-square="${toSquare}"]`);
     const pieceElement = fromElement.querySelector('span');
 
     if (!pieceElement) return;
@@ -404,23 +397,22 @@ function animateMove(fromSquare, toSquare, move) {
     const fromRow = Math.floor(fromIndex / 8);
     const fromCol = fromIndex % 8;
     const toRow = Math.floor(toIndex / 8);
-    const toCol = indexToSquare(toIndex) % 8; // Lỗi cú pháp
-    
-    // Sửa lỗi ở đây
-    const toColNew = toIndex % 8;
+    const toCol = toIndex % 8;
 
     const isFlipped = document.getElementById('chessboard').classList.contains('board-flipped');
     
     let dx, dy;
     if (isFlipped) {
-        dx = (fromCol - toColNew) * SQUARE_SIZE;
+        dx = (fromCol - toCol) * SQUARE_SIZE;
         dy = (fromRow - toRow) * SQUARE_SIZE;
     } else {
-        dx = (toColNew - fromCol) * SQUARE_SIZE;
+        dx = (toCol - fromCol) * SQUARE_SIZE;
         dy = (toRow - fromRow) * SQUARE_SIZE;
     }
     
-    toElement.innerHTML = ''; 
+    // Tạm thời ẩn quân cờ ở ô đích nếu có để animation không bị chồng
+    const toElement = document.querySelector(`[data-square="${toSquare}"]`);
+    if (toElement) toElement.innerHTML = ''; 
     
     pieceElement.style.transform = `translate(${dx}px, ${dy}px)`;
     pieceElement.style.zIndex = 100; 
@@ -448,11 +440,11 @@ function animateMove(fromSquare, toSquare, move) {
             positionPieces(game.board().flat()); 
 
             // Cập nhật lượt đi và kiểm tra trạng thái game
-            checkGameStatus();
-            
+            checkGameStatus(); // Kiểm tra trạng thái của lượt đi mới
+
             if (!game.game_over()) {
                 switchTurnDisplay(game.turn());
-                startTimer(); // Khởi động đồng hồ cho lượt mới
+                startTimer(); 
             } else {
                 stopAllTimers();
             }
@@ -478,6 +470,7 @@ function handleSquareClick(event) {
     const isPlayerTurn = game.turn() === playerColorChar;
     
     if (!isPlayerTurn) {
+        // Không phải lượt của người chơi, bỏ qua
         return; 
     }
 
@@ -548,29 +541,32 @@ function tryMove(fromSquare, toSquare, move) {
 function checkGameStatus() {
     if (!game) return;
     
-    document.querySelectorAll('.square.king-in-check').forEach(sq => {
-        sq.classList.remove('king-in-check');
-    });
+    highlightCheckState(); // Luôn gọi hàm này để cập nhật trạng thái glow chính xác
 
     if (game.in_checkmate()) {
-        stopAllTimers(); // Dừng tất cả đồng hồ khi Chiếu hết
+        stopAllTimers(); 
         const winner = game.turn() === 'w' ? 'Đen' : 'Trắng';
         addMessageToChat('Bot', `Game Over! ${winner} thắng bằng Chiếu hết.`);
-        highlightCheckState();
     } else if (game.in_draw()) {
-        stopAllTimers(); // Dừng tất cả đồng hồ khi Hòa cờ
+        stopAllTimers(); 
         addMessageToChat('Bot', `Game Over! Hòa cờ.`);
     } else if (game.in_check()) {
-        highlightCheckState();
         addMessageToChat('Bot', `${game.turn() === 'w' ? 'Trắng' : 'Đen'} đang bị chiếu!`);
     }
 }
 
 /**
- * Hàm hỗ trợ để áp dụng hiệu ứng glow cho Vua bị chiếu
+ * Hàm hỗ trợ để áp dụng/xóa hiệu ứng glow cho Vua bị chiếu
+ * 🚨 ĐÃ SỬA LỖI LOGIC ĐỂ CHỈ KIỂM TRA LƯỢT ĐI HIỆN TẠI
  */
 function highlightCheckState() {
-     if (game.in_check()) {
+    // 1. Xóa tất cả các hiệu ứng cũ
+    document.querySelectorAll('.square.king-in-check').forEach(sq => {
+        sq.classList.remove('king-in-check');
+    });
+
+    // 2. Nếu game đang bị chiếu, tìm Vua của bên đang bị chiếu và thêm hiệu ứng
+     if (game && game.in_check()) {
          const checkedKingSquare = game.king_square(game.turn()); 
          const kingElement = document.querySelector(`[data-square="${checkedKingSquare}"]`);
          if (kingElement) {
@@ -618,7 +614,12 @@ function makeBotMove() {
             }
         }
         
-        animateMove(move.from, move.to, move); 
+        if (move) {
+            animateMove(move.from, move.to, move); 
+        } else {
+             // Trường hợp không tìm thấy nước đi (rất hiếm, nhưng đề phòng)
+             checkGameStatus();
+        }
         
     }, delay);
 }
@@ -696,7 +697,7 @@ function handleSendMessage(inputElement) {
 
     const headerText = document.querySelector('#play-screen .game-header h2').textContent;
     const botNameMatch = headerText.match(/vs (.*?) \(Cấp độ/); 
-    const botName = botNameMatch ? botNameMatch[1].trim() : `Bot Cấp độ ${selectedBotLevel}`;
+    const botName = botNameMatch ? botName[1].trim() : `Bot Cấp độ ${selectedBotLevel}`;
     
     botResponse(message, botName, selectedBotLevel);
 }
