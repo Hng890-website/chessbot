@@ -201,7 +201,8 @@ body {
 /* Ký tự quân cờ (span) */
 .square span {
     line-height: 1; /* Căn giữa ký tự Unicode */
-    transition: transform 0.2s ease-out, box-shadow 0.2s, filter 0.2s; /* Đã thêm transition cho transform */
+    /* ĐẢM BẢO CÓ DÒNG NÀY ĐỂ ANIMATION HOẠT ĐỘNG */
+    transition: transform 0.2s ease-out, box-shadow 0.2s, filter 0.2s; 
     position: relative;
     z-index: 2;
     pointer-events: none; /* Rất quan trọng để click vào ô cờ chứ không phải quân cờ */
