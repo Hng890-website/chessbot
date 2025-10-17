@@ -1,4 +1,4 @@
-// script.js
+// script.js (VERSION ĐÃ LOẠI BỎ CHỨC NĂNG DỊCH THUẬT GÂY LỖI)
 
 // --- GLOBAL VARIABLES ---
 let selectedBotLevel = 1;
@@ -26,7 +26,6 @@ const PIECE_VALUES = {
     'k': 20000 // King (rất lớn để ưu tiên sống sót)
 };
 
-// Mảng chứa tất cả 64 tọa độ cờ vua từ 'a1' đến 'h8' (dùng để lặp)
 const ALL_SQUARES = [
     'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
     'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
@@ -41,33 +40,18 @@ const ALL_SQUARES = [
 
 // --- UTILITY FUNCTIONS ---
 
-/**
- * Chuyển đổi chỉ mục mảng (0-63) thành tọa độ cờ vua (a1-h8).
- * @param {number} index Chỉ mục từ 0 đến 63.
- * @returns {string} Tọa độ cờ vua.
- */
 function indexToSquare(index) {
     const file = String.fromCharCode('a'.charCodeAt(0) + (index % 8));
     const rank = 8 - Math.floor(index / 8);
     return file + rank;
 }
 
-/**
- * Chuyển đổi tọa độ cờ vua (a1-h8) thành chỉ mục mảng (0-63).
- * @param {string} square Tọa độ cờ vua.
- * @returns {number} Chỉ mục mảng.
- */
 function squareToIndex(square) {
     const file = square.charCodeAt(0) - 'a'.charCodeAt(0);
     const rank = 8 - parseInt(square[1]);
     return rank * 8 + file;
 }
 
-/**
- * Định dạng thời gian (giây) thành chuỗi MM:SS.
- * @param {number} seconds Tổng số giây.
- * @returns {string} Chuỗi thời gian đã định dạng.
- */
 function formatTime(seconds) {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -76,11 +60,6 @@ function formatTime(seconds) {
     return `${formattedMinutes}:${formattedSeconds}`;
 }
 
-/**
- * TÌM VỊ TRÍ VUA CỦA MỘT MÀU QUÂN TRÊN BÀN CỜ
- * @param {string} color 'w' hoặc 'b'
- * @returns {string|null} Tọa độ ô cờ (ví dụ: 'e1') hoặc null nếu không tìm thấy.
- */
 function findKingSquare(color) {
     if (!game) return null;
     
@@ -427,7 +406,6 @@ function animateMove(fromSquare, toSquare, move) {
     const pieceElement = fromElement.querySelector('span');
 
     if (!pieceElement) {
-        // Nếu không tìm thấy quân cờ, thực hiện move ngay lập tức
         finishMoveLogic(move);
         return;
     }
@@ -447,11 +425,9 @@ function animateMove(fromSquare, toSquare, move) {
     
     let dx, dy;
     if (isFlipped) {
-        // Nếu bàn cờ bị lật (Đen ở dưới)
         dx = (fromCol - toCol) * SQUARE_SIZE;
         dy = (fromRow - toRow) * SQUARE_SIZE;
     } else {
-        // Nếu bàn cờ không lật (Trắng ở dưới)
         dx = (toCol - fromCol) * SQUARE_SIZE;
         dy = (toRow - fromRow) * SQUARE_SIZE; 
     }
@@ -467,10 +443,10 @@ function animateMove(fromSquare, toSquare, move) {
     // Thời gian transition mặc định trong CSS là 0.2s (200ms)
     const transitionDuration = 200; 
 
-    // SỬ DỤNG setTimeout để đảm bảo logic chạy sau animation, KHÔNG CẦN DỰA VÀO transitionend
+    // SỬ DỤNG setTimeout để đảm bảo logic chạy sau animation
     setTimeout(() => {
         finishMoveLogic(move);
-    }, transitionDuration + 50); // Cho thêm 50ms dự phòng
+    }, transitionDuration + 50); 
 }
 
 
@@ -584,16 +560,13 @@ function highlightCheckState() {
 
 /**
  * Đánh giá bàn cờ dựa trên tổng giá trị quân cờ.
- * @returns {number} Điểm đánh giá (dương nếu Trắng lợi, âm nếu Đen lợi).
  */
 function evaluateBoard() {
     let score = 0;
-    // Lặp qua tất cả 64 ô cờ
     for (const square of ALL_SQUARES) {
         const piece = game.get(square);
         if (piece) {
             const value = PIECE_VALUES[piece.type];
-            // Cộng nếu là quân Trắng, trừ nếu là quân Đen
             score += (piece.color === 'w') ? value : -value;
         }
     }
@@ -601,17 +574,11 @@ function evaluateBoard() {
 }
 
 /**
- * Thuật toán Negamax (giống Minimax nhưng đơn giản hơn).
- * @param {number} depth Độ sâu tìm kiếm.
- * @param {number} alpha Ngưỡng alpha.
- * @param {number} beta Ngưỡng beta.
- * @returns {number} Điểm đánh giá tốt nhất.
+ * Thuật toán Negamax.
  */
 function negamax(depth, alpha, beta) {
-    // 1. Điều kiện dừng: Đã đạt độ sâu tìm kiếm hoặc Game Over
     if (depth === 0 || game.game_over()) {
         const evaluation = evaluateBoard();
-        // Trả về đánh giá từ góc nhìn của bên đang di chuyển
         return game.turn() === 'w' ? evaluation : -evaluation;
     }
 
@@ -619,17 +586,13 @@ function negamax(depth, alpha, beta) {
     const moves = game.moves({ verbose: true });
     
     for (const move of moves) {
-        game.move(move); // Thử nước đi
-        
-        // Gọi đệ quy: Negate (đổi dấu) kết quả của đối thủ
+        game.move(move);
         const evaluation = -negamax(depth - 1, -beta, -alpha);
-        
-        game.undo(); // Quay lại nước đi
+        game.undo();
         
         maxEval = Math.max(maxEval, evaluation);
         alpha = Math.max(alpha, evaluation);
         
-        // Cắt tỉa Alpha-Beta
         if (alpha >= beta) {
             break; 
         }
@@ -640,7 +603,6 @@ function negamax(depth, alpha, beta) {
 
 /**
  * Hàm chính tìm nước đi tốt nhất cho Bot (sử dụng Negamax).
- * @returns {Object|null} Nước đi tốt nhất (verbose move object).
  */
 function findBestMove() {
     const depthMap = {
@@ -662,15 +624,11 @@ function findBestMove() {
     const beta = Infinity; 
     const moves = game.moves({ verbose: true });
     
-    // Sắp xếp nước đi (ví dụ: ưu tiên nước ăn quân) để tăng hiệu quả cắt tỉa
     moves.sort((a, b) => (b.captured ? PIECE_VALUES[b.captured] : 0) - (a.captured ? PIECE_VALUES[a.captured] : 0));
 
     for (const move of moves) {
         game.move(move); 
-        
-        // Gọi Negamax. Độ sâu tìm kiếm giảm đi 1 vì ta đã đi 1 nước.
         const evaluation = -negamax(depth - 1, -beta, -alpha);
-        
         game.undo(); 
 
         if (evaluation > maxEval) {
@@ -695,7 +653,6 @@ function makeBotMove() {
         return; 
     }
     
-    // Tính toán độ trễ dựa trên cấp độ (từ 0.5s đến 3.5s)
     const maxDelay = 3500;
     const minDelay = 500;
     const delay = maxDelay - (selectedBotLevel - 1) * ((maxDelay - minDelay) / 9);
@@ -705,11 +662,8 @@ function makeBotMove() {
         let move = null;
         
         if (selectedBotLevel >= 4) {
-            // CẤP ĐỘ CAO: SỬ DỤNG AI
             move = findBestMove();
         } else {
-            // CẤP ĐỘ THẤP (1-3): SỬ DỤNG LOGIC NGẪU NHIÊN/SEMI-RANDOM
-            
             if (selectedBotLevel === 3) {
                 const captureMoves = possibleMoves.filter(m => m.captured);
                 const checkMoves = possibleMoves.filter(m => m.san.includes('+'));
@@ -722,7 +676,6 @@ function makeBotMove() {
                     move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
                 }
             } else {
-                // Cấp độ 1 & 2: Ngẫu nhiên hoàn toàn
                 move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
             }
         }
@@ -730,7 +683,6 @@ function makeBotMove() {
         if (move) {
             animateMove(move.from, move.to, move); 
         } else if (possibleMoves.length > 0) {
-             // Trường hợp findBestMove trả về null (chỉ xảy ra ở cấp độ 0) hoặc lỗi
              move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
              animateMove(move.from, move.to, move);
         } else {
@@ -841,44 +793,7 @@ function handleEnterPress(e) {
 }
 
 
-// --- 7. FUNCTION: LANGUAGE TRANSLATION FUNCTION ---
-function translatePage(targetLang) {
-    if (typeof google === 'undefined' || typeof google.translate === 'undefined') {
-        alert("Thư viện Google Dịch chưa tải xong. Vui lòng thử lại.");
-        return;
-    }
-
-    const expiryDate = new Date();
-    expiryDate.setTime(expiryDate.getTime() + (24 * 60 * 60 * 1000));
-    const expiryString = expiryDate.toUTCString();
-    const cookieValue = `/vi/${targetLang}`; 
-    document.cookie = `googtrans=${cookieValue}; expires=${expiryString}; path=/`;
-
-    if (targetLang === 'vi') {
-        document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:01 GMT; path=/';
-    }
-    
-    try {
-        if (targetLang === 'vi') {
-             window.location.reload(); 
-        } else {
-             const langPair = 'vi|' + targetLang;
-             const translator = google.translate.TranslateElement.get(document.getElementById('google_translate_element').id);
-             
-             if (translator) {
-                 translator.translatePage(langPair);
-             } else {
-                 window.location.reload(); 
-             }
-        }
-    } catch (e) {
-        console.error("Lỗi khi gọi API dịch thuật trực tiếp:", e);
-        window.location.reload();
-    }
-}
-
-
-// --- 8. INITIALIZATION ---
+// --- 7. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', (event) => {
     game = new Chess();
     initializeModalLogic(); 
