@@ -109,6 +109,42 @@ body {
     border: 1px solid #ccc;
 }
 
+.news {
+    margin-top: 40px;
+    text-align: left;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: var(--border-radius);
+}
+
+.news h2 {
+    color: #555;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 5px;
+}
+
+.news ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.news li {
+    margin-bottom: 8px;
+    font-size: 0.95em;
+    line-height: 1.5;
+}
+
+.news-btn {
+    margin-top: 15px;
+    padding: 8px 15px;
+    background-color: #f1f1f1;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+
 /* ==================================== */
 /* 4. PLAY SCREEN LAYOUT */
 /* ==================================== */
@@ -200,12 +236,11 @@ body {
 
 /* Ký tự quân cờ (span) */
 .square span {
-    line-height: 1; /* Căn giữa ký tự Unicode */
-    /* ĐẢM BẢO CÓ DÒNG NÀY ĐỂ ANIMATION HOẠT ĐỘNG */
+    line-height: 1; 
     transition: transform 0.2s ease-out, box-shadow 0.2s, filter 0.2s; 
     position: relative;
     z-index: 2;
-    pointer-events: none; /* Rất quan trọng để click vào ô cờ chứ không phải quân cờ */
+    pointer-events: none; 
 }
 
 
@@ -223,17 +258,14 @@ body {
 /* 6. HIGHLIGHTS & CHECK GLOW */
 /* ==================================== */
 
-/* 6.1. Hiệu ứng ô được chọn */
 .square.selected {
-    background-color: rgba(144, 238, 144, 0.7) !important; /* Xanh lá cây nhạt */
+    background-color: rgba(144, 238, 144, 0.7) !important; 
 }
 
-/* 6.2. Hiệu ứng nước đi hợp lệ */
 .square.highlight-move {
-    background-color: rgba(255, 255, 0, 0.2); /* Vàng nhạt */
+    background-color: rgba(255, 255, 0, 0.2); 
 }
 
-/* Dấu chấm tròn cho ô trống hợp lệ (nước đi) */
 .square.highlight-move:not(:has(span))::after {
     content: '';
     display: block;
@@ -242,67 +274,55 @@ body {
     left: 50%;
     width: 25px;
     height: 25px;
-    background-color: rgba(0, 0, 0, 0.15); /* Màu tối mờ */
+    background-color: rgba(0, 0, 0, 0.15); 
     border-radius: 50%;
     transform: translate(-50%, -50%);
     pointer-events: none;
     z-index: 1;
 }
 
-/* Viền đỏ cho quân cờ có thể ăn (ô đích có quân cờ đối phương) */
 .square.highlight-move span {
-    /* Tạo viền đỏ bằng box-shadow inset */
     box-shadow: inset 0 0 0 4px rgba(255, 0, 0, 0.6); 
-    border-radius: 50%; /* Quan trọng để box-shadow tạo viền tròn */
-    padding: 5px; /* Thêm padding để viền không quá sát ký tự */
+    border-radius: 50%; 
+    padding: 5px; 
 }
 
-
-/* 6.3. Hiệu ứng Vua bị chiếu (CHECK) - GLOW NHẸ */
-
 .square.king-in-check {
-    /* Đảm bảo ô cờ không có nền màu đỏ */
     background-color: transparent !important; 
     position: relative;
     animation: none;
     transform: none;
 }
 
-/* Hiệu ứng vòng tròn mờ nhạt bao quanh quân Vua */
 .square.king-in-check::before {
     content: '';
     display: block;
     position: absolute;
     top: 50%;
     left: 50%;
-    /* Kích thước vòng tròn, lớn hơn quân cờ một chút */
-    width: calc(var(--square-size) * 0.9); /* Ví dụ: 90% kích thước ô */
+    width: calc(var(--square-size) * 0.9); 
     height: calc(var(--square-size) * 0.9);
     
-    background-color: rgba(255, 0, 0, 0.1); /* Nền đỏ rất mờ */
-    border: 2px solid rgba(255, 0, 0, 0.4); /* Viền đỏ mờ hơn */
+    background-color: rgba(255, 0, 0, 0.1); 
+    border: 2px solid rgba(255, 0, 0, 0.4); 
     border-radius: 50%;
-    transform: translate(-50%, -50%); /* Căn giữa */
-    pointer-events: none; /* Đảm bảo không cản click */
-    z-index: 1; /* Đảm bảo nằm dưới quân cờ */
+    transform: translate(-50%, -50%); 
+    pointer-events: none; 
+    z-index: 1; 
 
-    /* Animation nhấp nháy cho vòng tròn */
     animation: subtle-pulse 1.5s infinite alternate;
 }
 
-/* Quân cờ Vua tự nó sẽ không có glow, chỉ thay đổi màu sắc và hơi phóng to */
 .square.king-in-check span {
-    color: #cc0000; /* Màu đỏ đậm hơn một chút cho quân cờ */
-    transform: scale(1.05); /* Phóng to nhẹ quân cờ */
-    transition: transform 0.3s ease-out, color 0.3s ease-out; /* Thêm transition */
-    box-shadow: none; /* Đảm bảo không có box-shadow trên chính quân cờ */
-    filter: none; /* Đảm bảo không có filter trên chính quân cờ */
-    animation: none; /* Xóa animation cũ trên quân cờ */
-    z-index: 2; /* Đảm bảo quân cờ nằm trên vòng tròn */
+    color: #cc0000; 
+    transform: scale(1.05); 
+    transition: transform 0.3s ease-out, color 0.3s ease-out; 
+    box-shadow: none; 
+    filter: none; 
+    animation: none; 
+    z-index: 2; 
 }
 
-
-/* Keyframes cho hiệu ứng nhấp nháy tinh tế của vòng tròn */
 @keyframes subtle-pulse {
     from {
         border-color: rgba(255, 0, 0, 0.3);
@@ -516,21 +536,4 @@ body {
 
 #start-match-btn:hover {
     background-color: #c82333;
-}
-
-/* ==================================== */
-/* 9. UTILITY & LANGUAGE */
-/* ==================================== */
-
-.language-selector {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    z-index: 1001;
-}
-
-.language-selector select {
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
 }
