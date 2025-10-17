@@ -201,7 +201,7 @@ body {
 /* Ký tự quân cờ (span) */
 .square span {
     line-height: 1; /* Căn giữa ký tự Unicode */
-    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    transition: transform 0.2s ease-out, box-shadow 0.2s, filter 0.2s; /* Đã thêm transition cho transform */
     position: relative;
     z-index: 2;
     pointer-events: none; /* Rất quan trọng để click vào ô cờ chứ không phải quân cờ */
@@ -257,13 +257,12 @@ body {
 }
 
 
-/* 6.3. Hiệu ứng Vua bị chiếu (CHECK) - ĐÃ CẬP NHẬT */
+/* 6.3. Hiệu ứng Vua bị chiếu (CHECK) - GLOW NHẸ */
 
 .square.king-in-check {
     /* Đảm bảo ô cờ không có nền màu đỏ */
     background-color: transparent !important; 
     position: relative;
-    /* Xóa bất kỳ animation hoặc transform nào trên ô cờ nếu có */
     animation: none;
     transform: none;
 }
