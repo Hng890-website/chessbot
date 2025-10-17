@@ -90,7 +90,7 @@ body {
     background-color: #f9f9f9;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+    z-index: 1001; /* Đảm bảo nó nằm trên menu chính */
     right: 0;
     top: 100%;
     border-radius: 4px;
@@ -119,7 +119,6 @@ body {
 
 /* --- SCREEN MANAGEMENT --- */
 .screen {
-    /* 🚨 SỬA LỖI: Tất cả các màn hình mặc định là ẩn */
     display: none;
     background-color: white;
     padding: 30px;
@@ -128,7 +127,6 @@ body {
 }
 
 .screen.active {
-    /* 🚨 SỬA LỖI: Màn hình active được hiển thị */
     display: block;
 }
 
@@ -223,7 +221,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background-color: #ddd; /* Màu nền đồng hồ không hoạt động */
+    background-color: #ddd; 
     font-weight: bold;
     opacity: 0.7;
     transition: all 0.3s;
@@ -237,7 +235,7 @@ body {
 }
 
 .player-clock.low-time {
-    background-color: #ffcc00; /* Vàng cảnh báo */
+    background-color: #ffcc00; 
     color: var(--text-color);
     animation: pulse 1s infinite alternate;
 }
@@ -267,7 +265,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow-y: auto;
-    max-height: 350px; /* Chiều cao cố định cho cửa sổ chat */
+    max-height: 350px; 
 }
 
 .chat-room p {
@@ -277,7 +275,7 @@ body {
 
 .chat-input-area {
     display: flex;
-    margin-top: auto; /* Đẩy xuống dưới cùng */
+    margin-top: auto; 
     padding-top: 10px;
     border-top: 1px solid #ccc;
 }
@@ -292,7 +290,7 @@ body {
 .chat-input-area .send-btn {
     padding: 8px 15px;
     border-radius: 0 4px 4px 0;
-    margin-left: -1px; /* Loại bỏ khoảng trắng giữa input và button */
+    margin-left: -1px; 
 }
 
 .bot-message {
@@ -305,22 +303,20 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Kích thước sẽ được điều chỉnh cho phù hợp với 8x8 */
     max-width: 480px; 
     max-height: 480px;
 }
 
 #chessboard {
     display: grid;
-    grid-template-columns: repeat(8, 60px); /* 8 cột, mỗi cột 60px */
-    grid-template-rows: repeat(8, 60px); /* 8 hàng, mỗi hàng 60px */
+    grid-template-columns: repeat(8, 60px); 
+    grid-template-rows: repeat(8, 60px); 
     width: 480px;
     height: 480px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
     border: 2px solid var(--background-dark);
     position: relative;
     
-    /* Thiết lập chuyển động 3D cho hiệu ứng lật */
     transform-style: preserve-3d;
     transition: transform 0.5s ease-in-out;
 }
@@ -372,7 +368,7 @@ body {
     z-index: 10;
     cursor: grab;
     user-select: none;
-    transition: transform 0.2s ease-out; /* Thêm transition cho di chuyển */
+    transition: transform 0.2s ease-out; 
     position: absolute;
 }
 
@@ -414,7 +410,8 @@ body {
     display: none;
     justify-content: center;
     align-items: center;
-    z-index: 1000;
+    /* 🚨 SỬA LỖI: Tăng Z-INDEX để đảm bảo lớp phủ luôn nằm trên cùng */
+    z-index: 9999; 
     transition: opacity 0.3s;
     opacity: 0;
 }
@@ -433,6 +430,8 @@ body {
     max-width: 400px;
     position: relative;
     animation: slide-down 0.3s ease-out;
+    /* 🚨 QUAN TRỌNG: Đảm bảo popup nằm trên lớp phủ */
+    z-index: 10000; 
 }
 
 @keyframes slide-down {
@@ -487,7 +486,6 @@ body {
     font-weight: bold;
     transition: background-color 0.2s, color 0.2s, transform 0.1s;
     
-    /* 🚨 SỬA LỖI HIỂN THỊ CHỮ: Đặt font-family cho nút chọn màu */
     font-family: Arial, sans-serif !important; 
 }
 
@@ -501,9 +499,8 @@ body {
     border-color: var(--primary-color);
 }
 
-/* SỬA: Điều chỉnh kích thước cho biểu tượng quân Vua */
 .color-btn {
-    font-size: 2em; /* Tăng kích thước font để biểu tượng Vua lớn hơn */
+    font-size: 2em; 
     max-width: 60px; 
     height: 40px; 
     padding: 0; 
@@ -511,12 +508,11 @@ body {
     line-height: 40px; 
 }
 
-/* 🚨 QUAN TRỌNG: Đảm bảo Vua Đen hiển thị màu đen khi không active */
 .color-btn[data-color="Đen"] {
     color: black;
 }
 .color-btn[data-color="Đen"].active {
-    color: white; /* Trở lại màu trắng khi active */
+    color: white; 
 }
 
 
