@@ -314,6 +314,7 @@ function positionPieces(boardState) {
     
     // Tìm ô Vua đang bị chiếu (nếu có)
     let checkedKingSquare = null;
+    // 🚨 SỬA LỖI: Chỉ áp dụng glow nếu chỉ là CHECK (không phải CHECKMATE)
     if (game.in_check() && !game.in_checkmate()) {
         checkedKingSquare = game.king_square(game.turn()); 
     }
@@ -338,7 +339,7 @@ function positionPieces(boardState) {
             
             squareElement.appendChild(pieceSpan);
 
-            // 🚨 LOGIC ĐÃ SỬA: Áp dụng glow dựa trên trạng thái đã tính toán
+            // Áp dụng glow
             if (checkedKingSquare && squareName === checkedKingSquare) {
                 squareElement.classList.add('king-in-check');
             }
@@ -358,7 +359,7 @@ function animateMove(fromSquare, toSquare, move) {
 
     if (!pieceElement) return;
 
-    stopTimer(); 
+    stopTimer(); // Tạm dừng đồng hồ ngay lập tức khi di chuyển bắt đầu
     
     // --- BƯỚC 1: TÍNH TOÁN VÀ THỰC HIỆN DỊCH CHUYỂN TRONG CSS ---
     
@@ -378,7 +379,7 @@ function animateMove(fromSquare, toSquare, move) {
         dx = (toCol - fromCol) * SQUARE_SIZE;
         dy = (toRow - fromRow) * SQUARE_SIZE;
     }
-    // Loại bỏ quân cờ bị bắt ở ô đích ngay lập tức
+    
     toElement.innerHTML = ''; 
     
     pieceElement.style.transform = `translate(${dx}px, ${dy}px)`;
@@ -400,14 +401,14 @@ function animateMove(fromSquare, toSquare, move) {
             
             fromElement.innerHTML = ''; 
             toElement.innerHTML = '';   
-            positionPieces(game.board().flat()); 
+            positionPieces(game.board().flat()); // Cập nhật vị trí và hiệu ứng glow
 
             // Cập nhật lượt đi và kiểm tra trạng thái game
             checkGameStatus();
             
             if (!game.game_over()) {
                 switchTurnDisplay(game.turn());
-                startTimer(); 
+                startTimer(); // Khởi động đồng hồ cho lượt mới
             } else {
                 stopTimer();
             }
@@ -415,6 +416,7 @@ function animateMove(fromSquare, toSquare, move) {
             // Khởi động lượt đi Bot (nếu cần)
             const userColorChar = selectedBotColor === 'Trắng' ? 'w' : 'b';
             if (!game.game_over() && game.turn() !== userColorChar) {
+                // 🚨 SỬA LỖI: Bot sẽ tự đi dù đang bị chiếu (vì game chưa kết thúc)
                 setTimeout(makeBotMove, 500); 
             }
         }
@@ -426,6 +428,7 @@ function animateMove(fromSquare, toSquare, move) {
 // --- 4. FUNCTION: INTERACTION HANDLER (Xử lý Click) ---
 
 function handleSquareClick(event) {
+    // 🚨 LỖI ĐÃ SỬA: Đảm bảo tương tác được chặn nếu game kết thúc, nhưng KHÔNG chặn khi chỉ bị chiếu
     if (!game || game.game_over()) return;
 
     const clickedSquare = event.currentTarget.dataset.square;
@@ -433,7 +436,7 @@ function handleSquareClick(event) {
     const isPlayerTurn = game.turn() === playerColorChar;
     
     if (!isPlayerTurn) {
-        console.log("Không phải lượt của bạn.");
+        // Đã đảm bảo người chơi không thể nhấp vào quân cờ khi không phải lượt của họ
         return; 
     }
 
@@ -477,17 +480,20 @@ function highlightValidMoves(square) {
 }
 
 function tryMove(fromSquare, toSquare) {
+    // Luôn giả định phong Hậu, vì Chess.js chỉ cho phép phong Hậu nếu không chỉ định rõ ràng
     const tempMove = { from: fromSquare, to: toSquare, promotion: 'q' }; 
     
-    const testGame = new Chess(game.fen());
-    const moveResult = testGame.move(tempMove);
-    
+    // Không cần tạo game mới, chỉ cần dùng game.move(tempMove) để kiểm tra
+    const moveResult = game.move(tempMove); 
+    game.undo(); // Hoàn tác nước đi để chỉ kiểm tra tính hợp lệ
+
     if (moveResult) {
         animateMove(fromSquare, toSquare, tempMove); 
     } else {
         console.log("Nước đi không hợp lệ.");
     }
 }
+
 
 // --- 5. FUNCTION: GAME LOGIC & BOT (CÓ MÔ PHỎNG LEVEL) ---
 
@@ -504,31 +510,28 @@ function checkGameStatus() {
         stopTimer();
         const winner = game.turn() === 'w' ? 'Đen' : 'Trắng';
         addMessageToChat('Bot', `Game Over! ${winner} thắng bằng Chiếu hết.`);
-        // 3. Highlight Vua (và quân chiếu) sau cùng
-        highlightCheckmate();
+        // Vua vẫn được highlight khi chiếu hết
+        highlightCheckState();
     } else if (game.in_draw()) {
         stopTimer();
         addMessageToChat('Bot', `Game Over! Hòa cờ.`);
     } else if (game.in_check()) {
-        // 4. Áp dụng glow đỏ nếu chỉ là Chiếu (không phải Chiếu hết)
-        const checkedKingSquare = game.king_square(game.turn()); 
-        const kingElement = document.querySelector(`[data-square="${checkedKingSquare}"]`);
-        if (kingElement) {
-            kingElement.classList.add('king-in-check'); 
-        }
+        // 3. Áp dụng glow đỏ nếu chỉ là Chiếu (không phải Chiếu hết)
+        highlightCheckState();
         addMessageToChat('Bot', `${game.turn() === 'w' ? 'Trắng' : 'Đen'} đang bị chiếu!`);
     }
 }
 
 /**
- * Hàm mô phỏng highlight khi chiếu hết (có thể thêm logic sau nếu cần).
+ * Hàm hỗ trợ để áp dụng hiệu ứng glow cho Vua bị chiếu
  */
-function highlightCheckmate() {
-     // Hiện tại, chỉ cần đảm bảo Vua đang bị chiếu (dù đã hết cờ)
-     const checkedKingSquare = game.king_square(game.turn()); 
-     const kingElement = document.querySelector(`[data-square="${checkedKingSquare}"]`);
-     if (kingElement) {
-         kingElement.classList.add('king-in-check'); 
+function highlightCheckState() {
+     if (game.in_check()) {
+         const checkedKingSquare = game.king_square(game.turn()); 
+         const kingElement = document.querySelector(`[data-square="${checkedKingSquare}"]`);
+         if (kingElement) {
+             kingElement.classList.add('king-in-check'); 
+         }
      }
 }
 
@@ -543,8 +546,9 @@ function makeBotMove() {
         return; 
     }
     
-    stopTimer();
-
+    // 🚨 SỬA LỖI: Chỉ tạm dừng đồng hồ sau khi Bot tính xong nước đi và bắt đầu animation.
+    // Việc này cho phép Bot tính toán khi đang bị chiếu.
+    
     const maxDelay = 3500;
     const minDelay = 500;
     const delay = maxDelay - (selectedBotLevel - 1) * ((maxDelay - minDelay) / 9);
