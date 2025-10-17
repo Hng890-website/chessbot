@@ -93,7 +93,7 @@ function findKingSquare(color) {
     return null;
 }
 
-// --- TIMER LOGIC (Không thay đổi) ---
+// --- TIMER LOGIC ---
 
 function updateTotalTime() {
     totalTimeSeconds++;
@@ -196,7 +196,7 @@ function switchTurnDisplay(turn) {
 }
 
 
-// --- 1. FUNCTION: SCREEN MANAGEMENT (Không thay đổi) ---
+// --- 1. FUNCTION: SCREEN MANAGEMENT ---
 
 function showScreen(screenName) {
     const screenId = screenName + '-screen'; 
@@ -218,7 +218,7 @@ function showScreen(screenName) {
     }
 }
 
-// --- 2. FUNCTION: MODAL MANAGEMENT (Không thay đổi) ---
+// --- 2. FUNCTION: MODAL MANAGEMENT ---
 function openBotSelection() {
     document.getElementById('modal-overlay').classList.add('visible');
 }
@@ -301,7 +301,7 @@ function startBotMatch() {
     }
 }
 
-// --- 3. FUNCTION: CHESSBOARD INITIALIZATION & RENDERING (Không thay đổi) ---
+// --- 3. FUNCTION: CHESSBOARD INITIALIZATION & RENDERING ---
 function initializeChessboard() {
     const chessboard = document.getElementById('chessboard');
     if (!chessboard || !game) return; 
@@ -379,7 +379,46 @@ function positionPieces() {
 }
 
 /**
- * Thực hiện animation di chuyển quân cờ. (ĐÃ SỬA LỖI TÍNH TOÁN TỌA ĐỘ)
+ * Logic thực hiện nước đi thực tế và cập nhật trạng thái game.
+ */
+function finishMoveLogic(move) {
+    // 1. Thực hiện nước đi thực tế trong engine
+    const actualMove = game.move({ 
+        from: move.from, 
+        to: move.to, 
+        promotion: move.promotion || 'q' 
+    });
+
+    if (actualMove) {
+        
+        const moveNotation = actualMove.san;
+        const player = actualMove.color === 'w' ? 'Trắng' : 'Đen'; 
+        addMessageToChat(player, `Nước đi: ${moveNotation}`); 
+        
+        // 2. Cập nhật vị trí quân cờ trên bàn cờ
+        positionPieces(); 
+
+        // 3. Cập nhật lượt đi và kiểm tra trạng thái game
+        checkGameStatus(); 
+
+        if (!game.game_over()) {
+            switchTurnDisplay(game.turn());
+            startTimer(); 
+        } else {
+            stopAllTimers();
+        }
+
+        // 4. Khởi động lượt đi Bot (nếu cần)
+        const userColorChar = selectedBotColor === 'Trắng' ? 'w' : 'b';
+        if (!game.game_over() && game.turn() !== userColorChar) {
+            setTimeout(makeBotMove, 500); 
+        }
+    }
+}
+
+
+/**
+ * Thực hiện animation di chuyển quân cờ. (SỬ DỤNG setTimeout DỰ PHÒNG)
  */
 function animateMove(fromSquare, toSquare, move) {
     if (!game) return;
@@ -387,7 +426,11 @@ function animateMove(fromSquare, toSquare, move) {
     const fromElement = document.querySelector(`[data-square="${fromSquare}"]`);
     const pieceElement = fromElement.querySelector('span');
 
-    if (!pieceElement) return;
+    if (!pieceElement) {
+        // Nếu không tìm thấy quân cờ, thực hiện move ngay lập tức
+        finishMoveLogic(move);
+        return;
+    }
 
     stopTimer(); 
     
@@ -409,79 +452,29 @@ function animateMove(fromSquare, toSquare, move) {
         dy = (fromRow - toRow) * SQUARE_SIZE;
     } else {
         // Nếu bàn cờ không lật (Trắng ở dưới)
-        // Lỗi đã được sửa tại đây:
         dx = (toCol - fromCol) * SQUARE_SIZE;
-        dy = (toRow - fromRow) * SQUARE_SIZE;
+        dy = (toRow - fromRow) * SQUARE_SIZE; 
     }
     
     // Tạm thời ẩn quân cờ ở ô đích nếu có để animation không bị chồng
     const toElement = document.querySelector(`[data-square="${toSquare}"]`);
     if (toElement) toElement.innerHTML = ''; 
     
+    // Bắt đầu animation CSS
     pieceElement.style.transform = `translate(${dx}px, ${dy}px)`;
     pieceElement.style.zIndex = 100; 
 
-    // --- BƯỚC 2: CHỜ ANIMATION KẾT THÚC VÀ CẬP NHẬT TRẠNG THÁI CUỐI ---
-    
+    // Thời gian transition mặc định trong CSS là 0.2s (200ms)
     const transitionDuration = 200; 
 
-    const finishMove = () => {
-        
-        // Thực hiện nước đi thực tế
-        const actualMove = game.move({ 
-            from: move.from, 
-            to: move.to, 
-            promotion: move.promotion || 'q' 
-        });
-
-        if (actualMove) {
-            
-            const moveNotation = actualMove.san;
-            const player = actualMove.color === 'w' ? 'Trắng' : 'Đen'; 
-            addMessageToChat(player, `Nước đi: ${moveNotation}`); 
-            
-            // Cập nhật vị trí quân cờ trên bàn cờ
-            positionPieces(); 
-
-            // Cập nhật lượt đi và kiểm tra trạng thái game
-            checkGameStatus(); 
-
-            if (!game.game_over()) {
-                switchTurnDisplay(game.turn());
-                startTimer(); 
-            } else {
-                stopAllTimers();
-            }
-
-            // Khởi động lượt đi Bot (nếu cần)
-            const userColorChar = selectedBotColor === 'Trắng' ? 'w' : 'b';
-            if (!game.game_over() && game.turn() !== userColorChar) {
-                setTimeout(makeBotMove, 500); 
-            }
-        }
-    };
-    
-    // Gắn event listener để lắng nghe khi animation kết thúc
-    const moveHandler = function handler() {
-        pieceElement.removeEventListener('transitionend', handler);
-        finishMove();
-    };
-
-    pieceElement.addEventListener('transitionend', moveHandler);
-
-    // Timeout dự phòng
+    // SỬ DỤNG setTimeout để đảm bảo logic chạy sau animation, KHÔNG CẦN DỰA VÀO transitionend
     setTimeout(() => {
-        // Kiểm tra xem transform đã trở về mặc định chưa (nghĩa là finishMove đã được gọi)
-        if (pieceElement.style.transform !== '' && pieceElement.style.transform !== 'translate(0px, 0px)') {
-             // Nếu transform vẫn còn, gọi finishMove và xóa listener để tránh gọi lại
-             pieceElement.removeEventListener('transitionend', moveHandler);
-             finishMove();
-        }
-    }, transitionDuration + 50); 
+        finishMoveLogic(move);
+    }, transitionDuration + 50); // Cho thêm 50ms dự phòng
 }
 
 
-// --- 4. FUNCTION: INTERACTION HANDLER (Không thay đổi) ---
+// --- 4. FUNCTION: INTERACTION HANDLER ---
 
 function handleSquareClick(event) {
     if (!game || game.game_over()) return;
@@ -748,7 +741,7 @@ function makeBotMove() {
 }
 
 
-// --- 6. FUNCTION: CHAT BOT LOGIC (Không thay đổi) ---
+// --- 6. FUNCTION: CHAT BOT LOGIC ---
 
 function addMessageToChat(sender, message) {
     const chatRoom = document.querySelector('.chat-room');
@@ -848,7 +841,7 @@ function handleEnterPress(e) {
 }
 
 
-// --- 7. FUNCTION: LANGUAGE TRANSLATION FUNCTION (Không thay đổi) ---
+// --- 7. FUNCTION: LANGUAGE TRANSLATION FUNCTION ---
 function translatePage(targetLang) {
     if (typeof google === 'undefined' || typeof google.translate === 'undefined') {
         alert("Thư viện Google Dịch chưa tải xong. Vui lòng thử lại.");
@@ -885,7 +878,7 @@ function translatePage(targetLang) {
 }
 
 
-// --- 8. INITIALIZATION (Không thay đổi) ---
+// --- 8. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', (event) => {
     game = new Chess();
     initializeModalLogic(); 
