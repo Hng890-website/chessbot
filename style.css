@@ -271,7 +271,7 @@ iframe[name*="google_translate_element"] {
 
 .game-layout {
     display: flex;
-    /* KHÔNG CẦN row-reverse NỮA: Chỉ cần Chat ở vị trí đầu tiên */
+    /* Xếp theo thứ tự HTML (Chat trước, Board sau) */
     flex-direction: row; 
     justify-content: center; 
     align-items: flex-start;
@@ -285,8 +285,7 @@ iframe[name*="google_translate_element"] {
 #chessboard-container {
     flex-shrink: 0;
     position: relative;
-    /* Đảm bảo bàn cờ luôn đứng sau chat (vị trí 2) */
-    order: 2; 
+    order: 2; /* 🚨 VỊ TRÍ 2 (Bên phải) */
 }
 
 #chessboard {
@@ -417,8 +416,7 @@ iframe[name*="google_translate_element"] {
 
 /* --- CHAT AREA & MODAL --- */
 .game-chat-news {
-    /* Đảm bảo khung chat ở vị trí 1 (bên trái) */
-    order: 1; 
+    order: 1; /* 🚨 VỊ TRÍ 1 (Bên trái) */
     flex-grow: 1;
     display: flex;
     flex-direction: column;
@@ -556,17 +554,14 @@ iframe[name*="google_translate_element"] {
     }
     
     .game-chat-news {
-        /* Đưa chat lên trên bàn cờ khi xếp chồng */
-        order: 1;
-        /* Trở lại chiều rộng bình thường khi xếp chồng */
+        order: 1; /* Vẫn ở trên cùng khi xếp chồng */
         max-width: 480px; 
         width: 100%;
         margin-top: 20px;
     }
     
     #chessboard-container {
-        /* Đưa bàn cờ xuống dưới chat khi xếp chồng */
-        order: 2;
+        order: 2; /* Vẫn ở dưới cùng khi xếp chồng */
     }
     
     #chessboard {
