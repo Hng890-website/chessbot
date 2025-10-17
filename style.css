@@ -413,7 +413,7 @@ iframe[name*="google_translate_element"] {
     margin-left: -25px;
 }
 
-/* --- HIỆU ỨNG VUA BỊ CHIẾU (MỚI) --- */
+/* --- HIỆU ỨNG VUA BỊ CHIẾU --- */
 .square.king-in-check {
     /* Đổ bóng đỏ mềm mại và lan tỏa */
     box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.6), inset 0 0 0 4px rgba(255, 0, 0, 0.7); 
@@ -477,6 +477,79 @@ iframe[name*="google_translate_element"] {
     border-radius: 0 3px 3px 0;
 }
 
+/* --- CLOCK & TURN DISPLAY STYLES (MỚI) --- */
+#current-turn-display {
+    font-size: 1.1em;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.turn-color {
+    padding: 2px 5px;
+    border-radius: 3px;
+    color: white;
+}
+.white-turn {
+    background-color: #3498db; /* Xanh dương */
+}
+.black-turn {
+    background-color: #e74c3c; /* Đỏ */
+}
+
+.clock-display {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.player-clock {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border-radius: 5px;
+    background-color: #eee;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.time-left {
+    font-size: 1.5em;
+    font-weight: bold;
+    min-width: 60px;
+    text-align: right;
+    padding: 0 5px;
+    transition: background-color 0.3s;
+}
+
+/* Hiệu ứng đồng hồ đang chạy */
+.player-clock.active {
+    background-color: #fff;
+    border: 2px solid #28a745;
+}
+
+.player-clock.active .time-left {
+    color: #28a745;
+}
+
+/* Hiệu ứng cảnh báo gần hết giờ */
+.player-clock.low-time {
+    background-color: #fdd; /* Màu nền hồng nhạt */
+    border: 2px solid #dc3545;
+}
+
+.player-clock.low-time .time-left {
+    color: #dc3545;
+    animation: flash-red 0.5s infinite alternate;
+}
+
+@keyframes flash-red {
+    from { color: #dc3545; }
+    to { color: #800; }
+}
+
+
+/* --- MODAL --- */
 #modal-overlay {
     display: none;
     position: fixed;
@@ -585,6 +658,22 @@ iframe[name*="google_translate_element"] {
          /* Giữ nguyên kích thước bàn cờ */
          width: 480px; 
          height: 480px;
+    }
+    
+    .game-info {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .clock-display {
+        flex-direction: row; /* Đồng hồ nằm ngang trên di động */
+        width: 100%;
+    }
+    
+    .player-clock {
+        flex-grow: 1;
+        margin: 0;
     }
 }
 
