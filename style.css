@@ -1,283 +1,404 @@
-/* style.css */
+/* ==================================== */
+/* 1. GLOBAL RESET & LAYOUT */
+/* ==================================== */
 
-/* --- GENERAL & RESET --- */
 :root {
-    --primary-color: #3f51b5; /* Màu Xanh chủ đạo (Indigo) */
-    --primary-hover: #303f9f; 
-    --secondary-color: #ff9800; /* Màu Cam (Accent) */
-    --background-light: #f4f7f6; /* Nền nhẹ */
-    --background-dark: #37474f; /* Nền tối (Sidebar/Modal) */
-    --text-color: #212121;
-    --chess-light: #f0d9b5; /* Màu ô cờ sáng */
-    --chess-dark: #b58863; /* Màu ô cờ tối */
-    --highlight-move: #90ee90; /* Màu highlight nước đi (Light Green) */
-    --highlight-selected: #5a75cf; /* Màu highlight ô được chọn (Blue) */
-    --check-color: #ff0000; /* Màu đỏ cho Vua bị chiếu */
+    --color-light-square: #f0d9b5;
+    --color-dark-square: #b58863;
+    --color-board-border: #4a4a4a;
+    --color-primary: #007bff;
+    --color-danger: #dc3545;
+    --square-size: 60px;
+    --border-radius: 8px;
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: var(--background-light);
-    color: var(--text-color);
-    line-height: 1.6;
+    font-family: var(--font-family);
+    background-color: #e9e9e9;
+    color: #333;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: auto;
 }
 
 .container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-/* --- MAIN MENU (Header) --- */
-.main-menu {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: var(--background-dark);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-.logo {
-    font-size: 1.8em;
-    font-weight: bold;
-    color: var(--secondary-color);
-}
-
-.main-menu nav a {
-    color: white;
-    text-decoration: none;
-    padding: 8px 15px;
-    margin-left: 10px;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-    cursor: pointer;
-}
-
-.main-menu nav a:hover {
-    background-color: var(--primary-color);
-}
-
-/* Dropdown Ngôn Ngữ */
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropbtn {
-    background-color: transparent;
-    color: white;
-    padding: 8px 15px;
-    font-size: 1em;
-    border: none;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1001; 
-    right: 0;
-    top: 100%;
-    border-radius: 4px;
-}
-
-.dropdown-content a {
-    color: var(--text-color);
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    margin: 0;
-}
-
-.dropdown-content a:hover {
-    background-color: #ddd;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-/* Ẩn widget Google Dịch mặc định */
-#google_translate_element {
-    display: none;
-}
-
-/* --- SCREEN MANAGEMENT --- */
-.screen {
-    display: none;
+    max-width: 1400px;
+    width: 95%;
     background-color: white;
-    padding: 30px;
-    border-radius: 8px;
-    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    min-height: 800px;
+}
+
+/* ==================================== */
+/* 2. SCREEN MANAGEMENT */
+/* ==================================== */
+
+.screen {
+    width: 100%;
+    display: none;
+    padding: 20px;
 }
 
 .screen.active {
-    display: block;
-}
-
-/* --- HOME SCREEN --- */
-.main-content-area {
     display: flex;
-    gap: 30px;
-    margin-top: 30px;
 }
 
-.battle-column, .news-column {
-    flex: 1;
-    padding: 20px;
-    border-radius: 6px;
-    border: 1px solid #ddd;
-}
-
-.battle-actions {
-    display: flex;
+#home-screen, #rules-screen {
     flex-direction: column;
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.action-btn {
-    padding: 12px 20px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.1s;
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.action-btn:hover {
-    background-color: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
-.green-doit-btn {
-    background-color: #4CAF50;
-}
-
-.green-doit-btn:hover {
-    background-color: #45a049;
-}
-
-#news-list p {
-    padding: 8px 0;
-    border-bottom: 1px dashed #eee;
-}
-
-/* --- PLAY SCREEN (Game Layout) --- */
-.game-header {
-    margin-bottom: 20px;
+    align-items: center;
+    justify-content: center;
     text-align: center;
 }
 
-.game-layout {
-    display: flex;
-    gap: 20px;
+/* ==================================== */
+/* 3. HOME SCREEN STYLES */
+/* ==================================== */
+
+.home-content {
+    max-width: 600px;
 }
 
-/* Sidebar Info & Chat */
-.game-chat-news {
-    flex-basis: 300px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
+.home-content h1 {
+    font-size: 3em;
+    margin-bottom: 15px;
+    color: var(--color-dark-square);
 }
 
-.game-info, .chat-room {
-    padding: 15px;
-    border-radius: 6px;
-    background-color: #f7f7f7;
-    border: 1px solid #eee;
+.home-content p {
+    font-size: 1.1em;
+    margin-bottom: 30px;
+    line-height: 1.6;
 }
 
-/* Đồng hồ đếm ngược (Timer) */
-.clock-display {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
-}
-
-.player-clock {
-    padding: 10px;
-    border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background-color: #ddd; 
+.menu-options button {
+    padding: 12px 25px;
+    margin: 10px;
+    font-size: 1.1em;
     font-weight: bold;
-    opacity: 0.7;
-    transition: all 0.3s;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.1s;
 }
 
-.player-clock.active {
-    background-color: var(--primary-color); 
+.menu-options button:hover {
+    transform: translateY(-2px);
+}
+
+.menu-options .play-btn {
+    background-color: var(--color-primary);
     color: white;
-    opacity: 1;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
 }
 
-.player-clock.low-time {
-    background-color: #ffcc00; 
-    color: var(--text-color);
-    animation: pulse 1s infinite alternate;
+.menu-options .rules-btn, 
+.menu-options .settings-btn {
+    background-color: #f1f1f1;
+    color: #333;
+    border: 1px solid #ccc;
 }
 
-@keyframes pulse {
-    from {
-        box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7);
-    }
-    to {
-        box-shadow: 0 0 5px 3px rgba(255, 204, 0, 0);
-    }
+/* ==================================== */
+/* 4. PLAY SCREEN LAYOUT */
+/* ==================================== */
+
+#play-screen {
+    display: grid;
+    grid-template-columns: minmax(min-content, 2fr) 1fr; /* Bàn cờ và Sidebar */
+    gap: 20px;
+    align-items: start;
+    padding: 0;
 }
 
-.time-left {
-    font-size: 1.5em;
+.game-area {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.sidebar {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-left: 1px solid #ddd;
+    display: flex;
+    flex-direction: column;
+    min-height: 800px;
+}
+
+.game-header {
+    width: 100%;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.game-header h2 {
+    font-size: 1.2em;
+    color: #555;
 }
 
 .turn-color {
-    font-weight: 700;
+    font-weight: bold;
 }
-.white-turn { color: #3f51b5; }
-.black-turn { color: #212121; }
+.white-turn { color: #007bff; }
+.black-turn { color: #333; }
+
+/* ==================================== */
+/* 5. CHESSBOARD STYLES */
+/* ==================================== */
+
+#chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, var(--square-size));
+    grid-template-rows: repeat(8, var(--square-size));
+    border: 5px solid var(--color-board-border);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+}
+
+.square {
+    width: var(--square-size);
+    height: var(--square-size);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: calc(var(--square-size) * 0.75); /* Kích thước quân cờ */
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.1s;
+}
+
+.square.light {
+    background-color: var(--color-light-square);
+}
+
+.square.dark {
+    background-color: var(--color-dark-square);
+}
+
+.piece-white {
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.piece-black {
+    color: black;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+/* Ký tự quân cờ (span) */
+.square span {
+    line-height: 1; /* Căn giữa ký tự Unicode */
+    transition: transform 0.2s, box-shadow 0.2s, filter 0.2s;
+    position: relative;
+    z-index: 2;
+    pointer-events: none; /* Rất quan trọng để click vào ô cờ chứ không phải quân cờ */
+}
+
+
+/* Hiệu ứng đảo bàn cờ khi chọn Đen */
+.board-flipped {
+    transform: rotate(180deg);
+}
+
+.board-flipped .square span {
+    transform: rotate(180deg);
+}
+
+
+/* ==================================== */
+/* 6. HIGHLIGHTS & CHECK GLOW */
+/* ==================================== */
+
+/* 6.1. Hiệu ứng ô được chọn */
+.square.selected {
+    background-color: rgba(144, 238, 144, 0.7) !important; /* Xanh lá cây nhạt */
+}
+
+/* 6.2. Hiệu ứng nước đi hợp lệ */
+.square.highlight-move {
+    background-color: rgba(255, 255, 0, 0.2); /* Vàng nhạt */
+}
+
+/* Dấu chấm tròn cho ô trống hợp lệ (nước đi) */
+.square.highlight-move:not(:has(span))::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 25px;
+    height: 25px;
+    background-color: rgba(0, 0, 0, 0.15); /* Màu tối mờ */
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* Viền đỏ cho quân cờ có thể ăn (ô đích có quân cờ đối phương) */
+.square.highlight-move span {
+    /* Tạo viền đỏ bằng box-shadow inset */
+    box-shadow: inset 0 0 0 4px rgba(255, 0, 0, 0.6); 
+    border-radius: 50%; /* Quan trọng để box-shadow tạo viền tròn */
+    padding: 5px; /* Thêm padding để viền không quá sát ký tự */
+}
+
+
+/* 6.3. Hiệu ứng Vua bị chiếu (CHECK) - ĐÃ CẬP NHẬT */
+
+.square.king-in-check {
+    /* Đảm bảo ô cờ không có nền màu đỏ */
+    background-color: transparent !important; 
+    position: relative;
+    /* Xóa bất kỳ animation hoặc transform nào trên ô cờ nếu có */
+    animation: none;
+    transform: none;
+}
+
+/* Hiệu ứng vòng tròn mờ nhạt bao quanh quân Vua */
+.square.king-in-check::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    /* Kích thước vòng tròn, lớn hơn quân cờ một chút */
+    width: calc(var(--square-size) * 0.9); /* Ví dụ: 90% kích thước ô */
+    height: calc(var(--square-size) * 0.9);
+    
+    background-color: rgba(255, 0, 0, 0.1); /* Nền đỏ rất mờ */
+    border: 2px solid rgba(255, 0, 0, 0.4); /* Viền đỏ mờ hơn */
+    border-radius: 50%;
+    transform: translate(-50%, -50%); /* Căn giữa */
+    pointer-events: none; /* Đảm bảo không cản click */
+    z-index: 1; /* Đảm bảo nằm dưới quân cờ */
+
+    /* Animation nhấp nháy cho vòng tròn */
+    animation: subtle-pulse 1.5s infinite alternate;
+}
+
+/* Quân cờ Vua tự nó sẽ không có glow, chỉ thay đổi màu sắc và hơi phóng to */
+.square.king-in-check span {
+    color: #cc0000; /* Màu đỏ đậm hơn một chút cho quân cờ */
+    transform: scale(1.05); /* Phóng to nhẹ quân cờ */
+    transition: transform 0.3s ease-out, color 0.3s ease-out; /* Thêm transition */
+    box-shadow: none; /* Đảm bảo không có box-shadow trên chính quân cờ */
+    filter: none; /* Đảm bảo không có filter trên chính quân cờ */
+    animation: none; /* Xóa animation cũ trên quân cờ */
+    z-index: 2; /* Đảm bảo quân cờ nằm trên vòng tròn */
+}
+
+
+/* Keyframes cho hiệu ứng nhấp nháy tinh tế của vòng tròn */
+@keyframes subtle-pulse {
+    from {
+        border-color: rgba(255, 0, 0, 0.3);
+        background-color: rgba(255, 0, 0, 0.05);
+        transform: translate(-50%, -50%) scale(0.98);
+    }
+    to {
+        border-color: rgba(255, 0, 0, 0.6);
+        background-color: rgba(255, 0, 0, 0.15);
+        transform: translate(-50%, -50%) scale(1.02);
+    }
+}
+
+/* ==================================== */
+/* 7. SIDEBAR (CHAT & METRICS) */
+/* ==================================== */
+
+.metrics, .chat {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: var(--border-radius);
+    background-color: white;
+}
+
+.metrics h3, .chat h3 {
+    margin-bottom: 15px;
+    border-bottom: 2px solid var(--color-primary);
+    padding-bottom: 5px;
+    color: #333;
+}
+
+.time-clocks {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 15px;
+}
+
+.clock {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s, background-color 0.3s;
+}
+
+.clock.active {
+    border-color: var(--color-primary);
+    background-color: #e6f0ff;
+}
+
+.clock.low-time {
+    background-color: #ffeaea;
+    border-color: var(--color-danger);
+}
+
+.time-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-item {
+    margin-bottom: 8px;
+    font-size: 1em;
+}
 
 /* Chat */
 .chat-room {
-    flex-grow: 1;
+    height: 400px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    background-color: #fcfcfc;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    max-height: 350px; 
 }
 
 .chat-room p {
     margin-bottom: 5px;
-    word-wrap: break-word;
+    line-height: 1.4;
+    font-size: 0.9em;
+}
+
+.bot-message {
+    color: #007bff;
+    font-weight: bold;
 }
 
 .chat-input-area {
     display: flex;
-    margin-top: auto; 
     padding-top: 10px;
-    border-top: 1px solid #ccc;
+    border-top: 1px solid #eee;
 }
 
 .chat-input-area input {
@@ -285,237 +406,131 @@ body {
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px 0 0 4px;
+    font-size: 1em;
 }
 
 .chat-input-area .send-btn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
     padding: 8px 15px;
     border-radius: 0 4px 4px 0;
-    margin-left: -1px; 
-}
-
-.bot-message {
-    color: var(--primary-color);
-}
-
-/* --- CHESS BOARD --- */
-#chessboard-container {
-    flex-grow: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 480px; 
-    max-height: 480px;
-}
-
-#chessboard {
-    display: grid;
-    grid-template-columns: repeat(8, 60px); 
-    grid-template-rows: repeat(8, 60px); 
-    width: 480px;
-    height: 480px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    border: 2px solid var(--background-dark);
-    position: relative;
-    
-    transform-style: preserve-3d;
-    transition: transform 0.5s ease-in-out;
-}
-
-/* Lật bàn cờ khi chọn quân Đen */
-#chessboard.board-flipped {
-    transform: rotateX(180deg) rotateY(180deg);
-}
-
-/* Ẩn các ô/quân cờ khi lật (để tránh hiển thị ngược) */
-#chessboard.board-flipped .square,
-#chessboard.board-flipped .square span {
-    transform: rotateX(180deg) rotateY(180deg);
-}
-
-.square {
-    width: 60px;
-    height: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
     cursor: pointer;
-    position: relative;
-    transition: background-color 0.2s;
+    transition: background-color 0.3s;
 }
 
-.light {
-    background-color: var(--chess-light);
+.chat-input-area .send-btn:hover {
+    background-color: #0056b3;
 }
 
-.dark {
-    background-color: var(--chess-dark);
-}
+/* ==================================== */
+/* 8. MODAL STYLES (BOT SELECTION) */
+/* ==================================== */
 
-/* Hiệu ứng ô cờ được chọn */
-.square.selected {
-    background-color: var(--highlight-selected);
-}
-
-/* Hiệu ứng ô cờ có thể đi tới */
-.square.highlight-move {
-    background-color: var(--highlight-move);
-}
-
-/* Quân cờ (Unicode) */
-.square span {
-    font-size: 38px;
-    line-height: 1;
-    z-index: 10;
-    cursor: grab;
-    user-select: none;
-    transition: transform 0.2s ease-out; 
-    position: absolute;
-}
-
-.piece-white {
-    color: white;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-}
-
-.piece-black {
-    color: black;
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
-}
-
-/* Hiệu ứng Vua bị chiếu */
-.square.king-in-check {
-    background-color: var(--check-color);
-    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) inset;
-    animation: check-glow 1s infinite alternate;
-}
-
-@keyframes check-glow {
-    from {
-        box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) inset;
-    }
-    to {
-        box-shadow: 0 0 20px rgba(255, 0, 0, 1) inset;
-    }
-}
-
-
-/* --- MODAL (POPUP) --- */
 #modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: none;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 9999; 
-    transition: opacity 0.3s;
+    z-index: 1000;
+    visibility: hidden;
     opacity: 0;
+    transition: visibility 0.3s, opacity 0.3s;
 }
 
 #modal-overlay.visible {
-    display: flex;
+    visibility: visible;
     opacity: 1;
 }
 
-.select-option-popup {
+.modal-content {
     background-color: white;
     padding: 30px;
-    border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    border-radius: var(--border-radius);
     width: 90%;
-    max-width: 400px;
-    position: relative;
-    animation: slide-down 0.3s ease-out;
-    z-index: 10000; 
+    max-width: 500px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    text-align: center;
 }
 
-@keyframes slide-down {
-    from {
-        transform: translateY(-50px);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
+.modal-content h2 {
+    color: var(--color-primary);
+    margin-bottom: 20px;
 }
 
-.close-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    cursor: pointer;
-    color: #aaa;
-    text-decoration: none;
+.setting-group {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 15px;
 }
 
-.select-option-popup label {
+.setting-group label {
     display: block;
-    margin-top: 15px;
     font-weight: bold;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+    color: #555;
 }
 
-.select-option-popup input[type="text"] {
+.setting-group input[type="text"] {
     width: 100%;
-    padding: 10px;
-    margin-top: 5px;
+    padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
+    margin-top: 5px;
 }
 
-.level-selection, .color-selection {
-    display: flex;
-    gap: 10px;
-    margin-top: 10px;
-    justify-content: center;
-}
-
-.level-btn, .color-btn {
+.selection-buttons button {
     padding: 8px 15px;
-    border: 2px solid var(--primary-color);
-    background-color: white;
-    color: var(--primary-color);
-    border-radius: 50px;
+    margin: 5px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f5f5f5;
     cursor: pointer;
+    transition: background-color 0.2s, border-color 0.2s;
     font-weight: bold;
-    transition: background-color 0.2s, color 0.2s, transform 0.1s;
-    
-    font-family: Arial, sans-serif !important; 
 }
 
-.level-btn:hover, .color-btn:hover {
-    background-color: #f0f0f0;
-}
-
-.level-btn.active, .color-btn.active {
-    background-color: var(--primary-color);
+.selection-buttons button.active {
+    background-color: var(--color-primary);
     color: white;
-    border-color: var(--primary-color);
+    border-color: var(--color-primary);
 }
 
-.color-btn {
-    font-size: 2em; 
-    max-width: 60px; 
-    height: 40px; 
-    padding: 0; 
-    width: 60px; 
-    line-height: 40px; 
-}
-
-.color-btn[data-color="Đen"] {
-    color: black;
-}
-.color-btn[data-color="Đen"].active {
-    color: white; 
-}
-
-
-.start-btn {
+#start-match-btn {
     width: 100%;
-    margin-top: 25px;
-    padding: 15px;
+    padding: 12px;
+    background-color: var(--color-danger);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#start-match-btn:hover {
+    background-color: #c82333;
+}
+
+/* ==================================== */
+/* 9. UTILITY & LANGUAGE */
+/* ==================================== */
+
+.language-selector {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 1001;
+}
+
+.language-selector select {
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
 }
