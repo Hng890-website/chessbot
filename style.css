@@ -90,7 +90,7 @@ body {
     background-color: #f9f9f9;
     min-width: 160px;
     box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1001; /* Đảm bảo nó nằm trên menu chính */
+    z-index: 1001; 
     right: 0;
     top: 100%;
     border-radius: 4px;
@@ -410,7 +410,6 @@ body {
     display: none;
     justify-content: center;
     align-items: center;
-    /* 🚨 SỬA LỖI: Tăng Z-INDEX để đảm bảo lớp phủ luôn nằm trên cùng */
     z-index: 9999; 
     transition: opacity 0.3s;
     opacity: 0;
@@ -430,7 +429,6 @@ body {
     max-width: 400px;
     position: relative;
     animation: slide-down 0.3s ease-out;
-    /* 🚨 QUAN TRỌNG: Đảm bảo popup nằm trên lớp phủ */
     z-index: 10000; 
 }
 
