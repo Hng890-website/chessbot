@@ -1,169 +1,527 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Bot - Cờ Vua Trực Tuyến</title>
+/* style.css */
+
+/* --- GENERAL & RESET --- */
+:root {
+    --primary-color: #3f51b5; /* Màu Xanh chủ đạo (Indigo) */
+    --primary-hover: #303f9f; 
+    --secondary-color: #ff9800; /* Màu Cam (Accent) */
+    --background-light: #f4f7f6; /* Nền nhẹ */
+    --background-dark: #37474f; /* Nền tối (Sidebar/Modal) */
+    --text-color: #212121;
+    --chess-light: #f0d9b5; /* Màu ô cờ sáng */
+    --chess-dark: #b58863; /* Màu ô cờ tối */
+    --highlight-move: #90ee90; /* Màu highlight nước đi (Light Green) */
+    --highlight-selected: #5a75cf; /* Màu highlight ô được chọn (Blue) */
+    --check-color: #ff0000; /* Màu đỏ cho Vua bị chiếu */
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: var(--background-light);
+    color: var(--text-color);
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* --- MAIN MENU (Header) --- */
+.main-menu {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: var(--background-dark);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--secondary-color);
+}
+
+.main-menu nav a {
+    color: white;
+    text-decoration: none;
+    padding: 8px 15px;
+    margin-left: 10px;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+    cursor: pointer;
+}
+
+.main-menu nav a:hover {
+    background-color: var(--primary-color);
+}
+
+/* Dropdown Ngôn Ngữ */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropbtn {
+    background-color: transparent;
+    color: white;
+    padding: 8px 15px;
+    font-size: 1em;
+    border: none;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    right: 0;
+    top: 100%;
+    border-radius: 4px;
+}
+
+.dropdown-content a {
+    color: var(--text-color);
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+    margin: 0;
+}
+
+.dropdown-content a:hover {
+    background-color: #ddd;
+}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Ẩn widget Google Dịch mặc định */
+#google_translate_element {
+    display: none;
+}
+
+/* --- SCREEN MANAGEMENT --- */
+.screen {
+    /* 🚨 SỬA LỖI: Tất cả các màn hình mặc định là ẩn */
+    display: none;
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+}
+
+.screen.active {
+    /* 🚨 SỬA LỖI: Màn hình active được hiển thị */
+    display: block;
+}
+
+/* --- HOME SCREEN --- */
+.main-content-area {
+    display: flex;
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.battle-column, .news-column {
+    flex: 1;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #ddd;
+}
+
+.battle-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.action-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1em;
+    font-weight: bold;
+    transition: background-color 0.3s, transform 0.1s;
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.action-btn:hover {
+    background-color: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.green-doit-btn {
+    background-color: #4CAF50;
+}
+
+.green-doit-btn:hover {
+    background-color: #45a049;
+}
+
+#news-list p {
+    padding: 8px 0;
+    border-bottom: 1px dashed #eee;
+}
+
+/* --- PLAY SCREEN (Game Layout) --- */
+.game-header {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.game-layout {
+    display: flex;
+    gap: 20px;
+}
+
+/* Sidebar Info & Chat */
+.game-chat-news {
+    flex-basis: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.game-info, .chat-room {
+    padding: 15px;
+    border-radius: 6px;
+    background-color: #f7f7f7;
+    border: 1px solid #eee;
+}
+
+/* Đồng hồ đếm ngược (Timer) */
+.clock-display {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.player-clock {
+    padding: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ddd; /* Màu nền đồng hồ không hoạt động */
+    font-weight: bold;
+    opacity: 0.7;
+    transition: all 0.3s;
+}
+
+.player-clock.active {
+    background-color: var(--primary-color); 
+    color: white;
+    opacity: 1;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.player-clock.low-time {
+    background-color: #ffcc00; /* Vàng cảnh báo */
+    color: var(--text-color);
+    animation: pulse 1s infinite alternate;
+}
+
+@keyframes pulse {
+    from {
+        box-shadow: 0 0 0 0 rgba(255, 204, 0, 0.7);
+    }
+    to {
+        box-shadow: 0 0 5px 3px rgba(255, 204, 0, 0);
+    }
+}
+
+.time-left {
+    font-size: 1.5em;
+}
+
+.turn-color {
+    font-weight: 700;
+}
+.white-turn { color: #3f51b5; }
+.black-turn { color: #212121; }
+
+/* Chat */
+.chat-room {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    max-height: 350px; /* Chiều cao cố định cho cửa sổ chat */
+}
+
+.chat-room p {
+    margin-bottom: 5px;
+    word-wrap: break-word;
+}
+
+.chat-input-area {
+    display: flex;
+    margin-top: auto; /* Đẩy xuống dưới cùng */
+    padding-top: 10px;
+    border-top: 1px solid #ccc;
+}
+
+.chat-input-area input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+}
+
+.chat-input-area .send-btn {
+    padding: 8px 15px;
+    border-radius: 0 4px 4px 0;
+    margin-left: -1px; /* Loại bỏ khoảng trắng giữa input và button */
+}
+
+.bot-message {
+    color: var(--primary-color);
+}
+
+/* --- CHESS BOARD --- */
+#chessboard-container {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Kích thước sẽ được điều chỉnh cho phù hợp với 8x8 */
+    max-width: 480px; 
+    max-height: 480px;
+}
+
+#chessboard {
+    display: grid;
+    grid-template-columns: repeat(8, 60px); /* 8 cột, mỗi cột 60px */
+    grid-template-rows: repeat(8, 60px); /* 8 hàng, mỗi hàng 60px */
+    width: 480px;
+    height: 480px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    border: 2px solid var(--background-dark);
+    position: relative;
     
-    <link rel="stylesheet" href="style.css">
+    /* Thiết lập chuyển động 3D cho hiệu ứng lật */
+    transform-style: preserve-3d;
+    transition: transform 0.5s ease-in-out;
+}
+
+/* Lật bàn cờ khi chọn quân Đen */
+#chessboard.board-flipped {
+    transform: rotateX(180deg) rotateY(180deg);
+}
+
+/* Ẩn các ô/quân cờ khi lật (để tránh hiển thị ngược) */
+#chessboard.board-flipped .square,
+#chessboard.board-flipped .square span {
+    transform: rotateX(180deg) rotateY(180deg);
+}
+
+.square {
+    width: 60px;
+    height: 60px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.2s;
+}
+
+.light {
+    background-color: var(--chess-light);
+}
+
+.dark {
+    background-color: var(--chess-dark);
+}
+
+/* Hiệu ứng ô cờ được chọn */
+.square.selected {
+    background-color: var(--highlight-selected);
+}
+
+/* Hiệu ứng ô cờ có thể đi tới */
+.square.highlight-move {
+    background-color: var(--highlight-move);
+}
+
+/* Quân cờ (Unicode) */
+.square span {
+    font-size: 38px;
+    line-height: 1;
+    z-index: 10;
+    cursor: grab;
+    user-select: none;
+    transition: transform 0.2s ease-out; /* Thêm transition cho di chuyển */
+    position: absolute;
+}
+
+.piece-white {
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
+}
+
+.piece-black {
+    color: black;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.5);
+}
+
+/* Hiệu ứng Vua bị chiếu */
+.square.king-in-check {
+    background-color: var(--check-color);
+    box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) inset;
+    animation: check-glow 1s infinite alternate;
+}
+
+@keyframes check-glow {
+    from {
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.8) inset;
+    }
+    to {
+        box-shadow: 0 0 20px rgba(255, 0, 0, 1) inset;
+    }
+}
+
+
+/* --- MODAL (POPUP) --- */
+#modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.3s;
+    opacity: 0;
+}
+
+#modal-overlay.visible {
+    display: flex;
+    opacity: 1;
+}
+
+.select-option-popup {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    width: 90%;
+    max-width: 400px;
+    position: relative;
+    animation: slide-down 0.3s ease-out;
+}
+
+@keyframes slide-down {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.close-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: #aaa;
+    text-decoration: none;
+}
+
+.select-option-popup label {
+    display: block;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+.select-option-popup input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.level-selection, .color-selection {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+    justify-content: center;
+}
+
+.level-btn, .color-btn {
+    padding: 8px 15px;
+    border: 2px solid var(--primary-color);
+    background-color: white;
+    color: var(--primary-color);
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s, transform 0.1s;
     
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-    
-    <script src="script.js" defer></script>
-    
-    <script type="text/javascript">
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'vi',
-                includedLanguages: 'en,es,fr,ja,ko,vi', 
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-                autoDisplay: false 
-            }, 'google_translate_element');
-        }
-    </script>
-    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-</head>
-<body>
+    /* 🚨 SỬA LỖI HIỂN THỊ CHỮ: Đặt font-family cho nút chọn màu */
+    font-family: Arial, sans-serif !important; 
+}
 
-    <div class="container">
-        
-        <header class="main-menu">
-            <div class="logo">Chess Bot</div>
-            <nav>
-                <a onclick="showScreen('home')">Trang Chủ</a>
-                <a onclick="showScreen('play')">Chơi Cờ</a>
-                <a onclick="showScreen('news')">Tin Tức</a>
-                
-                <div class="dropdown">
-                    <button class="dropbtn">Ngôn Ngữ</button>
-                    <div class="dropdown-content">
-                        <a onclick="translatePage('vi')">Tiếng Việt</a>
-                        <a onclick="translatePage('en')">English</a>
-                        <a onclick="translatePage('es')">Español</a>
-                        <a onclick="translatePage('fr')">Français</a>
-                        <a onclick="translatePage('ja')">日本語 (Jp)</a>
-                        <a onclick="translatePage('ko')">한국어 (Kr)</a>
-                    </div>
-                </div>
-                <div id="google_translate_element"></div> 
-            </nav>
-        </header>
+.level-btn:hover, .color-btn:hover {
+    background-color: #f0f0f0;
+}
 
-        <section id="home-screen" class="screen active">
-            <h1>Chào mừng đến với Chess Bot!</h1>
-            <p>Chọn chế độ chơi và sẵn sàng thách đấu với Bot hoặc bạn bè.</p>
+.level-btn.active, .color-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
 
-            <div class="main-content-area">
-                
-                <div class="battle-column">
-                    <h2>Chế Độ Đấu Cờ</h2>
-                    <p>Hãy chọn một chế độ để bắt đầu ván cờ vua.</p>
-                    <div class="battle-actions">
-                        <button class="action-btn" onclick="alert('Chế độ này chưa được hỗ trợ. Vui lòng chọn Chơi với Bot.')">Chơi Trực Tuyến (Sắp ra mắt)</button>
-                        <button class="action-btn green-doit-btn" onclick="openBotSelection()">Chơi với Bot</button>
-                    </div>
-                </div>
+/* SỬA: Điều chỉnh kích thước cho biểu tượng quân Vua */
+.color-btn {
+    font-size: 2em; /* Tăng kích thước font để biểu tượng Vua lớn hơn */
+    max-width: 60px; 
+    height: 40px; 
+    padding: 0; 
+    width: 60px; 
+    line-height: 40px; 
+}
 
-                <div class="news-column">
-                    <h2>Tin Tức Cờ Vua</h2>
-                    <div id="news-list">
-                        <p><strong>20/05/2024:</strong> Magnus Carlsen thắng giải Norway Chess với phong độ đỉnh cao.</p>
-                        <p><strong>15/05/2024:</strong> Giải vô địch cờ vua trẻ Quốc tế khởi tranh tại Hà Nội.</p>
-                        <p><strong>10/05/2024:</strong> Phân tích nước đi bất ngờ của Garry Kasparov.</p>
-                    </div>
-                    <button class="action-btn" style="margin-top: 10px;" onclick="showScreen('news')">Xem Thêm</button>
-                </div>
+/* 🚨 QUAN TRỌNG: Đảm bảo Vua Đen hiển thị màu đen khi không active */
+.color-btn[data-color="Đen"] {
+    color: black;
+}
+.color-btn[data-color="Đen"].active {
+    color: white; /* Trở lại màu trắng khi active */
+}
 
-            </div>
-        </section>
 
-        <section id="play-screen" class="screen">
-            <div class="game-header">
-                <h2>Bạn (Trắng) vs Bot Level 1 (Đen)</h2>
-            </div>
-            
-            <div class="game-layout">
-                
-                <div class="game-chat-news">
-                    
-                    <div class="game-info">
-                        <h3>Thông tin</h3>
-                        <p id="current-turn-display"><strong>Lượt Đi:</strong> <span class="turn-color white-turn">Trắng</span></p>
-                        
-                        <div class="clock-display">
-                            <div class="player-clock active" id="white-clock">
-                                <span class="player-name">Trắng</span>
-                                <span class="time-left" id="white-time">05:00</span>
-                            </div>
-                            <div class="player-clock" id="black-clock">
-                                <span class="player-name">Đen</span>
-                                <span class="time-left" id="black-time">05:00</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="chat-room">
-                        <p><strong>Bot:</strong> Chào mừng, chúc bạn một trận đấu hay!</p>
-                        <div class="chat-input-area">
-                            <input type="text" placeholder="Nhập tin nhắn...">
-                            <button class="action-btn send-btn">Gửi</button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="chessboard-container">
-                    <div id="chessboard">
-                        </div>
-                </div>
-
-            </div>
-        </section>
-
-        <section id="news-screen" class="screen">
-            <h2>Quản Lý Tin Tức</h2>
-            <p>Đây là khu vực để bạn thêm hoặc chỉnh sửa các tin tức cờ vua.</p>
-            
-            <form id="news-form">
-                <label for="news-content">Nội dung Tin tức:</label>
-                <textarea id="news-content" rows="4" placeholder="Nhập nội dung tin tức mới..."></textarea>
-                <button type="button" class="action-btn">Thêm Tin Tức</button>
-            </form>
-            
-            <div id="news-management">
-                <h3>Các Tin Đã Đăng</h3>
-                <p>20/05/2024: Magnus Carlsen thắng giải Norway Chess. (Chỉnh sửa | Xóa)</p>
-                <button class="action-btn" style="margin-top: 15px;" onclick="showScreen('home')">Quay Lại Trang Chủ</button>
-            </div>
-        </section>
-
-    </div>
-    
-    <div id="modal-overlay">
-        <div class="select-option-popup">
-            <a class="close-btn" onclick="closeBotSelection()">&times;</a>
-            <h3>Chọn Cấp Độ Bot</h3>
-            
-            <label for="bot-name">Tên Bot:</label>
-            <input type="text" id="bot-name" placeholder="Tên Bot (Mặc định)">
-            
-            <p style="margin-top: 15px; margin-bottom: 5px; font-weight: bold;">Cấp độ (1: Dễ - 10: Khó):</p>
-            <div id="level-selection" class="level-selection">
-                <button class="level-btn active" data-level="1">1</button>
-                <button class="level-btn" data-level="3">3</button>
-                <button class="level-btn" data-level="5">5</button>
-                <button class="level-btn" data-level="7">7</button>
-                <button class="level-btn" data-level="10">10</button>
-            </div>
-            
-            <p style="margin-top: 15px; margin-bottom: 5px; font-weight: bold;">Chọn Quân Cờ:</p>
-            <div id="color-selection" class="color-selection">
-                <button class="color-btn active" data-color="Trắng">♔</button>
-                <button class="color-btn" data-color="Đen">♚</button>
-            </div>
-            
-            <button class="action-btn start-btn green-doit-btn" onclick="startBotMatch()">Bắt Đầu Trận Đấu</button>
-        </div>
-    </div>
-    
-</body>
-</html>
+.start-btn {
+    width: 100%;
+    margin-top: 25px;
+    padding: 15px;
+}
