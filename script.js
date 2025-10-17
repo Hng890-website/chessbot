@@ -155,6 +155,7 @@ function switchTurnDisplay(turn) {
 function showScreen(screenName) {
     const screenId = screenName + '-screen'; 
     
+    // 🚨 SỬA LỖI: Chỉ hiển thị một màn hình duy nhất
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
@@ -162,20 +163,16 @@ function showScreen(screenName) {
     if (targetScreen) {
         targetScreen.classList.add('active');
     }
-
+    
+    // Nếu chuyển sang màn hình chơi cờ
     if (screenName === 'play') {
-        const chessboard = document.getElementById('chessboard');
-        if (chessboard) {
-             chessboard.innerHTML = '';
-             chessboard.classList.remove('board-flipped'); 
+        // Tái khởi tạo bàn cờ (sẽ được thực hiện trong startBotMatch)
+        if (game) { 
+            initializeChessboard(); 
+            attachChatHandlers();
         }
-        
-        stopTimer(); 
-        
-        game = new Chess(); 
-        initializeChessboard();
-        attachChatHandlers();
     } else {
+        // Nếu thoát màn hình chơi cờ, dừng đồng hồ
         stopTimer();
     }
 }
@@ -190,6 +187,7 @@ function closeBotSelection() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    // Logic chọn Level
     const levelSelection = document.getElementById('level-selection');
     if (levelSelection) {
         levelSelection.addEventListener('click', function(e) {
@@ -201,6 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Logic chọn Color (Vẫn giữ nguyên chữ data-color để logic JS không bị ảnh hưởng)
     const colorSelection = document.getElementById('color-selection');
     if (colorSelection) {
         colorSelection.addEventListener('click', function(e) {
@@ -212,6 +211,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
+    // Thiết lập giá trị mặc định khi tải trang
     const defaultLevel = document.querySelector('.level-btn[data-level="1"]');
     if (defaultLevel) defaultLevel.classList.add('active');
     const defaultColor = document.querySelector('.color-btn[data-color="Trắng"]');
@@ -220,9 +220,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 function startBotMatch() {
-    if (!game) return;
+    // 🚨 SỬA LỖI QUAN TRỌNG: Đảm bảo game được khởi tạo lại ở đây
+    game = new Chess(); 
     
-    // Reset thời gian và hiển thị
+    // 1. Ẩn Modal
+    closeBotSelection();
+    
+    // 2. Thiết lập thông tin trận đấu
     whiteTime = INITIAL_TIME_SECONDS;
     blackTime = INITIAL_TIME_SECONDS;
     document.getElementById('white-time').textContent = formatTime(whiteTime);
@@ -233,9 +237,6 @@ function startBotMatch() {
     const botNameInput = document.getElementById('bot-name').value.trim();
     const botName = botNameInput || `Bot Level ${selectedBotLevel}`; 
     
-    closeBotSelection();
-    showScreen('play');
-    
     const userColor = selectedBotColor; 
     const userColorChar = userColor === "Trắng" ? "w" : "b";
     const botOppositeColor = selectedBotColor === "Trắng" ? "Đen" : "Trắng";
@@ -243,6 +244,7 @@ function startBotMatch() {
     document.querySelector('#play-screen .game-header h2').textContent = 
         `Bạn (${userColor}) vs ${botName} (Cấp độ ${selectedBotLevel}) (${botOppositeColor})`;
 
+    // Xóa chat cũ và gửi tin nhắn chào mừng
     const chatRoom = document.querySelector('.chat-room');
     if (chatRoom) {
         chatRoom.querySelectorAll('p').forEach(p => {
@@ -251,11 +253,16 @@ function startBotMatch() {
     }
     addMessageToChat(botName, `Chào mừng ${userColor === 'Trắng' ? 'bạn, người chơi Trắng' : 'người chơi Đen'}. Tôi là ${botName}, chúc bạn một trận đấu hay!`);
 
-    // Thiết lập lượt đi và đồng hồ ban đầu
+    // 3. Hiển thị màn hình chơi và khởi tạo bàn cờ
+    showScreen('play'); 
+    // initializeChessboard() được gọi trong showScreen('play'), nhưng ta gọi lại đây để đảm bảo
+    initializeChessboard(); 
+    
+    // 4. Bắt đầu game và logic lượt đi
     switchTurnDisplay(game.turn());
     startTimer(); 
 
-    // Nếu người chơi chọn Đen (Bot là Trắng), Bot đi trước
+    // 5. Nếu người chơi chọn Đen (Bot là Trắng), Bot đi trước
     if (userColorChar !== game.turn()) {
         setTimeout(makeBotMove, 1000); 
     }
@@ -275,6 +282,7 @@ function initializeChessboard() {
     
     createBoardStructure();
     positionPieces(game.board().flat());
+    checkGameStatus();
 }
 
 /**
@@ -314,7 +322,6 @@ function positionPieces(boardState) {
     
     // Tìm ô Vua đang bị chiếu (nếu có)
     let checkedKingSquare = null;
-    // 🚨 SỬA LỖI: Chỉ áp dụng glow nếu chỉ là CHECK (không phải CHECKMATE)
     if (game.in_check() && !game.in_checkmate()) {
         checkedKingSquare = game.king_square(game.turn()); 
     }
@@ -322,7 +329,8 @@ function positionPieces(boardState) {
     document.querySelectorAll('.square').forEach(squareElement => {
         const squareName = squareElement.dataset.square;
         const index = squareToIndex(squareName);
-        const pieceData = boardState[index];
+        // Lấy dữ liệu quân cờ từ Chess.js
+        const pieceData = game.get(squareName); 
         
         // Xóa quân cờ cũ và hiệu ứng glow
         squareElement.innerHTML = ''; 
@@ -380,6 +388,7 @@ function animateMove(fromSquare, toSquare, move) {
         dy = (toRow - fromRow) * SQUARE_SIZE;
     }
     
+    // Đảm bảo ô cờ đích trống trước khi animation bắt đầu
     toElement.innerHTML = ''; 
     
     pieceElement.style.transform = `translate(${dx}px, ${dy}px)`;
@@ -390,18 +399,28 @@ function animateMove(fromSquare, toSquare, move) {
     pieceElement.addEventListener('transitionend', function handler() {
         
         pieceElement.removeEventListener('transitionend', handler);
+        
+        // 🚨 SỬA: Thực hiện nước đi thực tế
+        // Phải đảm bảo move là đối tượng có đủ from, to, promotion
+        const actualMove = game.move({ 
+            from: move.from, 
+            to: move.to, 
+            promotion: move.promotion || 'q' 
+        });
 
-        const moveResult = game.move(move);
-
-        if (moveResult) {
+        if (actualMove) {
             
-            const moveNotation = moveResult.san;
-            const player = moveResult.color === 'w' ? 'Trắng' : 'Đen'; 
+            const moveNotation = actualMove.san;
+            const player = actualMove.color === 'w' ? 'Trắng' : 'Đen'; 
             addMessageToChat(player, `Nước đi: ${moveNotation}`); 
             
-            fromElement.innerHTML = ''; 
-            toElement.innerHTML = '';   
-            positionPieces(game.board().flat()); // Cập nhật vị trí và hiệu ứng glow
+            // Cập nhật vị trí quân cờ trên bàn cờ
+            positionPieces(game.board().flat()); 
+            
+            // Xóa hiệu ứng highlight
+            document.querySelectorAll('.square.highlight-move, .square.selected').forEach(sq => {
+                sq.classList.remove('highlight-move', 'selected');
+            });
 
             // Cập nhật lượt đi và kiểm tra trạng thái game
             checkGameStatus();
@@ -416,7 +435,6 @@ function animateMove(fromSquare, toSquare, move) {
             // Khởi động lượt đi Bot (nếu cần)
             const userColorChar = selectedBotColor === 'Trắng' ? 'w' : 'b';
             if (!game.game_over() && game.turn() !== userColorChar) {
-                // 🚨 SỬA LỖI: Bot sẽ tự đi dù đang bị chiếu (vì game chưa kết thúc)
                 setTimeout(makeBotMove, 500); 
             }
         }
@@ -428,7 +446,6 @@ function animateMove(fromSquare, toSquare, move) {
 // --- 4. FUNCTION: INTERACTION HANDLER (Xử lý Click) ---
 
 function handleSquareClick(event) {
-    // 🚨 LỖI ĐÃ SỬA: Đảm bảo tương tác được chặn nếu game kết thúc, nhưng KHÔNG chặn khi chỉ bị chiếu
     if (!game || game.game_over()) return;
 
     const clickedSquare = event.currentTarget.dataset.square;
@@ -436,7 +453,6 @@ function handleSquareClick(event) {
     const isPlayerTurn = game.turn() === playerColorChar;
     
     if (!isPlayerTurn) {
-        // Đã đảm bảo người chơi không thể nhấp vào quân cờ khi không phải lượt của họ
         return; 
     }
 
@@ -446,11 +462,29 @@ function handleSquareClick(event) {
 
     if (selectedSquare) {
         if (selectedSquare === clickedSquare) {
+            // Hủy chọn
             selectedSquare = null;
             return;
         }
 
-        tryMove(selectedSquare, clickedSquare);
+        const validMoves = game.moves({ square: selectedSquare, verbose: true });
+        const targetMove = validMoves.find(m => m.to === clickedSquare);
+
+        if (targetMove) {
+            // Nước đi hợp lệ, thực hiện animation
+            tryMove(selectedSquare, clickedSquare, targetMove);
+        } else {
+            // Click vào ô không hợp lệ, hoặc chọn quân khác
+            const piece = game.get(clickedSquare);
+            if (piece && piece.color === playerColorChar) {
+                selectedSquare = clickedSquare;
+                event.currentTarget.classList.add('selected');
+                highlightValidMoves(selectedSquare);
+            } else {
+                console.log("Nước đi không hợp lệ.");
+            }
+        }
+        
         selectedSquare = null; 
         
     } else {
@@ -479,19 +513,9 @@ function highlightValidMoves(square) {
     });
 }
 
-function tryMove(fromSquare, toSquare) {
-    // Luôn giả định phong Hậu, vì Chess.js chỉ cho phép phong Hậu nếu không chỉ định rõ ràng
-    const tempMove = { from: fromSquare, to: toSquare, promotion: 'q' }; 
-    
-    // Không cần tạo game mới, chỉ cần dùng game.move(tempMove) để kiểm tra
-    const moveResult = game.move(tempMove); 
-    game.undo(); // Hoàn tác nước đi để chỉ kiểm tra tính hợp lệ
-
-    if (moveResult) {
-        animateMove(fromSquare, toSquare, tempMove); 
-    } else {
-        console.log("Nước đi không hợp lệ.");
-    }
+function tryMove(fromSquare, toSquare, move) {
+    // Chỉ cần gọi animateMove với đối tượng move đầy đủ
+    animateMove(fromSquare, toSquare, move); 
 }
 
 
@@ -510,13 +534,11 @@ function checkGameStatus() {
         stopTimer();
         const winner = game.turn() === 'w' ? 'Đen' : 'Trắng';
         addMessageToChat('Bot', `Game Over! ${winner} thắng bằng Chiếu hết.`);
-        // Vua vẫn được highlight khi chiếu hết
         highlightCheckState();
     } else if (game.in_draw()) {
         stopTimer();
         addMessageToChat('Bot', `Game Over! Hòa cờ.`);
     } else if (game.in_check()) {
-        // 3. Áp dụng glow đỏ nếu chỉ là Chiếu (không phải Chiếu hết)
         highlightCheckState();
         addMessageToChat('Bot', `${game.turn() === 'w' ? 'Trắng' : 'Đen'} đang bị chiếu!`);
     }
@@ -546,9 +568,7 @@ function makeBotMove() {
         return; 
     }
     
-    // 🚨 SỬA LỖI: Chỉ tạm dừng đồng hồ sau khi Bot tính xong nước đi và bắt đầu animation.
-    // Việc này cho phép Bot tính toán khi đang bị chiếu.
-    
+    // Tính toán độ trễ dựa trên cấp độ
     const maxDelay = 3500;
     const minDelay = 500;
     const delay = maxDelay - (selectedBotLevel - 1) * ((maxDelay - minDelay) / 9);
@@ -576,6 +596,7 @@ function makeBotMove() {
             }
         }
         
+        // Thực hiện animation với đối tượng move đã tìm được
         animateMove(move.from, move.to, move); 
         
     }, delay);
@@ -664,12 +685,14 @@ function attachChatHandlers() {
     const chatInput = document.querySelector('#play-screen .chat-input-area input');
 
     if (sendButton) {
-        sendButton.onclick = null;
-        sendButton.addEventListener('click', () => handleSendMessage(chatInput));
+        // Loại bỏ handler cũ để tránh nhân đôi
+        sendButton.onclick = null; 
+        sendButton.addEventListener('click', () => handleSendMessage(chatInput), { once: true });
     }
     
     if (chatInput) {
-        chatInput.onkeypress = null;
+        // Loại bỏ handler cũ để tránh nhân đôi
+        chatInput.onkeypress = null; 
         chatInput.addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
@@ -679,7 +702,7 @@ function attachChatHandlers() {
     }
 }
 
-// --- 7. LANGUAGE TRANSLATION FUNCTION ---
+// --- 7. LANGUAGE TRANSLATION FUNCTION (Không đổi) ---
 /**
  * Dịch trang bằng cách đặt cookie và sau đó can thiệp để kích hoạt dịch thuật ngay lập tức,
  * tránh việc tải lại trang gây lỗi "Can't translate".
@@ -730,15 +753,13 @@ function translatePage(targetLang) {
 
 // --- 8. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', (event) => {
+    // 🚨 SỬA: Đảm bảo game được khởi tạo ngay lúc đầu để tránh lỗi null
+    game = new Chess();
+    // Bắt đầu bằng màn hình Home
     showScreen('home');
 
     const playWithBotsBtn = document.querySelector('.battle-actions button:nth-child(2)');
     if (playWithBotsBtn) {
         playWithBotsBtn.addEventListener('click', openBotSelection);
-    }
-    
-    const doneButton = document.querySelector('#add-news-screen .action-btn');
-    if (doneButton) {
-        doneButton.addEventListener('click', () => showScreen('home'));
     }
 });
