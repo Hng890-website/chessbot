@@ -18,12 +18,25 @@ let totalTimeInterval = null; // Đồng hồ tổng thời gian
 
 // --- UTILITY FUNCTIONS ---
 
+// Mảng chứa tất cả 64 tọa độ cờ vua từ 'a1' đến 'h8' (dùng để lặp)
+const ALL_SQUARES = [
+    'a8', 'b8', 'c8', 'd8', 'e8', 'f8', 'g8', 'h8',
+    'a7', 'b7', 'c7', 'd7', 'e7', 'f7', 'g7', 'h7',
+    'a6', 'b6', 'c6', 'd6', 'e6', 'f6', 'g6', 'h6',
+    'a5', 'b5', 'c5', 'd5', 'e5', 'f5', 'g5', 'h5',
+    'a4', 'b4', 'c4', 'd4', 'e4', 'f4', 'g4', 'h4',
+    'a3', 'b3', 'c3', 'd3', 'e3', 'f3', 'g3', 'h3',
+    'a2', 'b2', 'c2', 'd2', 'e2', 'f2', 'g2', 'h2',
+    'a1', 'b1', 'c1', 'd1', 'e1', 'f1', 'g1', 'h1'
+];
+
 /**
  * Chuyển đổi chỉ mục mảng (0-63) thành tọa độ cờ vua (a1-h8).
  * @param {number} index Chỉ mục từ 0 đến 63.
  * @returns {string} Tọa độ cờ vua.
  */
 function indexToSquare(index) {
+    // Chỉ dùng trong trường hợp logic cần, nhưng ta đã có ALL_SQUARES
     const file = String.fromCharCode('a'.charCodeAt(0) + (index % 8));
     const rank = 8 - Math.floor(index / 8);
     return file + rank;
@@ -55,22 +68,18 @@ function formatTime(seconds) {
 
 /**
  * TÌM VỊ TRÍ VUA CỦA MỘT MÀU QUÂN TRÊN BÀN CỜ
- * 🚨 ĐÃ SỬA: Đảm bảo logic lặp qua mảng 8x8 (flat array)
+ * 🚨 PHƯƠNG PHÁP CHẮC CHẮN NHẤT
  * @param {string} color 'w' hoặc 'b'
  * @returns {string|null} Tọa độ ô cờ (ví dụ: 'e1') hoặc null nếu không tìm thấy.
  */
 function findKingSquare(color) {
     if (!game) return null;
-    const board = game.board(); // Lấy mảng 8x8
     
-    for (let r = 0; r < 8; r++) {
-        for (let c = 0; c < 8; c++) {
-            const piece = board[r][c];
-            if (piece && piece.type === 'k' && piece.color === color) {
-                // Chuyển đổi tọa độ mảng [r][c] thành tọa độ cờ vua (a1-h8)
-                const index = r * 8 + c;
-                return indexToSquare(index);
-            }
+    // Lặp qua tất cả 64 ô cờ
+    for (const square of ALL_SQUARES) {
+        const piece = game.get(square); // Sử dụng game.get(square) để lấy quân cờ
+        if (piece && piece.type === 'k' && piece.color === color) {
+            return square;
         }
     }
     return null;
@@ -332,7 +341,8 @@ function initializeChessboard() {
     }
     
     createBoardStructure();
-    positionPieces(game.board().flat());
+    // Thay vì game.board().flat(), ta chỉ cần tạo cấu trúc, positionPieces sẽ dùng game.get
+    positionPieces(); 
     checkGameStatus(); // Kiểm tra trạng thái ngay sau khi khởi tạo (dùng để highlight)
 }
 
@@ -349,7 +359,8 @@ function createBoardStructure() {
         
         const row = Math.floor(i / 8);
         const col = i % 8;
-        const squareName = indexToSquare(i);
+        // Sử dụng mảng ALL_SQUARES để lấy tên ô cờ
+        const squareName = ALL_SQUARES[i]; 
         
         square.dataset.square = squareName; 
         
@@ -369,10 +380,11 @@ function createBoardStructure() {
 /**
  * Đặt quân cờ vào các ô tương ứng.
  */
-function positionPieces(boardState) {
+function positionPieces() {
     if (!game) return; 
     const pieceSymbols = { 'k': '♔', 'q': '♕', 'r': '♖', 'b': '♗', 'n': '♘', 'p': '♙' };
     
+    // Lặp qua tất cả các ô cờ trên DOM
     document.querySelectorAll('.square').forEach(squareElement => {
         const squareName = squareElement.dataset.square;
         const pieceData = game.get(squareName); 
@@ -380,7 +392,6 @@ function positionPieces(boardState) {
         // Xóa quân cờ cũ và hiệu ứng highlight/glow
         squareElement.innerHTML = ''; 
         squareElement.classList.remove('selected', 'highlight-move');
-        // Lưu ý: KHÔNG xóa 'king-in-check' ở đây, để nó được kiểm soát bởi highlightCheckState
 
         if (pieceData) {
             const isWhite = pieceData.color === 'w';
@@ -459,7 +470,7 @@ function animateMove(fromSquare, toSquare, move) {
             addMessageToChat(player, `Nước đi: ${moveNotation}`); 
             
             // Cập nhật vị trí quân cờ trên bàn cờ
-            positionPieces(game.board().flat()); 
+            positionPieces(); // Đã bỏ đối số flat array
 
             // Cập nhật lượt đi và kiểm tra trạng thái game
             checkGameStatus(); // Kiểm tra trạng thái của lượt đi mới
@@ -507,6 +518,7 @@ function handleSquareClick(event) {
             return;
         }
 
+        // Lấy tất cả nước đi hợp lệ từ ô đang chọn
         const validMoves = game.moves({ square: selectedSquare, verbose: true });
         const targetMove = validMoves.find(m => m.to === clickedSquare);
 
@@ -587,8 +599,11 @@ function highlightCheckState() {
 
     // 2. Nếu game đang bị chiếu, tìm Vua của bên đang bị chiếu và thêm hiệu ứng
      if (game && game.in_check()) {
-         // Sử dụng hàm đã sửa lỗi findKingSquare
-         const checkedKingSquare = findKingSquare(game.turn()); 
+         // Lấy màu của bên đang bị chiếu (lượt đi hiện tại)
+         const colorInCheck = game.turn(); 
+         
+         // Sử dụng hàm findKingSquare đã được sửa
+         const checkedKingSquare = findKingSquare(colorInCheck); 
          
          if (checkedKingSquare) {
              const kingElement = document.querySelector(`[data-square="${checkedKingSquare}"]`);
