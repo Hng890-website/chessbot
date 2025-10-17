@@ -352,6 +352,13 @@ function positionPieces() {
         const squareName = squareElement.dataset.square;
         const pieceData = game.get(squareName); 
         
+        // Đảm bảo không còn transform animation nào từ nước đi trước đó
+        const pieceSpan = squareElement.querySelector('span');
+        if (pieceSpan) {
+            pieceSpan.style.transform = ''; 
+            pieceSpan.style.zIndex = '';
+        }
+
         squareElement.innerHTML = ''; 
         squareElement.classList.remove('selected', 'highlight-move');
 
@@ -359,18 +366,21 @@ function positionPieces() {
             const isWhite = pieceData.color === 'w';
             const pieceUnicode = pieceSymbols[pieceData.type.toLowerCase()];
             
-            const pieceSpan = document.createElement('span');
-            pieceSpan.textContent = pieceUnicode;
-            pieceSpan.classList.add(isWhite ? 'piece-white' : 'piece-black');
-            pieceSpan.dataset.piece = pieceData.color + pieceData.type; 
+            const pieceSpanNew = document.createElement('span');
+            pieceSpanNew.textContent = pieceUnicode;
+            pieceSpanNew.classList.add(isWhite ? 'piece-white' : 'piece-black');
+            pieceSpanNew.dataset.piece = pieceData.color + pieceData.type; 
             
-            squareElement.appendChild(pieceSpan);
+            squareElement.appendChild(pieceSpanNew);
         }
     });
     
     highlightCheckState();
 }
 
+/**
+ * Thực hiện animation di chuyển quân cờ. (ĐÃ SỬA LỖI TÍNH TOÁN TỌA ĐỘ)
+ */
 function animateMove(fromSquare, toSquare, move) {
     if (!game) return;
     
@@ -380,6 +390,8 @@ function animateMove(fromSquare, toSquare, move) {
     if (!pieceElement) return;
 
     stopTimer(); 
+    
+    // --- BƯỚC 1: TÍNH TOÁN VÀ THỰC HIỆN DỊCH CHUYỂN TRONG CSS ---
     
     const fromIndex = squareToIndex(fromSquare);
     const toIndex = squareToIndex(toSquare);
@@ -392,24 +404,30 @@ function animateMove(fromSquare, toSquare, move) {
     
     let dx, dy;
     if (isFlipped) {
+        // Nếu bàn cờ bị lật (Đen ở dưới)
         dx = (fromCol - toCol) * SQUARE_SIZE;
         dy = (fromRow - toRow) * SQUARE_SIZE;
     } else {
+        // Nếu bàn cờ không lật (Trắng ở dưới)
+        // Lỗi đã được sửa tại đây:
         dx = (toCol - fromCol) * SQUARE_SIZE;
-        dy = (toRow - row) * SQUARE_SIZE; // Sửa lỗi cú pháp: sử dụng `toRow`
         dy = (toRow - fromRow) * SQUARE_SIZE;
     }
     
+    // Tạm thời ẩn quân cờ ở ô đích nếu có để animation không bị chồng
     const toElement = document.querySelector(`[data-square="${toSquare}"]`);
     if (toElement) toElement.innerHTML = ''; 
     
     pieceElement.style.transform = `translate(${dx}px, ${dy}px)`;
     pieceElement.style.zIndex = 100; 
 
-    pieceElement.addEventListener('transitionend', function handler() {
+    // --- BƯỚC 2: CHỜ ANIMATION KẾT THÚC VÀ CẬP NHẬT TRẠNG THÁI CUỐI ---
+    
+    const transitionDuration = 200; 
+
+    const finishMove = () => {
         
-        pieceElement.removeEventListener('transitionend', handler);
-        
+        // Thực hiện nước đi thực tế
         const actualMove = game.move({ 
             from: move.from, 
             to: move.to, 
@@ -422,9 +440,11 @@ function animateMove(fromSquare, toSquare, move) {
             const player = actualMove.color === 'w' ? 'Trắng' : 'Đen'; 
             addMessageToChat(player, `Nước đi: ${moveNotation}`); 
             
+            // Cập nhật vị trí quân cờ trên bàn cờ
             positionPieces(); 
 
-            checkGameStatus();
+            // Cập nhật lượt đi và kiểm tra trạng thái game
+            checkGameStatus(); 
 
             if (!game.game_over()) {
                 switchTurnDisplay(game.turn());
@@ -433,13 +453,31 @@ function animateMove(fromSquare, toSquare, move) {
                 stopAllTimers();
             }
 
+            // Khởi động lượt đi Bot (nếu cần)
             const userColorChar = selectedBotColor === 'Trắng' ? 'w' : 'b';
             if (!game.game_over() && game.turn() !== userColorChar) {
                 setTimeout(makeBotMove, 500); 
             }
         }
-        
-    });
+    };
+    
+    // Gắn event listener để lắng nghe khi animation kết thúc
+    const moveHandler = function handler() {
+        pieceElement.removeEventListener('transitionend', handler);
+        finishMove();
+    };
+
+    pieceElement.addEventListener('transitionend', moveHandler);
+
+    // Timeout dự phòng
+    setTimeout(() => {
+        // Kiểm tra xem transform đã trở về mặc định chưa (nghĩa là finishMove đã được gọi)
+        if (pieceElement.style.transform !== '' && pieceElement.style.transform !== 'translate(0px, 0px)') {
+             // Nếu transform vẫn còn, gọi finishMove và xóa listener để tránh gọi lại
+             pieceElement.removeEventListener('transitionend', moveHandler);
+             finishMove();
+        }
+    }, transitionDuration + 50); 
 }
 
 
@@ -613,15 +651,14 @@ function negamax(depth, alpha, beta) {
  */
 function findBestMove() {
     const depthMap = {
-        1: 0, 2: 0, 3: 0, // Cấp độ thấp: ngẫu nhiên (sẽ được xử lý ngoài hàm này)
-        4: 1, // Cấp độ trung bình: Tìm kiếm 1 lớp
-        5: 1, 6: 2, 7: 2, // Cấp độ cao: Tìm kiếm 2 lớp
-        8: 3, 9: 3, 10: 3 // Cấp độ khó: Tìm kiếm 3 lớp (có thể chậm)
+        1: 0, 2: 0, 3: 0, 
+        4: 1, 
+        5: 1, 6: 2, 7: 2, 
+        8: 3, 9: 3, 10: 3 
     };
     
     const depth = depthMap[selectedBotLevel] || 0;
     
-    // Nếu độ sâu là 0, dùng logic ngẫu nhiên/semi-random (nhanh)
     if (depth === 0) {
         return null; 
     }
@@ -668,7 +705,6 @@ function makeBotMove() {
     // Tính toán độ trễ dựa trên cấp độ (từ 0.5s đến 3.5s)
     const maxDelay = 3500;
     const minDelay = 500;
-    // Độ trễ sẽ giảm dần cho tất cả cấp độ
     const delay = maxDelay - (selectedBotLevel - 1) * ((maxDelay - minDelay) / 9);
 
     setTimeout(() => {
@@ -681,7 +717,6 @@ function makeBotMove() {
         } else {
             // CẤP ĐỘ THẤP (1-3): SỬ DỤNG LOGIC NGẪU NHIÊN/SEMI-RANDOM
             
-            // Lọc ưu tiên cho cấp độ 3
             if (selectedBotLevel === 3) {
                 const captureMoves = possibleMoves.filter(m => m.captured);
                 const checkMoves = possibleMoves.filter(m => m.san.includes('+'));
