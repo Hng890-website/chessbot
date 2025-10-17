@@ -11,7 +11,11 @@ const SQUARE_SIZE = 60; // Kích thước mỗi ô cờ (phải khớp với CSS
 const INITIAL_TIME_SECONDS = 300; // 5 phút
 let whiteTime = INITIAL_TIME_SECONDS;
 let blackTime = INITIAL_TIME_SECONDS;
-let timerInterval = null;
+let timerInterval = null; // Đồng hồ đếm ngược của người chơi
+
+// Thêm biến cho tổng thời gian chơi
+let totalTimeSeconds = 0; 
+let totalTimeInterval = null; // Đồng hồ tổng thời gian
 
 // --- UTILITY FUNCTIONS ---
 
@@ -51,6 +55,36 @@ function formatTime(seconds) {
 }
 
 // --- TIMER LOGIC ---
+
+/**
+ * Cập nhật tổng thời gian chơi.
+ */
+function updateTotalTime() {
+    totalTimeSeconds++;
+    const totalTimeElement = document.getElementById('total-game-time');
+    if (totalTimeElement) {
+        totalTimeElement.textContent = formatTime(totalTimeSeconds);
+    }
+}
+
+/**
+ * Bắt đầu đồng hồ tổng thời gian.
+ */
+function startTotalTimer() {
+    if (totalTimeInterval) clearInterval(totalTimeInterval);
+    totalTimeSeconds = 0; // Reset tổng thời gian khi bắt đầu ván mới
+    updateTotalTime(); // Hiển thị 00:00 ngay lập tức
+    totalTimeInterval = setInterval(updateTotalTime, 1000);
+}
+
+/**
+ * Dừng tất cả đồng hồ.
+ */
+function stopAllTimers() {
+    stopTimer(); // Dừng đồng hồ đếm ngược của người chơi
+    if (totalTimeInterval) clearInterval(totalTimeInterval); // Dừng đồng hồ tổng thời gian
+    totalTimeInterval = null;
+}
 
 /**
  * Cập nhật hiển thị thời gian và kiểm tra cờ hết giờ.
@@ -124,7 +158,7 @@ function stopTimer() {
  * @param {string} timedOutColor Màu quân cờ hết giờ ('w' hoặc 'b').
  */
 function handleTimeout(timedOutColor) {
-    stopTimer();
+    stopAllTimers();
     const winnerColor = timedOutColor === 'w' ? 'Đen' : 'Trắng';
     addMessageToChat('Bot', `Game Over! ${timedOutColor === 'w' ? 'Trắng' : 'Đen'} hết giờ. ${winnerColor} thắng.`);
     game = null; 
@@ -152,7 +186,6 @@ function switchTurnDisplay(turn) {
 function showScreen(screenName) {
     const screenId = screenName + '-screen'; 
     
-    // 🚨 QUAN TRỌNG: Chỉ hiển thị một màn hình duy nhất
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
@@ -162,7 +195,7 @@ function showScreen(screenName) {
     }
     
     if (screenName !== 'play') {
-        stopTimer();
+        stopAllTimers(); // Dừng tất cả đồng hồ khi rời màn hình chơi
     }
 
     if (screenName === 'play') {
@@ -176,7 +209,6 @@ function openBotSelection() {
 }
 
 function closeBotSelection() {
-    // 🚨 QUAN TRỌNG: Đảm bảo overlay bị xóa class 'visible'
     document.getElementById('modal-overlay').classList.remove('visible');
 }
 
@@ -221,7 +253,7 @@ function startBotMatch() {
         // 2. Đóng Modal
         closeBotSelection();
         
-        // 3. Thiết lập thông tin trận đấu
+        // 3. Thiết lập thông tin trận đấu và Đồng hồ
         whiteTime = INITIAL_TIME_SECONDS;
         blackTime = INITIAL_TIME_SECONDS;
         document.getElementById('white-time').textContent = formatTime(whiteTime);
@@ -242,7 +274,6 @@ function startBotMatch() {
         // Xóa chat cũ và gửi tin nhắn chào mừng
         const chatRoom = document.querySelector('.chat-room');
         if (chatRoom) {
-            // Xóa tất cả các tin nhắn cũ trừ tin nhắn mẫu đầu tiên
             Array.from(chatRoom.children).filter((child, index) => index > 0 && !child.classList.contains('chat-input-area')).forEach(p => p.remove());
         }
         addMessageToChat(botName, `Chào mừng ${userColor === 'Trắng' ? 'bạn, người chơi Trắng' : 'người chơi Đen'}. Tôi là ${botName}, chúc bạn một trận đấu hay!`);
@@ -254,6 +285,7 @@ function startBotMatch() {
         // 5. Bắt đầu game và logic lượt đi
         switchTurnDisplay(game.turn());
         startTimer(); 
+        startTotalTimer(); // BẮT ĐẦU ĐỒNG HỒ TỔNG THỜI GIAN
 
         // 6. Nếu người chơi chọn Đen (Bot là Trắng), Bot đi trước
         if (userColorChar !== game.turn()) {
@@ -321,7 +353,6 @@ function positionPieces(boardState) {
     
     let checkedKingSquare = null;
     if (game.in_check() && !game.in_checkmate()) {
-        // Lấy ô Vua đang bị chiếu của quân đang đến lượt đi
         checkedKingSquare = game.king_square(game.turn()); 
     }
     
@@ -373,15 +404,19 @@ function animateMove(fromSquare, toSquare, move) {
     const fromRow = Math.floor(fromIndex / 8);
     const fromCol = fromIndex % 8;
     const toRow = Math.floor(toIndex / 8);
-    const toCol = toIndex % 8;
+    const toCol = indexToSquare(toIndex) % 8; // Lỗi cú pháp
+    
+    // Sửa lỗi ở đây
+    const toColNew = toIndex % 8;
+
     const isFlipped = document.getElementById('chessboard').classList.contains('board-flipped');
     
     let dx, dy;
     if (isFlipped) {
-        dx = (fromCol - toCol) * SQUARE_SIZE;
+        dx = (fromCol - toColNew) * SQUARE_SIZE;
         dy = (fromRow - toRow) * SQUARE_SIZE;
     } else {
-        dx = (toCol - fromCol) * SQUARE_SIZE;
+        dx = (toColNew - fromCol) * SQUARE_SIZE;
         dy = (toRow - fromRow) * SQUARE_SIZE;
     }
     
@@ -419,7 +454,7 @@ function animateMove(fromSquare, toSquare, move) {
                 switchTurnDisplay(game.turn());
                 startTimer(); // Khởi động đồng hồ cho lượt mới
             } else {
-                stopTimer();
+                stopAllTimers();
             }
 
             // Khởi động lượt đi Bot (nếu cần)
@@ -464,7 +499,7 @@ function handleSquareClick(event) {
         if (targetMove) {
             // Nước đi hợp lệ, thực hiện animation
             tryMove(selectedSquare, clickedSquare, targetMove);
-            selectedSquare = null; // Sau khi di chuyển phải reset
+            selectedSquare = null; 
         } else {
             // Nếu click vào ô không hợp lệ, thử chọn quân cờ mới
             const piece = game.get(clickedSquare);
@@ -473,7 +508,6 @@ function handleSquareClick(event) {
                 event.currentTarget.classList.add('selected');
                 highlightValidMoves(selectedSquare);
             } else {
-                // Nếu click vào ô trống hoặc quân địch, không làm gì cả
                 selectedSquare = null;
             }
         }
@@ -519,12 +553,12 @@ function checkGameStatus() {
     });
 
     if (game.in_checkmate()) {
-        stopTimer();
+        stopAllTimers(); // Dừng tất cả đồng hồ khi Chiếu hết
         const winner = game.turn() === 'w' ? 'Đen' : 'Trắng';
         addMessageToChat('Bot', `Game Over! ${winner} thắng bằng Chiếu hết.`);
         highlightCheckState();
     } else if (game.in_draw()) {
-        stopTimer();
+        stopAllTimers(); // Dừng tất cả đồng hồ khi Hòa cờ
         addMessageToChat('Bot', `Game Over! Hòa cờ.`);
     } else if (game.in_check()) {
         highlightCheckState();
