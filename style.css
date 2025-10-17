@@ -285,7 +285,7 @@ iframe[name*="google_translate_element"] {
 #chessboard-container {
     flex-shrink: 0;
     position: relative;
-    order: 2; /* 🚨 VỊ TRÍ 2 (Bên phải) */
+    order: 2; /* VỊ TRÍ 2 (Bên phải) */
 }
 
 #chessboard {
@@ -362,7 +362,7 @@ iframe[name*="google_translate_element"] {
 
 /* --- THAY ĐỔI HIỆU ỨNG QUÂN CỜ (PHẲNG HƠN - MYCHESS STYLE) --- */
 .piece-white {
-    /* Màu trắng thuần và đổ bóng nhẹ (như hình bạn cung cấp) */
+    /* Màu trắng thuần và đổ bóng nhẹ */
     color: #fff !important; 
     text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4); 
 }
@@ -413,10 +413,27 @@ iframe[name*="google_translate_element"] {
     margin-left: -25px;
 }
 
+/* --- HIỆU ỨNG VUA BỊ CHIẾU (MỚI) --- */
+.square.king-in-check {
+    /* Đổ bóng đỏ mềm mại và lan tỏa */
+    box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.6), inset 0 0 0 4px rgba(255, 0, 0, 0.7); 
+    border: 4px solid rgba(255, 0, 0, 0.5); /* Thêm viền đỏ nhẹ */
+    animation: pulse-red 1.5s infinite alternate; /* Hiệu ứng nhấp nháy */
+}
+
+@keyframes pulse-red {
+    from {
+        box-shadow: 0 0 15px 5px rgba(255, 0, 0, 0.6), inset 0 0 0 4px rgba(255, 0, 0, 0.7);
+    }
+    to {
+        box-shadow: 0 0 25px 8px rgba(255, 0, 0, 0.8), inset 0 0 0 4px rgba(255, 0, 0, 0.9);
+    }
+}
+
 
 /* --- CHAT AREA & MODAL --- */
 .game-chat-news {
-    order: 1; /* 🚨 VỊ TRÍ 1 (Bên trái) */
+    order: 1; /* VỊ TRÍ 1 (Bên trái) */
     flex-grow: 1;
     display: flex;
     flex-direction: column;
