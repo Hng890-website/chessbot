@@ -1,14 +1,14 @@
-// script.js (FINAL VERSION - SỬA LỖI ANIMATION VÀ GIAO DIỆN)
+// script.js (FINAL VERSION - ĐÃ SỬA LỖI ANIMATION VÀ GIAO DIỆN)
 
 // --- GLOBAL VARIABLES ---
 let selectedBotLevel = 1;
 let selectedBotColor = "Trắng"; 
-let game = null; 
+let game = null; // Biến lưu trữ trạng thái game từ thư viện Chess.js
 let selectedSquare = null; 
 const SQUARE_SIZE = 60; 
 
 // --- TIMER VARIABLES ---
-const INITIAL_TIME_SECONDS = 300; 
+const INITIAL_TIME_SECONDS = 300; // 5 phút
 let whiteTime = INITIAL_TIME_SECONDS;
 let blackTime = INITIAL_TIME_SECONDS;
 let timerInterval = null; 
@@ -178,16 +178,22 @@ function switchTurnDisplay(turn) {
 // --- 1. FUNCTION: SCREEN MANAGEMENT ---
 
 function showScreen(screenName) {
-    const screenId = screenName + '-screen'; 
-    
+    // 1. Lặp qua TẤT CẢ các màn hình và loại bỏ lớp 'active', đồng thời ẩn đi
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
+        screen.style.display = 'none'; 
     });
+
+    const screenId = screenName + '-screen'; 
     const targetScreen = document.getElementById(screenId);
+    
+    // 2. Kích hoạt màn hình mục tiêu
     if (targetScreen) {
         targetScreen.classList.add('active');
+        targetScreen.style.display = 'flex'; 
     }
     
+    // 3. Quản lý timer và các hành động liên quan
     if (screenName !== 'play') {
         stopAllTimers(); 
     }
@@ -197,7 +203,6 @@ function showScreen(screenName) {
     }
     
     if (screenName === 'rules') {
-        // Quay lại màn hình chính sau khi xem luật
         const rulesScreen = document.getElementById('rules-screen');
         const backButton = rulesScreen ? rulesScreen.querySelector('button') : null;
         if (backButton) {
@@ -247,9 +252,11 @@ function initializeModalLogic() {
 
 function startBotMatch() {
     try {
+        // Khởi tạo game cờ vua mới
         game = new Chess(); 
         closeBotSelection();
         
+        // Thiết lập thời gian ban đầu
         whiteTime = INITIAL_TIME_SECONDS;
         blackTime = INITIAL_TIME_SECONDS;
         document.getElementById('white-time').textContent = formatTime(whiteTime);
@@ -257,6 +264,7 @@ function startBotMatch() {
         document.getElementById('white-clock').classList.remove('low-time');
         document.getElementById('black-clock').classList.remove('low-time');
         
+        // Thiết lập tên và màu sắc
         const botNameInput = document.getElementById('bot-name').value.trim();
         const botName = botNameInput || `Bot Level ${selectedBotLevel}`; 
         
@@ -267,13 +275,14 @@ function startBotMatch() {
         document.querySelector('#play-screen .game-header h2').textContent = 
             `Bạn (${userColor}) vs ${botName} (Cấp độ ${selectedBotLevel}) (${botOppositeColor})`;
 
+        // Dọn dẹp phòng chat
         const chatRoom = document.querySelector('.chat-room');
         if (chatRoom) {
-            // Xóa các tin nhắn cũ, giữ lại phần nhập tin nhắn
             Array.from(chatRoom.children).filter((child, index) => index > 0 && !child.classList.contains('chat-input-area')).forEach(p => p.remove());
         }
         addMessageToChat(botName, `Chào mừng ${userColor === 'Trắng' ? 'bạn, người chơi Trắng' : 'người chơi Đen'}. Tôi là ${botName}, chúc bạn một trận đấu hay!`);
 
+        // Chuyển sang màn hình chơi cờ
         showScreen('play'); 
         initializeChessboard(); 
         
@@ -281,6 +290,7 @@ function startBotMatch() {
         startTimer(); 
         startTotalTimer(); 
 
+        // Nếu Bot đi trước, thực hiện nước đi Bot sau 1 giây
         if (userColorChar !== game.turn()) {
             setTimeout(makeBotMove, 1000); 
         }
@@ -402,7 +412,7 @@ function finishMoveLogic(move) {
 
 
 /**
- * Thực hiện animation di chuyển quân cờ. (SỬ DỤNG setTimeout)
+ * Thực hiện animation di chuyển quân cờ. 
  */
 function animateMove(fromSquare, toSquare, move) {
     if (!game) return;
@@ -428,22 +438,26 @@ function animateMove(fromSquare, toSquare, move) {
     
     let dx, dy;
     if (isFlipped) {
+        // Nếu bàn cờ bị lật, tính toán tọa độ ngược lại
         dx = (fromCol - toCol) * SQUARE_SIZE;
         dy = (fromRow - toRow) * SQUARE_SIZE;
     } else {
+        // Bàn cờ không lật
         dx = (toCol - fromCol) * SQUARE_SIZE;
         dy = (toRow - fromRow) * SQUARE_SIZE; 
     }
     
+    // Tạm thời ẩn quân cờ ở ô đích
     const toElement = document.querySelector(`[data-square="${toSquare}"]`);
     if (toElement) toElement.innerHTML = ''; 
     
+    // Bắt đầu animation CSS
     pieceElement.style.transform = `translate(${dx}px, ${dy}px)`;
     pieceElement.style.zIndex = 100; 
 
     const transitionDuration = 200; 
 
-    // Gọi finishMoveLogic sau khi animation kết thúc
+    // Gọi finishMoveLogic sau khi animation kết thúc (200ms)
     setTimeout(() => {
         finishMoveLogic(move);
     }, transitionDuration + 50); 
@@ -477,9 +491,11 @@ function handleSquareClick(event) {
         const targetMove = validMoves.find(m => m.to === clickedSquare);
 
         if (targetMove) {
+            // Thực hiện nước đi
             tryMove(selectedSquare, clickedSquare, targetMove);
             selectedSquare = null; 
         } else {
+            // Chọn quân cờ khác (cùng màu)
             const piece = game.get(clickedSquare);
             if (piece && piece.color === playerColorChar) {
                 selectedSquare = clickedSquare;
@@ -558,6 +574,9 @@ function highlightCheckState() {
      }
 }
 
+/**
+ * Đánh giá bàn cờ dựa trên tổng giá trị quân cờ.
+ */
 function evaluateBoard() {
     let score = 0;
     for (const square of ALL_SQUARES) {
@@ -570,6 +589,9 @@ function evaluateBoard() {
     return score;
 }
 
+/**
+ * Thuật toán Negamax (chỉ tìm kiếm sâu 1-3).
+ */
 function negamax(depth, alpha, beta) {
     if (depth === 0 || game.game_over()) {
         const evaluation = evaluateBoard();
@@ -595,7 +617,11 @@ function negamax(depth, alpha, beta) {
     return maxEval;
 }
 
+/**
+ * Hàm chính tìm nước đi tốt nhất cho Bot (sử dụng Negamax).
+ */
 function findBestMove() {
+    // Độ sâu tìm kiếm (depth): Level 1-3: Random/Simple, Level 4-5: Depth 1, Level 6-7: Depth 2, Level 8-10: Depth 3
     const depthMap = {
         1: 0, 2: 0, 3: 0, 
         4: 1, 
@@ -606,7 +632,7 @@ function findBestMove() {
     const depth = depthMap[selectedBotLevel] || 0;
     
     if (depth === 0) {
-        return null; 
+        return null; // Dùng logic Random/Capture cho level thấp
     }
     
     let bestMove = null;
@@ -615,6 +641,7 @@ function findBestMove() {
     const beta = Infinity; 
     const moves = game.moves({ verbose: true });
     
+    // Sắp xếp các nước đi ưu tiên ăn quân để Alpha-Beta pruning hiệu quả hơn
     moves.sort((a, b) => (b.captured ? PIECE_VALUES[b.captured] : 0) - (a.captured ? PIECE_VALUES[a.captured] : 0));
 
     for (const move of moves) {
@@ -644,6 +671,7 @@ function makeBotMove() {
         return; 
     }
     
+    // Tính toán độ trễ dựa trên cấp độ Bot (Level càng cao, độ trễ càng thấp)
     const maxDelay = 3500;
     const minDelay = 500;
     const delay = maxDelay - (selectedBotLevel - 1) * ((maxDelay - minDelay) / 9);
@@ -653,8 +681,10 @@ function makeBotMove() {
         let move = null;
         
         if (selectedBotLevel >= 4) {
+            // Dùng AI Negamax cho level 4 trở lên
             move = findBestMove();
         } else {
+            // Logic đơn giản/Random cho level thấp
             if (selectedBotLevel === 3) {
                 const captureMoves = possibleMoves.filter(m => m.captured);
                 const checkMoves = possibleMoves.filter(m => m.san.includes('+'));
@@ -667,6 +697,7 @@ function makeBotMove() {
                     move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
                 }
             } else {
+                // Level 1, 2: Random hoàn toàn
                 move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
             }
         }
@@ -674,6 +705,7 @@ function makeBotMove() {
         if (move) {
             animateMove(move.from, move.to, move); 
         } else if (possibleMoves.length > 0) {
+             // Dùng random nếu Negamax không tìm thấy nước đi (chỉ xảy ra ở depth=0)
              move = possibleMoves[Math.floor(Math.random() * possibleMoves.length)];
              animateMove(move.from, move.to, move);
         } else {
@@ -790,10 +822,24 @@ document.addEventListener('DOMContentLoaded', (event) => {
     initializeModalLogic(); 
     
     // Gán sự kiện cho các nút chuyển màn hình
-    document.querySelector('[data-action="open-bot-selection"]').addEventListener('click', openBotSelection);
-    document.querySelector('[data-action="show-rules"]').addEventListener('click', () => showScreen('rules'));
+    const playWithBotsBtn = document.querySelector('[data-action="open-bot-selection"]');
+    if (playWithBotsBtn) {
+        playWithBotsBtn.removeEventListener('click', openBotSelection); 
+        playWithBotsBtn.addEventListener('click', openBotSelection);
+    }
     
-    document.getElementById('start-match-btn').addEventListener('click', startBotMatch);
+    const showRulesBtn = document.querySelector('[data-action="show-rules"]');
+    if (showRulesBtn) {
+         showRulesBtn.removeEventListener('click', () => showScreen('rules'));
+         showRulesBtn.addEventListener('click', () => showScreen('rules'));
+    }
     
+    const startMatchBtn = document.getElementById('start-match-btn');
+    if (startMatchBtn) {
+        startMatchBtn.removeEventListener('click', startBotMatch); 
+        startMatchBtn.addEventListener('click', startBotMatch);
+    }
+    
+    // Hiển thị màn hình chính khi khởi động
     showScreen('home');
 });
