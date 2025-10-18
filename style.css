@@ -42,17 +42,22 @@ body {
 }
 
 /* ==================================== */
-/* 2. SCREEN MANAGEMENT */
+/* 2. SCREEN MANAGEMENT (SỬA LỖI HIỂN THỊ KÉP) */
 /* ==================================== */
 
 .screen {
     width: 100%;
-    display: none;
+    /* QUY TẮC BUỘC ẨN: đảm bảo các màn hình không hoạt động bị ẩn */
+    display: none !important; 
     padding: 20px;
+    /* Thiết lập layout mặc định cho các màn hình */
+    flex-direction: column; 
+    align-items: flex-start;
 }
 
 .screen.active {
-    display: flex;
+    /* QUY TẮC BUỘC HIỂN THỊ: đảm bảo màn hình đang hoạt động được hiển thị */
+    display: flex !important;
 }
 
 #home-screen, #rules-screen {
@@ -150,7 +155,7 @@ body {
 /* ==================================== */
 
 #play-screen {
-    display: grid;
+    display: grid !important; /* Đảm bảo layout lưới được áp dụng */
     grid-template-columns: minmax(min-content, 2fr) 1fr; /* Bàn cờ và Sidebar */
     gap: 20px;
     align-items: start;
@@ -165,8 +170,8 @@ body {
 }
 
 .sidebar {
-    background-color: #f9f9f9;
     padding: 20px;
+    background-color: #f9f9f9;
     border-left: 1px solid #ddd;
     display: flex;
     flex-direction: column;
