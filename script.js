@@ -7,13 +7,13 @@ const chessboardEl = document.getElementById('chessboard');
 const currentTurnDisplay = document.getElementById('current-turn-display');
 
 let selectedSquare = null;
-let currentTurn = 'w'; // 'w' cho Trắng, 'b' cho Đen
-let playerColor = 'w'; // Người chơi LUÔN LÀ TRẮNG ('w') theo thiết kế modal mới
-let botLevel = 6; // Mặc định Level 6
+let currentTurn = 'w'; 
+let playerColor = 'w'; // Người chơi LUÔN LÀ TRẮNG ('w')
+let botLevel = 6; 
 let botName = "Bot Level 6";
 
 // ===========================================
-// LOGIC BOT AI (NEGAMAX CÓ NÂNG CẤP)
+// LOGIC BOT AI (NEGAMAX) - GIỮ NGUYÊN
 // ===========================================
 
 const PieceValues = {
@@ -177,7 +177,8 @@ function updateClocks() {
 function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     
-    if (whiteTime <= 0 && blackTime <= 0) return; // Không chạy timer nếu là "Vô hạn"
+    // Nếu cả hai đều là 0, tức là vô hạn, không chạy timer
+    if (whiteTime <= 0 && blackTime <= 0) return; 
 
     timerInterval = setInterval(() => {
         totalGameTime++;
@@ -186,12 +187,14 @@ function startTimer() {
             if (whiteTime <= 0) {
                 clearInterval(timerInterval);
                 alert("Hết giờ! Trắng thua.");
+                checkGameState(); // Cập nhật trạng thái game khi hết giờ
             }
         } else {
             blackTime--;
             if (blackTime <= 0) {
                 clearInterval(timerInterval);
                 alert("Hết giờ! Đen thua.");
+                checkGameState();
             }
         }
         updateClocks();
@@ -206,8 +209,24 @@ function stopTimer() {
 // GAME & UI LOGIC
 // ===========================================
 
+/**
+ * Lấy ký tự Unicode của quân cờ.
+ * Đảm bảo chỉ trả về ký tự cho một quân cờ.
+ */
+function getPieceChar(type, color) {
+    const pieces = {
+        w: { 'k': '♔', 'q': '♕', 'r': '♖', 'b': '♗', 'n': '♘', 'p': '♙' },
+        b: { 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' }
+    };
+    return pieces[color][type];
+}
+
+
+/**
+ * Tạo bàn cờ và gán các sự kiện.
+ */
 function setupBoard() {
-    chessboardEl.innerHTML = ''; 
+    chessboardEl.innerHTML = ''; // Xóa bàn cờ cũ
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             const squareEl = document.createElement('div');
@@ -227,18 +246,26 @@ function setupBoard() {
     renderBoard();
 }
 
+/**
+ * Cập nhật hiển thị quân cờ trên bàn cờ.
+ * KHẮC PHỤC LỖI: Đảm bảo chỉ chèn ký tự Unicode vào ô cờ.
+ */
 function renderBoard() {
     const board = game.board();
-    const isFlipped = playerColor === 'b'; // Dù playerColor là 'w', vẫn giữ logic lật bàn cờ nếu cần
+    const isFlipped = playerColor === 'b'; 
     
     chessboardEl.classList.toggle('board-flipped', isFlipped);
 
     document.querySelectorAll('.square').forEach(el => {
         const squareName = el.dataset.square;
-        el.innerHTML = '';
+        el.innerHTML = ''; // Rất quan trọng: Xóa nội dung cũ
         el.classList.remove('king-in-check', 'selected', 'highlight-move');
         
-        const squareData = board[8 - parseInt(squareName[1])][squareName.charCodeAt(0) - 'a'.charCodeAt(0)];
+        // Tính toán vị trí trong mảng board từ tên ô cờ (a1 -> [7][0])
+        const row = 8 - parseInt(squareName[1]);
+        const col = squareName.charCodeAt(0) - 'a'.charCodeAt(0);
+
+        const squareData = board[row][col];
 
         if (squareData) {
             const pieceChar = getPieceChar(squareData.type, squareData.color);
@@ -257,6 +284,7 @@ function renderBoard() {
     }
 }
 
+
 function findKingSquare(color) {
     const board = game.board();
     for (let r = 0; r < 8; r++) {
@@ -270,14 +298,6 @@ function findKingSquare(color) {
     return null;
 }
 
-function getPieceChar(type, color) {
-    const pieces = {
-        w: { 'k': '♔', 'q': '♕', 'r': '♖', 'b': '♗', 'n': '♘', 'p': '♙' },
-        b: { 'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟' }
-    };
-    return pieces[color][type];
-}
-
 function updateTurnDisplay() {
     currentTurn = game.turn();
     const turnColor = currentTurn === 'w' ? 'Trắng' : 'Đen';
@@ -287,7 +307,6 @@ function updateTurnDisplay() {
 }
 
 function handleSquareClick(squareName) {
-    // Luôn là lượt Trắng nếu playerColor là 'w'
     if (game.turn() !== playerColor) {
         addChatMessage("Hệ thống", "Không phải lượt của bạn.");
         return;
@@ -311,12 +330,13 @@ function handleSquareClick(squareName) {
 
         const result = game.move(move);
 
-        document.querySelector(`[data-square="${selectedSquare}"]`).classList.remove('selected');
+        // Xóa highlight và trạng thái chọn
+        document.querySelector(`[data-square="${selectedSquare}"]`)?.classList.remove('selected');
         document.querySelectorAll('.highlight-move').forEach(el => el.classList.remove('highlight-move'));
         
         if (result) {
             // Cộng thời gian cho người chơi nếu có increment
-            if (whiteTime > 0) { // Chỉ cộng nếu không phải vô hạn
+            if (whiteTime > 0) {
                 whiteTime += timeIncrement;
             }
             
@@ -327,15 +347,21 @@ function handleSquareClick(squareName) {
             checkGameState();
             
             if (!game.game_over() && game.turn() !== playerColor) {
+                // Thêm increment cho Bot (Đen)
+                if (blackTime > 0) {
+                    blackTime += timeIncrement;
+                }
                 makeBotMove();
             }
         } 
         else if (piece && piece.color === playerColor) {
+            // Chuyển chọn quân
             selectedSquare = squareName;
             document.querySelector(`[data-square="${squareName}"]`).classList.add('selected');
             highlightMoves(squareName);
         }
         else {
+            // Nước đi không hợp lệ
             selectedSquare = null;
             renderBoard(); 
             addChatMessage("Hệ thống", "Nước đi không hợp lệ.");
@@ -387,6 +413,7 @@ function addChatMessage(sender, message) {
     p.appendChild(document.createTextNode(message));
     
     chatRoomEl.prepend(p); 
+    // Cuộn về tin nhắn mới nhất (phía dưới)
     chatRoomEl.scrollTop = chatRoomEl.scrollHeight; 
 }
 
@@ -431,7 +458,7 @@ function simpleBotResponse(message) {
 const modalOverlay = document.getElementById('modal-overlay');
 const levelButtons = document.querySelectorAll('#level-selection .level-btn');
 const startMatchBtn = document.getElementById('start-match-btn');
-const botNameInput = document.getElementById('bot-name-new'); // Đã đổi ID
+const botNameInput = document.getElementById('bot-name-new'); 
 const timeControlSelect = document.getElementById('time-control-select');
 
 // Ẩn/hiện modal
@@ -472,26 +499,20 @@ function setTimeControl(value) {
 
 // Xử lý nút BẮT ĐẦU TRẬN ĐẤU
 startMatchBtn.addEventListener('click', () => {
-    // Dừng timer cũ (nếu có)
     stopTimer();
     
-    // Lấy cấp độ đã chọn
     const activeLevelBtn = document.querySelector('#level-selection .level-btn.active');
     botLevel = activeLevelBtn ? parseInt(activeLevelBtn.dataset.level) : 6;
     
-    // Cập nhật tên Bot
     const inputName = botNameInput.value.trim();
     botName = inputName !== "" ? inputName : `Bot Level ${botLevel}`;
     
-    // Thiết lập thời gian mới
     setTimeControl(timeControlSelect.value);
     
-    // Đặt lại trạng thái game và thời gian
     game.reset();
     totalGameTime = 0;
-    playerColor = 'w'; // Luôn là Trắng
+    playerColor = 'w'; 
     
-    // Chuyển màn hình và khởi tạo game
     showScreen('play');
     toggleModal(false);
     setupBoard();
@@ -503,10 +524,8 @@ startMatchBtn.addEventListener('click', () => {
     document.getElementById('player-color-display').textContent = 'Trắng';
     document.getElementById('bot-color-display').textContent = 'Đen';
     
-    // Bắt đầu Timer
     startTimer();
     
-    // Bot luôn đi sau (Đen) nên không cần gọi makeBotMove()
     addChatMessage(botName, "Chào mừng, chúc bạn một trận đấu hay!");
 });
 
@@ -551,5 +570,5 @@ function showScreen(screenId) {
 // Khởi tạo trạng thái ban đầu
 showScreen('home');
 setupBoard();
-setTimeControl('unlimited'); // Thiết lập mặc định thời gian vô hạn
+setTimeControl('unlimited'); 
 updateClocks();
