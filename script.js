@@ -1,4 +1,4 @@
-// script.js (FINAL VERSION - ĐÃ SỬA LỖI CHUYỂN MÀN HÌNH VÀ SỬ DỤNG THƯ VIỆN CHESS.JS)
+// script.js (FINAL VERSION - ĐÃ ĐẢM BẢO LOGIC ẨN/HIỆN MÀN HÌNH VÀ KHỞI TẠO GAME)
 
 // --- GLOBAL VARIABLES ---
 let selectedBotLevel = 1;
@@ -258,7 +258,6 @@ function initializeModalLogic() {
 
 
 function startBotMatch() {
-    // Kiểm tra xem thư viện Chess có được tải chưa
     if (typeof Chess === 'undefined') {
         alert("Lỗi: Thư viện Chess.js không được tải. Vui lòng kiểm tra file index.html.");
         return;
@@ -287,7 +286,8 @@ function startBotMatch() {
 
         const chatRoom = document.querySelector('.chat-room');
         if (chatRoom) {
-            Array.from(chatRoom.children).filter((child, index) => index > 0 && !child.classList.contains('chat-input-area')).forEach(p => p.remove());
+            // Xóa tin nhắn cũ, giữ lại input area
+            Array.from(chatRoom.children).filter(child => !child.classList.contains('chat-input-area')).forEach(p => p.remove());
         }
         addMessageToChat(botName, `Chào mừng ${userColor === 'Trắng' ? 'bạn, người chơi Trắng' : 'người chơi Đen'}. Tôi là ${botName}, chúc bạn một trận đấu hay!`);
 
@@ -802,12 +802,10 @@ function handleEnterPress(e) {
 
 // --- 7. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', (event) => {
-    // Chỉ khởi tạo game nếu thư viện Chess đã được tải thành công
     if (typeof Chess !== 'undefined') {
         game = new Chess();
     } else {
         console.error("Thư viện Chess.js không khả dụng. Game cờ vua sẽ không hoạt động.");
-        // Hiển thị thông báo thân thiện hơn cho người dùng (nếu cần)
     }
 
     initializeModalLogic(); 
