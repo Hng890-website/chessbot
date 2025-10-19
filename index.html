@@ -3,127 +3,125 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Bot - Cờ Vua AI</title>
-    <link rel="stylesheet" href="style.css"> 
-</head>
+    <title>Game Cờ Vua Đấu Bot</title>
+    <link rel="stylesheet" href="style.css">
+    </head>
 <body>
 
-    <div class="container">
-        <div id="home-screen" class="screen active">
-            <div class="home-content">
-                <h1>CHÀO MỪNG ĐẾN VỚI CHESS BOT!</h1>
-                <p>Chọn chế độ chơi và sẵn sàng thách đấu với Bot hoặc bạn bè. Tăng cường kỹ năng cờ vua của bạn ngay hôm nay!</p>
-
-                <div class="menu-options">
-                    <button class="play-btn" data-action="open-bot-selection">Chơi với Bot</button>
-                    <button class="rules-btn" data-action="show-rules">Luật chơi</button>
-                </div>
-                
-                <div class="news">
-                    <h2>Tin Tức Cờ Vua</h2>
-                    <ul>
-                        <li><strong>20/05/2024:</strong> Magnus Carlsen thắng giải Norway Chess với phong độ đỉnh cao.</li>
-                        <li><strong>15/05/2024:</strong> Giải vô địch cờ vua trẻ Quốc tế khởi tranh tại Hà Nội.</li>
-                        <li><strong>10/05/2024:</strong> Phân tích nước đi bất ngờ của Garry Kasparov.</li>
-                    </ul>
-                    <button class="news-btn">Xem Thêm</button>
-                </div>
-            </div>
-        </div>
-
-        <div id="play-screen" class="screen">
-            <div class="game-area">
-                <div class="game-header">
-                    <h2 id="match-title">Bạn (Trắng) vs Bot Level 1 (Đen)</h2>
-                </div>
-
-                <div id="chessboard">
-                    </div>
+<div class="container">
+    
+    <section id="home-screen" class="screen active">
+        <div class="home-content">
+            <h1>Cờ Vua Việt Nam</h1>
+            <p>Chơi cờ vua trực tuyến và rèn luyện kỹ năng của bạn với các Bot AI được lập trình với nhiều cấp độ khác nhau. Bắt đầu ngay!</p>
+            <div class="menu-options">
+                <button class="play-btn" data-action="open-bot-selection">
+                    Chơi với BOT
+                </button>
+                <button class="rules-btn" data-action="show-rules">
+                    Luật chơi
+                </button>
             </div>
             
-            <div class="sidebar">
-                
-                <div class="metrics">
-                    <h3>Thời gian & Trạng thái</h3>
-                    <div class="time-clocks">
-                        <div id="white-clock" class="clock active">
-                            <span class="player-color">Trắng</span>
-                            <span id="white-time" class="time-value">05:00</span>
-                        </div>
-                        <div id="black-clock" class="clock">
-                            <span class="player-color">Đen</span>
-                            <span id="black-time" class="time-value">05:00</span>
-                        </div>
-                    </div>
-                    <div id="current-turn-display" class="stat-item">
-                        Lượt Đi: <strong class="turn-color"><span class="white-turn">Trắng</span></strong>
-                    </div>
-                    <div class="stat-item">
-                        Tổng thời gian trận đấu: <strong id="total-game-time">00:00</strong>
-                    </div>
-                    <button class="rules-btn" onclick="showScreen('home')">Kết thúc trận đấu</button>
-                </div>
-                
-                <div class="chat">
-                    <h3>Chat Bot</h3>
-                    <div class="chat-room">
-                        <p><strong>Bot:</strong> Chúc bạn một trận đấu hay!</p>
-                        <div class="chat-input-area">
-                            <input type="text" placeholder="Nhập tin nhắn..." id="chat-input">
-                            <button class="send-btn">Gửi</button>
-                        </div>
-                    </div>
-                </div>
-                
+            <div class="news">
+                <h2>Tin tức cờ vua mới nhất</h2>
+                <ul>
+                    <li>♟️ Giải Vô địch Cờ Vua Quốc gia sắp diễn ra vào cuối năm.</li>
+                    <li>📈 Các Bot AI mới đã được nâng cấp thuật toán Negamax!</li>
+                    <li>👑 Hướng dẫn các chiến thuật khai cuộc Sicilian Defense.</li>
+                </ul>
+                <button class="news-btn">Xem thêm</button>
             </div>
         </div>
+    </section>
 
-        <div id="rules-screen" class="screen">
-             <h2>Luật Chơi Cờ Vua</h2>
-             <p>Bạn có thể tham khảo luật chơi cờ vua cơ bản trên Wikipedia hoặc các nguồn khác.</p>
-             <button onclick="showScreen('home')">Quay lại</button>
+    <section id="play-screen" class="screen">
+        <div class="game-area">
+            <div class="game-header">
+                <h2 id="current-turn-display">Lượt đi: <strong><span class="turn-color white-turn">Trắng</span></strong></h2>
+            </div>
+            <div id="chessboard">
+                </div>
+            <div style="margin-top: 15px;">
+                <button class="news-btn" onclick="showScreen('home')">Quay lại Trang Chủ</button>
+            </div>
         </div>
         
-    </div>
-
-    <div id="modal-overlay">
-        <div class="modal-content">
-            <h2>Thiết Lập Trận Đấu</h2>
+        <div class="sidebar">
+            <div class="metrics">
+                <h3>Thời Gian & Số Liệu</h3>
+                <div class="time-clocks">
+                    <div id="white-clock" class="clock active">
+                        <span class="time-value" id="white-time">05:00</span>
+                        <small>Trắng</small>
+                    </div>
+                    <div id="black-clock" class="clock">
+                        <span class="time-value" id="black-time">05:00</span>
+                        <small>Đen</small>
+                    </div>
+                </div>
+                <div class="stat-item">
+                    <strong>Tổng thời gian:</strong> <span id="total-game-time">00:00</span>
+                </div>
+                <div class="stat-item">
+                    <strong>Tên Bot:</strong> <span id="bot-info-name">Bot Level 1</span>
+                </div>
+            </div>
             
-            <div class="setting-group">
-                <label for="bot-name">Tên Bot (Tùy chọn):</label>
-                <input type="text" id="bot-name" placeholder="Ví dụ: Stockfish Junior">
-            </div>
-
-            <div class="setting-group">
-                <label>Chọn cấp độ Bot (1 - 10):</label>
-                <div id="level-selection" class="selection-buttons">
-                    <button class="level-btn active" data-level="1">1</button>
-                    <button class="level-btn" data-level="2">2</button>
-                    <button class="level-btn" data-level="3">3</button>
-                    <button class="level-btn" data-level="4">4</button>
-                    <button class="level-btn" data-level="5">5</button>
-                    <button class="level-btn" data-level="6">6</button>
-                    <button class="level-btn" data-level="7">7</button>
-                    <button class="level-btn" data-level="8">8</button>
-                    <button class="level-btn" data-level="9">9</button>
-                    <button class="level-btn" data-level="10">10</button>
+            <div class="chat">
+                <h3>Chat Room</h3>
+                <div class="chat-room">
+                    <div class="chat-input-area">
+                        <input type="text" placeholder="Gửi tin nhắn cho Bot..." id="chat-input">
+                        <button class="send-btn">Gửi</button>
+                    </div>
                 </div>
             </div>
-
-            <div class="setting-group">
-                <label>Chọn màu quân cờ của bạn:</label>
-                <div id="color-selection" class="selection-buttons">
-                    <button class="color-btn active" data-color="Trắng">Trắng</button>
-                    <button class="color-btn" data-color="Đen">Đen</button>
-                </div>
-            </div>
-
-            <button id="start-match-btn">Bắt Đầu Trận Đấu!</button>
         </div>
-    </div>
+    </section>
 
-    <script src="chess.js"></script> 
-    <script src="script.js"></script> 
+    <section id="rules-screen" class="screen">
+        <h2>Luật Chơi Cờ Vua</h2>
+        <p>Đây là nơi mô tả chi tiết luật chơi, cách di chuyển của từng quân cờ (Vua, Hậu, Xe, Tượng, Mã, Tốt) và các quy tắc đặc biệt (nhập thành, bắt tốt qua đường, phong cấp).</p>
+        <p>Vui lòng tham khảo các hướng dẫn cụ thể trên mạng để biết thêm chi tiết về luật cờ vua.</p>
+        <button class="play-btn">Quay lại Trang Chủ</button>
+    </section>
+    
+</div>
+
+<div id="modal-overlay">
+    <div class="modal-content">
+        <h2>Thiết Lập Trận Đấu Bot</h2>
+        
+        <div class="setting-group">
+            <label for="bot-name">Tên Bot (Tùy chọn)</label>
+            <input type="text" id="bot-name" placeholder="Ví dụ: Deep Blue Việt">
+        </div>
+
+        <div class="setting-group">
+            <label>Chọn Cấp Độ Bot (Mức độ khó)</label>
+            <div class="selection-buttons" id="level-selection">
+                <button class="level-btn active" data-level="1">Dễ</button>
+                <button class="level-btn" data-level="4">Trung Bình</button>
+                <button class="level-btn" data-level="7">Khó</button>
+                <button class="level-btn" data-level="10">Chuyên Nghiệp</button>
+            </div>
+        </div>
+
+        <div class="setting-group">
+            <label>Chọn Màu Của Bạn</label>
+            <div class="selection-buttons" id="color-selection">
+                <button class="color-btn active" data-color="Trắng">Trắng</button>
+                <button class="color-btn" data-color="Đen">Đen</button>
+            </div>
+        </div>
+        
+        <button id="start-match-btn">BẮT ĐẦU TRẬN ĐẤU (5 phút)</button>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="script.js"></script>
+
 </body>
 </html>
