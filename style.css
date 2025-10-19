@@ -89,18 +89,18 @@ body {
 }
 
 /* ==================================== */
-/* 3. PLAY SCREEN LAYOUT (Khắc phục lỗi hiển thị kép) */
+/* 3. PLAY SCREEN LAYOUT (SỬA ĐỔI ĐỂ ĐẢO VỊ TRÍ SIDEBAR) */
 /* ==================================== */
 
-/* #play-screen chỉ hiển thị layout lưới khi nó là .active */
+/* THAY ĐỔI LỚN NHẤT: Đảo thứ tự cột (1fr 2fr) để sidebar nằm bên trái */
 #play-screen.active {
     display: grid !important; 
-    grid-template-columns: minmax(min-content, 2fr) 1fr;
+    /* Dòng này đổi từ "2fr 1fr" thành "1fr 2fr" */
+    grid-template-columns: 1fr minmax(min-content, 2fr); 
     gap: 20px;
     align-items: start;
     padding: 0;
 }
-/* Nếu #play-screen không active, nó bị display:none (nhờ quy tắc .screen) nên không cần ẩn các phần con */
 
 
 .game-area {
@@ -113,7 +113,9 @@ body {
 .sidebar {
     padding: 20px;
     background-color: #f9f9f9;
-    border-left: 1px solid #ddd;
+    /* Đổi border: Bỏ border-left, thêm border-right */
+    border-left: none; 
+    border-right: 1px solid #ddd;
     display: flex;
     flex-direction: column;
     min-height: 800px;
