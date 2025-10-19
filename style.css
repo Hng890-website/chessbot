@@ -25,23 +25,22 @@ body {
     font-family: var(--font-family);
     background-color: #e9e9e9;
     color: #333;
-    /* Thiết lập body để hiển thị header và container theo chiều dọc */
     display: flex;
     flex-direction: column;
     align-items: center; 
     min-height: 100vh;
-    overflow-x: hidden; /* Tránh scroll ngang không mong muốn */
+    overflow-x: hidden;
 }
 
 /* THANH CÔNG CỤ MÀU CAM ĐẬM */
 #main-header {
     width: 100%;
-    background-color: var(--color-dark-orange); /* Màu cam đậm */
+    background-color: var(--color-dark-orange); 
     color: white;
     padding: 15px 0;
     text-align: center;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    margin-bottom: 20px; /* Khoảng cách với khung container chính */
+    margin-bottom: 20px; 
 }
 
 #main-header h1 {
@@ -59,17 +58,17 @@ body {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     border-radius: var(--border-radius);
     overflow: hidden;
-    min-height: 800px;
+    /* Đã xóa min-height: 800px; để nó linh hoạt hơn */
+    min-height: 500px; /* Giữ một chiều cao tối thiểu hợp lý */
     flex-grow: 1; 
 }
 
 /* ==================================== */
-/* 2. SCREEN MANAGEMENT (SỬA LỖI HIỂN THỊ KÉP VỚI !important) */
+/* 2. SCREEN MANAGEMENT */
 /* ==================================== */
 
 .screen {
     width: 100%;
-    /* QUY TẮC BUỘC ẨN: đảm bảo các màn hình không hoạt động bị ẩn */
     display: none !important; 
     padding: 20px;
     flex-direction: column; 
@@ -77,7 +76,6 @@ body {
 }
 
 .screen.active {
-    /* QUY TẮC BUỘC HIỂN THỊ */
     display: flex !important;
 }
 
@@ -89,16 +87,18 @@ body {
 }
 
 /* ==================================== */
-/* 3. PLAY SCREEN LAYOUT (Bàn cờ bên phải, Sidebar bên trái) */
+/* 3. PLAY SCREEN LAYOUT (Sidebar bên trái, Bàn cờ bên phải) */
 /* ==================================== */
 
 #play-screen.active {
     display: grid !important; 
-    /* ĐẢO VỊ TRÍ: sidebar (1fr) ở bên trái, game-area (2fr) ở bên phải */
+    /* Bố cục: Cột 1 (Sidebar) chiếm 1 phần, Cột 2 (Bàn cờ) chiếm 2 phần */
     grid-template-columns: 1fr minmax(min-content, 2fr); 
     gap: 20px;
     align-items: start;
     padding: 0;
+    /* Căn giữa toàn bộ nội dung trong container */
+    align-items: stretch;
 }
 
 
@@ -112,12 +112,12 @@ body {
 .sidebar {
     padding: 20px;
     background-color: #f9f9f9;
-    /* THAY ĐỔI: Thêm đường viền bên phải để chia cách với bàn cờ */
+    /* Thêm đường viền bên phải */
     border-right: 1px solid #ddd;
-    border-left: none; /* Đảm bảo không có viền thừa */
+    border-left: none; 
     display: flex;
     flex-direction: column;
-    min-height: 800px;
+    /* Đã xóa min-height: 800px; để tránh kéo dài không cần thiết */
 }
 
 .game-header {
@@ -143,20 +143,21 @@ body {
 
 #chessboard {
     display: grid;
-    grid-template-columns: repeat(8, var(--square-size));
-    grid-template-rows: repeat(8, var(--square-size));
+    /* Điều chỉnh kích thước ô cờ nhỏ hơn để phù hợp với bố cục */
+    grid-template-columns: repeat(8, min(60px, 12.5vw)); /* Kích thước tối đa 60px */
+    grid-template-rows: repeat(8, min(60px, 12.5vw));
     border: 5px solid var(--color-board-border);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     position: relative;
 }
-
+/* Đảm bảo square size vẫn đúng */
 .square {
-    width: var(--square-size);
-    height: var(--square-size);
+    width: 100%; 
+    height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: calc(var(--square-size) * 0.75);
+    font-size: 45px; /* Điều chỉnh font size cho phù hợp với kích thước ô cờ mới */
     cursor: pointer;
     user-select: none;
     position: relative;
@@ -217,8 +218,8 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 25px;
-    height: 25px;
+    width: 20px; /* Giảm kích thước vòng tròn */
+    height: 20px;
     background-color: rgba(0, 0, 0, 0.15); 
     border-radius: 50%;
     transform: translate(-50%, -50%);
@@ -245,8 +246,8 @@ body {
     position: absolute;
     top: 50%;
     left: 50%;
-    width: calc(var(--square-size) * 0.9); 
-    height: calc(var(--square-size) * 0.9);
+    width: 90%; 
+    height: 90%;
     
     background-color: rgba(255, 0, 0, 0.1); 
     border: 2px solid rgba(255, 0, 0, 0.4); 
@@ -338,7 +339,8 @@ body {
 
 /* Chat */
 .chat-room {
-    height: 400px;
+    /* Đã giảm chiều cao để tránh kéo dài */
+    height: 300px; 
     overflow-y: auto;
     border: 1px solid #ddd;
     padding: 10px;
@@ -396,11 +398,8 @@ body {
     max-width: 600px;
 }
 
-/* Ẩn tiêu đề h1 cũ trong home-screen để chỉ dùng header mới */
+/* Ẩn tiêu đề h1 cũ trong home-screen */
 #home-screen .home-content h1 {
-    font-size: 3em;
-    margin-bottom: 15px;
-    color: var(--color-dark-square);
     display: none; 
 }
 
