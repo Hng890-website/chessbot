@@ -119,8 +119,14 @@
                     <option value="5+0">5 phút (Blitz)</option>
                     <option value="10+0">10 phút (Rapid)</option>
                     <option value="3+2">3 phút + 2 giây</option>
-                </select>
+                    <option value="custom">Thời gian khác</option> </select>
                 <span class="custom-arrow"></span>
+            </div>
+            
+            <div id="custom-time-input-group" class="setting-group hidden-input">
+                <label for="custom-time-input">Hãy nhập một thời gian tùy chỉnh (phút+giây):</label>
+                <input type="text" id="custom-time-input" placeholder="Ví dụ: 15+10 (15 phút, 10 giây cộng thêm)">
+                <small class="help-text">Định dạng: **Phút+Giây** (ví dụ: 5+3) hoặc **Chỉ Phút** (ví dụ: 15+0)</small>
             </div>
         </div>
 
@@ -132,7 +138,8 @@
                 <button class="level-btn" data-level="3">3</button>
                 <button class="level-btn" data-level="4">4</button>
                 <button class="level-btn" data-level="5">5</button>
-                <button class="level-btn active" data-level="6">6</button> <button class="level-btn" data-level="7">7</button>
+                <button class="level-btn active" data-level="6">6</button> 
+                <button class="level-btn" data-level="7">7</button>
                 <button class="level-btn" data-level="8">8</button>
                 <button class="level-btn" data-level="9">9</button>
                 <button class="level-btn" data-level="10">10</button>
