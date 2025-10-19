@@ -3,6 +3,8 @@
 /* ==================================== */
 
 :root {
+    /* Đổi màu cam đậm (Dark Orange) */
+    --color-dark-orange: #ff8c00; 
     --color-light-square: #f0d9b5;
     --color-dark-square: #b58863;
     --color-board-border: #4a4a4a;
@@ -23,11 +25,30 @@ body {
     font-family: var(--font-family);
     background-color: #e9e9e9;
     color: #333;
+    /* Thiết lập body để hiển thị header và container theo chiều dọc */
     display: flex;
-    justify-content: center;
-    align-items: center;
+    flex-direction: column;
+    align-items: center; 
     min-height: 100vh;
-    overflow: auto;
+    overflow-x: hidden; /* Tránh scroll ngang không mong muốn */
+}
+
+/* THÊM STYLE CHO THANH CÔNG CỤ MÀU CAM ĐẬM */
+#main-header {
+    width: 100%;
+    background-color: var(--color-dark-orange); /* Màu cam đậm */
+    color: white;
+    padding: 15px 0;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-bottom: 20px; /* Khoảng cách với khung container chính */
+}
+
+#main-header h1 {
+    font-size: 1.8em;
+    font-weight: bold;
+    margin: 0;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .container {
@@ -39,6 +60,7 @@ body {
     border-radius: var(--border-radius);
     overflow: hidden;
     min-height: 800px;
+    flex-grow: 1; /* Cho phép container chiếm hết không gian còn lại */
 }
 
 /* ==================================== */
@@ -373,10 +395,12 @@ body {
     max-width: 600px;
 }
 
-.home-content h1 {
+/* Ẩn tiêu đề h1 cũ trong home-screen để chỉ dùng header mới */
+#home-screen .home-content h1 {
     font-size: 3em;
     margin-bottom: 15px;
     color: var(--color-dark-square);
+    display: none; /* QUAN TRỌNG: ẨN H1 TRÙNG LẶP */
 }
 
 .home-content p {
