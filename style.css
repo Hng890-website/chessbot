@@ -62,7 +62,7 @@ body {
 }
 
 /* ==================================== */
-/* 2. SCREEN MANAGEMENT */
+/* 2. SCREEN MANAGEMENT & HOME SCREEN FIX */
 /* ==================================== */
 
 .screen {
@@ -77,11 +77,24 @@ body {
     display: flex !important;
 }
 
+/* Đảm bảo Home Screen hiển thị ở giữa */
 #home-screen, #rules-screen {
     flex-direction: column;
     align-items: center;
     justify-content: center;
     text-align: center;
+}
+#home-screen h1, #home-screen h2 {
+    margin-bottom: 15px;
+}
+.home-content {
+    max-width: 600px;
+    padding: 20px;
+}
+.menu-options button {
+    margin: 10px;
+    padding: 10px 20px;
+    font-size: 1.1em;
 }
 
 /* ==================================== */
@@ -90,7 +103,6 @@ body {
 
 #play-screen.active {
     display: grid !important; 
-    /* Bố cục: Cột 1 (Sidebar) chiếm 1 phần, Cột 2 (Bàn cờ) chiếm 2 phần */
     grid-template-columns: 1fr minmax(min-content, 2fr); 
     gap: 20px;
     align-items: stretch;
@@ -127,20 +139,18 @@ body {
 }
 
 /* ==================================== */
-/* 4. CHESSBOARD STYLES (Sửa lỗi hiển thị quân cờ) */
+/* 4. CHESSBOARD STYLES */
 /* ==================================== */
 
 #chessboard {
     display: grid;
-    /* Điều chỉnh kích thước ô cờ */
     grid-template-columns: repeat(8, min(60px, 12.5vw)); 
     grid-template-rows: repeat(8, min(60px, 12.5vw));
     border: 5px solid var(--color-board-border);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
     position: relative;
-    /* KHẮC PHỤC LỖI: Đảm bảo font cờ vua được sử dụng */
     font-family: 'Arial Unicode MS', 'Segoe UI Symbol', 'Noto Sans Symbols', sans-serif;
-    line-height: 1; /* Rất quan trọng để các icon không bị giãn cách */
+    line-height: 1; 
 }
 
 .square {
@@ -149,7 +159,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    /* Kích thước quân cờ */
     font-size: 45px; 
     cursor: pointer;
     user-select: none;
@@ -194,7 +203,7 @@ body {
 
 
 /* ==================================== */
-/* 5. HIGHLIGHTS & CHECK GLOW (Giữ nguyên) */
+/* 5. HIGHLIGHTS & CHECK GLOW */
 /* ==================================== */
 
 .square.selected {
@@ -344,7 +353,7 @@ body {
     border-radius: 4px;
     background-color: #fcfcfc;
     display: flex;
-    flex-direction: column-reverse; /* Đảo ngược để tin nhắn mới nhất ở trên */
+    flex-direction: column-reverse; 
 }
 .chat-room p {
     margin-bottom: 5px;
@@ -382,7 +391,7 @@ body {
 
 
 /* ==================================== */
-/* 8. MODAL STYLES (Giữ nguyên thiết kế mới) */
+/* 8. MODAL STYLES */
 /* ==================================== */
 
 #modal-overlay {
@@ -496,6 +505,7 @@ body {
     right: 15px;
     transform: translateY(-50%);
     pointer-events: none;
+    /* Ký tự mũi tên xuống */
     content: 'v';
     display: inline-block;
     color: var(--color-modal-accent);
