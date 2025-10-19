@@ -1,4 +1,4 @@
-// script.js (FINAL VERSION - ĐÃ SỬA LỖI CHUYỂN MÀN HÌNH)
+// script.js (FINAL VERSION - ĐÃ SỬA LỖI CHUYỂN MÀN HÌNH VÀ SỬ DỤNG THƯ VIỆN CHESS.JS)
 
 // --- GLOBAL VARIABLES ---
 let selectedBotLevel = 1;
@@ -181,7 +181,7 @@ function showScreen(screenName) {
     // 1. Lặp qua TẤT CẢ các màn hình và loại bỏ lớp 'active', đồng thời ẩn đi
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
-        // Sử dụng style.display để bổ sung cho CSS (đã thêm !important)
+        // Vẫn giữ style.display để bổ sung cho CSS (đã có !important)
         screen.style.display = 'none'; 
     });
 
@@ -191,7 +191,7 @@ function showScreen(screenName) {
     // 2. Kích hoạt màn hình mục tiêu
     if (targetScreen) {
         targetScreen.classList.add('active');
-        // Sử dụng style.display để bổ sung cho CSS (đã thêm !important)
+        // Vẫn giữ style.display để bổ sung cho CSS (đã có !important)
         targetScreen.style.display = 'flex'; 
     }
     
@@ -202,6 +202,11 @@ function showScreen(screenName) {
 
     if (screenName === 'play') {
         attachChatHandlers();
+        // Cập nhật tên bot khi vào màn hình play
+        const headerText = document.querySelector('#play-screen .game-header h2').textContent;
+        const botNameMatch = headerText.match(/vs (.*?) \(Cấp độ/); 
+        const botName = botNameMatch ? botNameMatch[1].trim() : `Bot Level ${selectedBotLevel}`;
+        document.getElementById('bot-info-name').textContent = `${botName} (Cấp ${selectedBotLevel})`;
     }
     
     if (screenName === 'rules') {
@@ -253,6 +258,12 @@ function initializeModalLogic() {
 
 
 function startBotMatch() {
+    // Kiểm tra xem thư viện Chess có được tải chưa
+    if (typeof Chess === 'undefined') {
+        alert("Lỗi: Thư viện Chess.js không được tải. Vui lòng kiểm tra file index.html.");
+        return;
+    }
+
     try {
         game = new Chess(); 
         closeBotSelection();
@@ -428,7 +439,7 @@ function animateMove(fromSquare, toSquare, move) {
     const fromRow = Math.floor(fromIndex / 8);
     const fromCol = fromIndex % 8;
     const toRow = Math.floor(toIndex / 8);
-    const toCol = col % 8;
+    const toCol = toIndex % 8;
 
     const isFlipped = document.getElementById('chessboard').classList.contains('board-flipped');
     
@@ -791,7 +802,14 @@ function handleEnterPress(e) {
 
 // --- 7. INITIALIZATION ---
 document.addEventListener('DOMContentLoaded', (event) => {
-    game = new Chess();
+    // Chỉ khởi tạo game nếu thư viện Chess đã được tải thành công
+    if (typeof Chess !== 'undefined') {
+        game = new Chess();
+    } else {
+        console.error("Thư viện Chess.js không khả dụng. Game cờ vua sẽ không hoạt động.");
+        // Hiển thị thông báo thân thiện hơn cho người dùng (nếu cần)
+    }
+
     initializeModalLogic(); 
     
     // Gán sự kiện cho các nút chuyển màn hình
