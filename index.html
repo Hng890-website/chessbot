@@ -16,8 +16,10 @@
     
     <section id="home-screen" class="screen active">
         <div class="home-content">
-            <h1>Chess Bot</h1>
-            <p>Chơi cờ vua trực tuyến và rèn luyện kỹ năng của bạn với các Bot AI được lập trình với nhiều cấp độ khác nhau. Bắt đầu ngay!</p>
+            <h1>Chào mừng đến với Chess Bot!</h1>
+            <p>Chọn chế độ chơi và sẵn sàng thách đấu với Bot hoặc bạn bè. Bắt đầu ngay!</p>
+            
+            <h2>Chế Độ Đấu Cờ</h2>
             <div class="menu-options">
                 <button class="play-btn" data-action="open-bot-selection">
                     Chơi với BOT
@@ -30,9 +32,9 @@
             <div class="news">
                 <h2>Tin tức cờ vua mới nhất</h2>
                 <ul>
-                    <li>♟️ Giải Vô địch Cờ Vua Quốc gia sắp diễn ra vào cuối năm.</li>
-                    <li>📈 Các Bot AI mới đã được nâng cấp thuật toán Negamax!</li>
-                    <li>👑 Hướng dẫn các chiến thuật khai cuộc Sicilian Defense.</li>
+                    <li>20/05/2024: Magnus Carlsen thắng giải Norway Chess với phong độ đỉnh cao.</li>
+                    <li>15/05/2024: Giải vô địch cờ vua trẻ Quốc tế khời tranh tại Hà Nội.</li>
+                    <li>10/05/2024: Phân tích nước đi bất ngờ của Garry Kasparov.</li>
                 </ul>
                 <button class="news-btn">Xem thêm</button>
             </div>
@@ -42,6 +44,10 @@
     <section id="play-screen" class="screen">
         
         <div class="sidebar">
+            <div class="game-info">
+                <p>Bạn (<span id="player-color-display">Trắng</span>) vs Bot <span id="bot-level-display">Level 1</span> (<span id="bot-color-display">Đen</span>)</p>
+            </div>
+            
             <div class="metrics">
                 <h3>Thời Gian & Số Liệu</h3>
                 <div class="time-clocks">
@@ -65,10 +71,10 @@
             <div class="chat">
                 <h3>Chat Room</h3>
                 <div class="chat-room">
-                    <div class="chat-input-area">
-                        <input type="text" placeholder="Gửi tin nhắn cho Bot..." id="chat-input">
-                        <button class="send-btn">Gửi</button>
                     </div>
+                <div class="chat-input-area">
+                    <input type="text" placeholder="Gửi tin nhắn cho Bot..." id="chat-input">
+                    <button class="send-btn">Gửi</button>
                 </div>
             </div>
         </div>
@@ -97,32 +103,43 @@
 
 <div id="modal-overlay">
     <div class="modal-content">
-        <h2>Thiết Lập Trận Đấu Bot</h2>
+        <button class="close-modal-btn" onclick="toggleModal(false)">&times;</button>
+        <h2>Thiết Lập Trận Đấu (Bot)</h2>
         
         <div class="setting-group">
-            <label for="bot-name">Tên Bot (Tùy chọn)</label>
-            <input type="text" id="bot-name" placeholder="Ví dụ: Deep Blue Việt">
+            <label for="bot-name-new">Đặt tên Bot:</label>
+            <input type="text" id="bot-name-new" placeholder="Tên Bot (Tùy chọn)">
         </div>
 
         <div class="setting-group">
-            <label>Chọn Cấp Độ Bot (Mức độ khó)</label>
-            <div class="selection-buttons" id="level-selection">
-                <button class="level-btn active" data-level="1">Dễ</button>
-                <button class="level-btn" data-level="4">Trung Bình</button>
-                <button class="level-btn" data-level="7">Khó</button>
-                <button class="level-btn" data-level="10">Chuyên Nghiệp</button>
+            <label for="time-control-select">Kiểu thời gian:</label>
+            <div class="custom-select-wrapper">
+                 <select id="time-control-select" class="custom-select">
+                    <option value="unlimited" selected>Vô hạn</option>
+                    <option value="5+0">5 phút (Blitz)</option>
+                    <option value="10+0">10 phút (Rapid)</option>
+                    <option value="3+2">3 phút + 2 giây</option>
+                </select>
+                <span class="custom-arrow"></span>
             </div>
         </div>
 
-        <div class="setting-group">
-            <label>Chọn Màu Của Bạn</label>
-            <div class="selection-buttons" id="color-selection">
-                <button class="color-btn active" data-color="Trắng">Trắng</button>
-                <button class="color-btn" data-color="Đen">Đen</button>
+        <div class="setting-group level-selection-group">
+            <label>Cấp độ:</label>
+            <div class="selection-buttons level-1-10-grid" id="level-selection">
+                <button class="level-btn" data-level="1">1</button>
+                <button class="level-btn" data-level="2">2</button>
+                <button class="level-btn" data-level="3">3</button>
+                <button class="level-btn" data-level="4">4</button>
+                <button class="level-btn" data-level="5">5</button>
+                <button class="level-btn active" data-level="6">6</button> <button class="level-btn" data-level="7">7</button>
+                <button class="level-btn" data-level="8">8</button>
+                <button class="level-btn" data-level="9">9</button>
+                <button class="level-btn" data-level="10">10</button>
             </div>
         </div>
         
-        <button id="start-match-btn">BẮT ĐẦU TRẬN ĐẤU (5 phút)</button>
+        <button id="start-match-btn">Bắt đầu!</button>
     </div>
 </div>
 
