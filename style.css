@@ -3,9 +3,8 @@
 /* ==================================== */
 
 :root {
-    /* Đổi màu cam đậm (Dark Orange) */
     --color-dark-orange: #ff8c00; 
-    --color-modal-accent: #e96700; /* Màu cam đậm hơn cho viền modal */
+    --color-modal-accent: #e96700; 
     --color-light-square: #f0d9b5;
     --color-dark-square: #b58863;
     --color-board-border: #4a4a4a;
@@ -33,7 +32,6 @@ body {
     overflow-x: hidden;
 }
 
-/* THANH CÔNG CỤ MÀU CAM ĐẬM */
 #main-header {
     width: 100%;
     background-color: var(--color-dark-orange); 
@@ -92,11 +90,11 @@ body {
 
 #play-screen.active {
     display: grid !important; 
+    /* Bố cục: Cột 1 (Sidebar) chiếm 1 phần, Cột 2 (Bàn cờ) chiếm 2 phần */
     grid-template-columns: 1fr minmax(min-content, 2fr); 
     gap: 20px;
-    align-items: start;
-    padding: 0;
     align-items: stretch;
+    padding: 0;
 }
 
 .game-area {
@@ -128,7 +126,155 @@ body {
     margin-bottom: 20px;
 }
 
-/* ... (Các style bàn cờ, highlight, clock giữ nguyên như phiên bản trước) ... */
+/* ==================================== */
+/* 4. CHESSBOARD STYLES (Sửa lỗi hiển thị quân cờ) */
+/* ==================================== */
+
+#chessboard {
+    display: grid;
+    /* Điều chỉnh kích thước ô cờ */
+    grid-template-columns: repeat(8, min(60px, 12.5vw)); 
+    grid-template-rows: repeat(8, min(60px, 12.5vw));
+    border: 5px solid var(--color-board-border);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+    position: relative;
+    /* KHẮC PHỤC LỖI: Đảm bảo font cờ vua được sử dụng */
+    font-family: 'Arial Unicode MS', 'Segoe UI Symbol', 'Noto Sans Symbols', sans-serif;
+    line-height: 1; /* Rất quan trọng để các icon không bị giãn cách */
+}
+
+.square {
+    width: 100%; 
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* Kích thước quân cờ */
+    font-size: 45px; 
+    cursor: pointer;
+    user-select: none;
+    position: relative;
+    transition: background-color 0.1s;
+}
+
+.square.light {
+    background-color: var(--color-light-square);
+}
+
+.square.dark {
+    background-color: var(--color-dark-square);
+}
+
+.piece-white {
+    color: white;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.piece-black {
+    color: black;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.4);
+}
+
+.square span {
+    line-height: 1; 
+    transition: transform 0.2s ease-out, box-shadow 0.2s, filter 0.2s; 
+    position: relative;
+    z-index: 2;
+    pointer-events: none; 
+}
+
+
+.board-flipped {
+    transform: rotate(180deg);
+}
+
+.board-flipped .square span {
+    transform: rotate(180deg);
+}
+
+
+/* ==================================== */
+/* 5. HIGHLIGHTS & CHECK GLOW (Giữ nguyên) */
+/* ==================================== */
+
+.square.selected {
+    background-color: rgba(144, 238, 144, 0.7) !important; 
+}
+
+.square.highlight-move {
+    background-color: rgba(255, 255, 0, 0.2); 
+}
+
+.square.highlight-move:not(:has(span))::after {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px; 
+    height: 20px;
+    background-color: rgba(0, 0, 0, 0.15); 
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 1;
+}
+
+.square.highlight-move span {
+    box-shadow: inset 0 0 0 4px rgba(255, 0, 0, 0.6); 
+    border-radius: 50%; 
+    padding: 5px; 
+}
+
+.square.king-in-check {
+    background-color: transparent !important; 
+    position: relative;
+    animation: none;
+    transform: none;
+}
+
+.square.king-in-check::before {
+    content: '';
+    display: block;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 90%; 
+    height: 90%;
+    
+    background-color: rgba(255, 0, 0, 0.1); 
+    border: 2px solid rgba(255, 0, 0, 0.4); 
+    border-radius: 50%;
+    transform: translate(-50%, -50%); 
+    pointer-events: none; 
+    z-index: 1; 
+
+    animation: subtle-pulse 1.5s infinite alternate;
+}
+
+.square.king-in-check span {
+    color: #cc0000; 
+    transform: scale(1.05); 
+    transition: transform 0.3s ease-out, color 0.3s ease-out; 
+    box-shadow: none; 
+    filter: none; 
+    animation: none; 
+    z-index: 2; 
+}
+
+@keyframes subtle-pulse {
+    from {
+        border-color: rgba(255, 0, 0, 0.3);
+        background-color: rgba(255, 0, 0, 0.05);
+        transform: translate(-50%, -50%) scale(0.98);
+    }
+    to {
+        border-color: rgba(255, 0, 0, 0.6);
+        background-color: rgba(255, 0, 0, 0.15);
+        transform: translate(-50%, -50%) scale(1.02);
+    }
+}
+
 
 /* ==================================== */
 /* 6. SIDEBAR (CHAT & METRICS) */
@@ -171,11 +317,72 @@ body {
     border-color: var(--color-primary);
     background-color: #e6f0ff;
 }
-/* ... (Các style chat room giữ nguyên) ... */
+
+.clock.low-time {
+    background-color: #ffeaea;
+    border-color: var(--color-danger);
+}
+
+.time-value {
+    font-size: 1.8em;
+    font-weight: bold;
+    display: block;
+}
+
+.stat-item {
+    margin-bottom: 8px;
+    font-size: 1em;
+}
+
+/* Chat */
+.chat-room {
+    height: 300px; 
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    background-color: #fcfcfc;
+    display: flex;
+    flex-direction: column-reverse; /* Đảo ngược để tin nhắn mới nhất ở trên */
+}
+.chat-room p {
+    margin-bottom: 5px;
+    line-height: 1.4;
+    font-size: 0.9em;
+}
+.bot-message {
+    color: #007bff;
+    font-weight: bold;
+}
+.chat-input-area {
+    display: flex;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+.chat-input-area input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    font-size: 1em;
+}
+.chat-input-area .send-btn {
+    background-color: var(--color-primary);
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.chat-input-area .send-btn:hover {
+    background-color: #0056b3;
+}
 
 
 /* ==================================== */
-/* 8. MODAL STYLES (THIẾT KẾ MỚI) */
+/* 8. MODAL STYLES (Giữ nguyên thiết kế mới) */
 /* ==================================== */
 
 #modal-overlay {
@@ -184,7 +391,7 @@ body {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.8); /* Màu nền tối hơn */
+    background-color: rgba(0, 0, 0, 0.8); 
     display: flex;
     justify-content: center;
     align-items: center;
@@ -202,14 +409,12 @@ body {
 .modal-content {
     position: relative;
     background-color: white;
-    padding: 40px; /* Tăng padding */
-    border-radius: 40px; /* Bo góc cực lớn */
+    padding: 40px; 
+    border-radius: 40px; 
     width: 90%;
     max-width: 450px;
     box-shadow: 0 5px 25px rgba(0, 0, 0, 0.5);
     text-align: left;
-    
-    /* Thiết kế viền dày theo hình ảnh */
     border: 5px solid black;
 }
 
@@ -244,7 +449,7 @@ body {
 
 .setting-group {
     margin-bottom: 25px;
-    padding-bottom: 0; /* Loại bỏ viền dưới */
+    padding-bottom: 0; 
     border-bottom: none;
 }
 
@@ -256,25 +461,23 @@ body {
     color: #333;
 }
 
-/* Style cho input Đặt tên Bot */
 #bot-name-new {
     width: 100%;
     padding: 10px;
-    border: 3px solid var(--color-modal-accent); /* Viền màu cam */
+    border: 3px solid var(--color-modal-accent); 
     border-radius: 8px;
     margin-top: 5px;
     font-size: 1.1em;
     box-shadow: none;
 }
 
-/* Style cho dropdown Kiểu thời gian */
 .custom-select-wrapper {
     position: relative;
     width: 100%;
 }
 
 #time-control-select {
-    appearance: none; /* Ẩn mũi tên mặc định */
+    appearance: none; 
     -webkit-appearance: none;
     -moz-appearance: none;
     width: 100%;
@@ -293,7 +496,6 @@ body {
     right: 15px;
     transform: translateY(-50%);
     pointer-events: none;
-    /* Ký tự mũi tên xuống */
     content: 'v';
     display: inline-block;
     color: var(--color-modal-accent);
@@ -301,7 +503,6 @@ body {
     font-weight: bold;
 }
 
-/* Style cho cấp độ 1-10 */
 .level-selection-group label {
     text-align: center;
     width: 100%;
@@ -334,19 +535,18 @@ body {
     border-color: var(--color-modal-accent);
 }
 
-/* Nút Bắt đầu lớn */
 #start-match-btn {
     width: 100%;
-    padding: 15px; /* Tăng padding */
-    background-color: #ff7f00; /* Màu cam sáng hơn */
+    padding: 15px; 
+    background-color: #ff7f00; 
     color: white;
     border: none;
-    border-radius: 50px; /* Bo tròn hoàn toàn */
+    border-radius: 50px; 
     font-size: 1.3em;
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.3s, transform 0.1s;
-    box-shadow: 0 5px 0 0 #e96700; /* Hiệu ứng 3D */
+    box-shadow: 0 5px 0 0 #e96700; 
     margin-top: 20px;
 }
 
