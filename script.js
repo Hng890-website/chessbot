@@ -8,12 +8,12 @@ const currentTurnDisplay = document.getElementById('current-turn-display');
 
 let selectedSquare = null;
 let currentTurn = 'w'; 
-let playerColor = 'w'; // Người chơi LUÔN LÀ TRẮNG ('w')
+let playerColor = 'w'; 
 let botLevel = 6; 
 let botName = "Bot Level 6";
 
 // ===========================================
-// LOGIC BOT AI (NEGAMAX) - GIỮ NGUYÊN
+// LOGIC BOT AI (NEGAMAX)
 // ===========================================
 
 const PieceValues = {
@@ -177,7 +177,6 @@ function updateClocks() {
 function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     
-    // Nếu cả hai đều là 0, tức là vô hạn, không chạy timer
     if (whiteTime <= 0 && blackTime <= 0) return; 
 
     timerInterval = setInterval(() => {
@@ -187,7 +186,7 @@ function startTimer() {
             if (whiteTime <= 0) {
                 clearInterval(timerInterval);
                 alert("Hết giờ! Trắng thua.");
-                checkGameState(); // Cập nhật trạng thái game khi hết giờ
+                checkGameState(); 
             }
         } else {
             blackTime--;
@@ -209,10 +208,6 @@ function stopTimer() {
 // GAME & UI LOGIC
 // ===========================================
 
-/**
- * Lấy ký tự Unicode của quân cờ.
- * Đảm bảo chỉ trả về ký tự cho một quân cờ.
- */
 function getPieceChar(type, color) {
     const pieces = {
         w: { 'k': '♔', 'q': '♕', 'r': '♖', 'b': '♗', 'n': '♘', 'p': '♙' },
@@ -221,12 +216,8 @@ function getPieceChar(type, color) {
     return pieces[color][type];
 }
 
-
-/**
- * Tạo bàn cờ và gán các sự kiện.
- */
 function setupBoard() {
-    chessboardEl.innerHTML = ''; // Xóa bàn cờ cũ
+    chessboardEl.innerHTML = ''; 
     for (let row = 0; row < 8; row++) {
         for (let col = 0; col < 8; col++) {
             const squareEl = document.createElement('div');
@@ -246,10 +237,6 @@ function setupBoard() {
     renderBoard();
 }
 
-/**
- * Cập nhật hiển thị quân cờ trên bàn cờ.
- * KHẮC PHỤC LỖI: Đảm bảo chỉ chèn ký tự Unicode vào ô cờ.
- */
 function renderBoard() {
     const board = game.board();
     const isFlipped = playerColor === 'b'; 
@@ -258,10 +245,9 @@ function renderBoard() {
 
     document.querySelectorAll('.square').forEach(el => {
         const squareName = el.dataset.square;
-        el.innerHTML = ''; // Rất quan trọng: Xóa nội dung cũ
+        el.innerHTML = ''; 
         el.classList.remove('king-in-check', 'selected', 'highlight-move');
         
-        // Tính toán vị trí trong mảng board từ tên ô cờ (a1 -> [7][0])
         const row = 8 - parseInt(squareName[1]);
         const col = squareName.charCodeAt(0) - 'a'.charCodeAt(0);
 
@@ -330,12 +316,10 @@ function handleSquareClick(squareName) {
 
         const result = game.move(move);
 
-        // Xóa highlight và trạng thái chọn
         document.querySelector(`[data-square="${selectedSquare}"]`)?.classList.remove('selected');
         document.querySelectorAll('.highlight-move').forEach(el => el.classList.remove('highlight-move'));
         
         if (result) {
-            // Cộng thời gian cho người chơi nếu có increment
             if (whiteTime > 0) {
                 whiteTime += timeIncrement;
             }
@@ -347,7 +331,6 @@ function handleSquareClick(squareName) {
             checkGameState();
             
             if (!game.game_over() && game.turn() !== playerColor) {
-                // Thêm increment cho Bot (Đen)
                 if (blackTime > 0) {
                     blackTime += timeIncrement;
                 }
@@ -355,13 +338,11 @@ function handleSquareClick(squareName) {
             }
         } 
         else if (piece && piece.color === playerColor) {
-            // Chuyển chọn quân
             selectedSquare = squareName;
             document.querySelector(`[data-square="${squareName}"]`).classList.add('selected');
             highlightMoves(squareName);
         }
         else {
-            // Nước đi không hợp lệ
             selectedSquare = null;
             renderBoard(); 
             addChatMessage("Hệ thống", "Nước đi không hợp lệ.");
@@ -413,7 +394,6 @@ function addChatMessage(sender, message) {
     p.appendChild(document.createTextNode(message));
     
     chatRoomEl.prepend(p); 
-    // Cuộn về tin nhắn mới nhất (phía dưới)
     chatRoomEl.scrollTop = chatRoomEl.scrollHeight; 
 }
 
@@ -460,11 +440,24 @@ const levelButtons = document.querySelectorAll('#level-selection .level-btn');
 const startMatchBtn = document.getElementById('start-match-btn');
 const botNameInput = document.getElementById('bot-name-new'); 
 const timeControlSelect = document.getElementById('time-control-select');
+const customTimeInputGroup = document.getElementById('custom-time-input-group');
+const customTimeInput = document.getElementById('custom-time-input');
+
 
 // Ẩn/hiện modal
 function toggleModal(show) {
     modalOverlay.classList.toggle('visible', show);
 }
+
+// Xử lý sự kiện thay đổi của dropdown Kiểu thời gian
+timeControlSelect.addEventListener('change', (e) => {
+    if (e.target.value === 'custom') {
+        customTimeInputGroup.classList.add('visible');
+    } else {
+        customTimeInputGroup.classList.remove('visible');
+    }
+});
+
 
 // Xử lý chọn cấp độ
 levelButtons.forEach(btn => {
@@ -480,20 +473,55 @@ document.querySelector('.play-btn[data-action="open-bot-selection"]').addEventLi
     toggleModal(true);
 });
 
-// Hàm thiết lập thời gian
+/**
+ * Hàm thiết lập thời gian dựa trên giá trị đã chọn hoặc tùy chỉnh.
+ * @param {string} value - Giá trị từ dropdown (ví dụ: '5+0', 'unlimited', 'custom').
+ */
 function setTimeControl(value) {
+    let timeString = value;
+
     if (value === 'unlimited') {
         whiteTime = 0;
         blackTime = 0;
         timeIncrement = 0;
-    } else {
-        const parts = value.split('+');
-        const minutes = parseInt(parts[0]);
-        const increment = parseInt(parts[1] || '0');
-        whiteTime = minutes * 60;
-        blackTime = minutes * 60;
-        timeIncrement = increment;
+        return true;
+    } 
+    
+    if (value === 'custom') {
+        timeString = customTimeInput.value.trim();
+        if (!timeString) {
+             alert("Vui lòng nhập thời gian tùy chỉnh (ví dụ: 15+10) hoặc chọn một kiểu thời gian khác.");
+             return false;
+        }
     }
+    
+    // Phân tích cú pháp: Phút+Giây
+    const parts = timeString.split('+');
+    let minutes = 0;
+    let increment = 0;
+    
+    if (parts.length === 1) {
+        minutes = parseInt(parts[0]);
+    } else if (parts.length === 2) {
+        minutes = parseInt(parts[0]);
+        increment = parseInt(parts[1] || '0');
+    }
+
+    if (isNaN(minutes) || isNaN(increment) || minutes < 0 || increment < 0) {
+        alert("Định dạng thời gian không hợp lệ. Vui lòng sử dụng định dạng PHÚT+GIÂY (ví dụ: 10+5).");
+        return false;
+    }
+
+    whiteTime = minutes * 60;
+    blackTime = minutes * 60;
+    timeIncrement = increment;
+    
+    if (whiteTime === 0 && timeIncrement === 0) {
+        alert("Thời gian không hợp lệ. Vui lòng nhập thời gian lớn hơn 0.");
+        return false;
+    }
+    
+    return true;
 }
 
 
@@ -507,7 +535,11 @@ startMatchBtn.addEventListener('click', () => {
     const inputName = botNameInput.value.trim();
     botName = inputName !== "" ? inputName : `Bot Level ${botLevel}`;
     
-    setTimeControl(timeControlSelect.value);
+    // Kiểm tra và thiết lập thời gian
+    const timeControlValue = timeControlSelect.value;
+    if (!setTimeControl(timeControlValue)) {
+        return; // Dừng nếu thiết lập thời gian không thành công
+    }
     
     game.reset();
     totalGameTime = 0;
@@ -518,7 +550,6 @@ startMatchBtn.addEventListener('click', () => {
     setupBoard();
     updateTurnDisplay();
     
-    // Cập nhật thông tin trên Sidebar
     document.getElementById('bot-info-name').textContent = botName;
     document.getElementById('bot-level-display').textContent = `Level ${botLevel}`;
     document.getElementById('player-color-display').textContent = 'Trắng';
