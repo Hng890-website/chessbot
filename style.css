@@ -391,7 +391,7 @@ body {
 
 
 /* ==================================== */
-/* 8. MODAL STYLES */
+/* 8. MODAL STYLES & CUSTOM TIME INPUT */
 /* ==================================== */
 
 #modal-overlay {
@@ -470,7 +470,7 @@ body {
     color: #333;
 }
 
-#bot-name-new {
+#bot-name-new, #custom-time-input {
     width: 100%;
     padding: 10px;
     border: 3px solid var(--color-modal-accent); 
@@ -505,12 +505,28 @@ body {
     right: 15px;
     transform: translateY(-50%);
     pointer-events: none;
-    /* Ký tự mũi tên xuống */
     content: 'v';
     display: inline-block;
     color: var(--color-modal-accent);
     font-size: 1.2em;
     font-weight: bold;
+}
+
+/* Ẩn/Hiện Custom Input */
+.hidden-input {
+    display: none;
+    /* Giảm margin trên để nó nằm sát dropdown hơn */
+    margin-top: 15px; 
+}
+.hidden-input.visible {
+    display: block;
+}
+
+.help-text {
+    font-size: 0.85em;
+    color: #666;
+    margin-top: 5px;
+    display: block;
 }
 
 .level-selection-group label {
