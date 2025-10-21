@@ -151,24 +151,27 @@ let blackTime = 0;
 let timeIncrement = 0;
 let totalGameTime = 0;
 let timerInterval = null;
-let isUnlimitedTime = false; // BIẾN MỚI: Cờ báo hiệu chế độ Vô hạn
+let isUnlimitedTime = false; 
 
 /**
- * CẬP NHẬT: Xử lý hiển thị ký tự Vô hạn
+ * CẬP NHẬT: Hàm formatTime chỉ còn nhiệm vụ chuyển đổi sang MM:SS
  */
 function formatTime(seconds) {
-    if (isUnlimitedTime) {
-        return "∞"; // Trả về ký tự vô hạn
-    }
     if (seconds < 0) seconds = 0;
     const min = Math.floor(seconds / 60);
     const sec = seconds % 60;
     return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
 }
 
+/**
+ * CẬP NHẬT: Hàm updateClocks xử lý hiển thị "∞" riêng biệt cho đồng hồ cá nhân
+ */
 function updateClocks() {
-    document.getElementById('white-time').textContent = formatTime(whiteTime);
-    document.getElementById('black-time').textContent = formatTime(blackTime);
+    // Đồng hồ cá nhân: Hiển thị "∞" nếu là chế độ Vô hạn, ngược lại hiển thị thời gian
+    document.getElementById('white-time').textContent = isUnlimitedTime ? "∞" : formatTime(whiteTime);
+    document.getElementById('black-time').textContent = isUnlimitedTime ? "∞" : formatTime(blackTime);
+    
+    // TỔNG THỜI GIAN: LUÔN DÙNG formatTime để hiển thị MM:SS
     document.getElementById('total-game-time').textContent = formatTime(totalGameTime);
 
     const whiteClockEl = document.getElementById('white-clock');
@@ -177,14 +180,27 @@ function updateClocks() {
     whiteClockEl.classList.toggle('active', currentTurn === 'w' && !isUnlimitedTime);
     blackClockEl.classList.toggle('active', currentTurn === 'b' && !isUnlimitedTime);
     
-    whiteClockEl.classList.toggle('low-time', whiteTime > 0 && whiteTime < 60);
-    blackClockEl.classList.toggle('low-time', blackTime > 0 && blackTime < 60);
+    // Chỉ kiểm tra thời gian thấp nếu không phải là chế độ Vô hạn
+    const checkLowTime = !isUnlimitedTime && (whiteTime > 0 && whiteTime < 60);
+    whiteClockEl.classList.toggle('low-time', checkLowTime);
+    
+    const checkLowTimeBlack = !isUnlimitedTime && (blackTime > 0 && blackTime < 60);
+    blackClockEl.classList.toggle('low-time', checkLowTimeBlack);
 }
 
 function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     
-    if (isUnlimitedTime || (whiteTime <= 0 && blackTime <= 0)) return; 
+    // Nếu là Vô hạn, vẫn chạy interval để cập nhật totalGameTime, nhưng không giảm thời gian
+    if (isUnlimitedTime) {
+        timerInterval = setInterval(() => {
+            totalGameTime++;
+            updateClocks();
+        }, 1000);
+        return;
+    }
+    
+    if (whiteTime <= 0 && blackTime <= 0) return; 
 
     timerInterval = setInterval(() => {
         totalGameTime++;
@@ -481,7 +497,7 @@ document.querySelector('.play-btn[data-action="open-bot-selection"]').addEventLi
 });
 
 /**
- * CẬP NHẬT: Thiết lập biến cờ isUnlimitedTime
+ * Thiết lập biến cờ isUnlimitedTime
  */
 function setTimeControl(value) {
     let timeString = value;
@@ -550,7 +566,7 @@ startMatchBtn.addEventListener('click', () => {
     }
     
     game.reset();
-    totalGameTime = 0;
+    totalGameTime = 0; // Đặt lại tổng thời gian khi bắt đầu
     playerColor = 'w'; 
     
     showScreen('play');
