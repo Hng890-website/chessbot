@@ -151,8 +151,15 @@ let blackTime = 0;
 let timeIncrement = 0;
 let totalGameTime = 0;
 let timerInterval = null;
+let isUnlimitedTime = false; // BIẾN MỚI: Cờ báo hiệu chế độ Vô hạn
 
+/**
+ * CẬP NHẬT: Xử lý hiển thị ký tự Vô hạn
+ */
 function formatTime(seconds) {
+    if (isUnlimitedTime) {
+        return "∞"; // Trả về ký tự vô hạn
+    }
     if (seconds < 0) seconds = 0;
     const min = Math.floor(seconds / 60);
     const sec = seconds % 60;
@@ -167,8 +174,8 @@ function updateClocks() {
     const whiteClockEl = document.getElementById('white-clock');
     const blackClockEl = document.getElementById('black-clock');
     
-    whiteClockEl.classList.toggle('active', currentTurn === 'w');
-    blackClockEl.classList.toggle('active', currentTurn === 'b');
+    whiteClockEl.classList.toggle('active', currentTurn === 'w' && !isUnlimitedTime);
+    blackClockEl.classList.toggle('active', currentTurn === 'b' && !isUnlimitedTime);
     
     whiteClockEl.classList.toggle('low-time', whiteTime > 0 && whiteTime < 60);
     blackClockEl.classList.toggle('low-time', blackTime > 0 && blackTime < 60);
@@ -177,7 +184,7 @@ function updateClocks() {
 function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     
-    if (whiteTime <= 0 && blackTime <= 0) return; 
+    if (isUnlimitedTime || (whiteTime <= 0 && blackTime <= 0)) return; 
 
     timerInterval = setInterval(() => {
         totalGameTime++;
@@ -474,13 +481,14 @@ document.querySelector('.play-btn[data-action="open-bot-selection"]').addEventLi
 });
 
 /**
- * Hàm thiết lập thời gian dựa trên giá trị đã chọn hoặc tùy chỉnh.
- * @param {string} value - Giá trị từ dropdown (ví dụ: '5+0', 'unlimited', 'custom').
+ * CẬP NHẬT: Thiết lập biến cờ isUnlimitedTime
  */
 function setTimeControl(value) {
     let timeString = value;
+    
+    isUnlimitedTime = (value === 'unlimited'); // Đặt cờ Vô hạn
 
-    if (value === 'unlimited') {
+    if (isUnlimitedTime) {
         whiteTime = 0;
         blackTime = 0;
         timeIncrement = 0;
