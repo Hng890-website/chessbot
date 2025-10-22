@@ -630,6 +630,89 @@ function updateCurrentTime() {
 }
 
 
+// ===========================================
+// DRAG AND DROP LOGIC (TIME WIDGET)
+// ===========================================
+
+const timeWidget = document.getElementById('time-widget');
+const draggableHeader = document.querySelector('#time-widget .draggable-header');
+
+let isDragging = false;
+let currentX;
+let currentY;
+let initialX;
+let initialY;
+let xOffset = 0;
+let yOffset = 0;
+
+if (timeWidget && draggableHeader) {
+    draggableHeader.addEventListener("mousedown", dragStart);
+    document.addEventListener("mouseup", dragEnd);
+    document.addEventListener("mousemove", drag);
+    
+    // Hỗ trợ cảm ứng (touch)
+    draggableHeader.addEventListener("touchstart", dragStart);
+    document.addEventListener("touchend", dragEnd);
+    document.addEventListener("touchmove", drag);
+}
+
+function dragStart(e) {
+    if (e.target.closest('.close-widget-btn')) return; // Ngăn kéo khi click nút đóng
+    
+    // Lấy vị trí ban đầu (dùng e.touches[0] cho cảm ứng)
+    const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+    const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+    // Tính offset dựa trên vị trí con trỏ và vị trí hiện tại của widget
+    const rect = timeWidget.getBoundingClientRect();
+    initialX = clientX - rect.left;
+    initialY = clientY - rect.top;
+
+    // Reset transform khi bắt đầu kéo để sử dụng toạ độ tuyệt đối
+    timeWidget.style.transform = 'none';
+    timeWidget.style.right = 'auto'; 
+    timeWidget.style.bottom = 'auto';
+
+    isDragging = true;
+    timeWidget.style.cursor = 'grabbing';
+}
+
+function dragEnd(e) {
+    isDragging = false;
+    timeWidget.style.cursor = 'grab';
+    
+    // Lưu vị trí cuối cùng vào left/top
+    if (timeWidget.style.transform) {
+        timeWidget.style.left = timeWidget.getBoundingClientRect().left + 'px';
+        timeWidget.style.top = timeWidget.getBoundingClientRect().top + 'px';
+        timeWidget.style.transform = 'none';
+    }
+}
+
+function drag(e) {
+    if (isDragging) {
+        e.preventDefault();
+        
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        
+        currentX = clientX - initialX;
+        currentY = clientY - initialY;
+
+        // Giới hạn kéo trong phạm vi màn hình
+        const maxX = window.innerWidth - timeWidget.offsetWidth;
+        const maxY = window.innerHeight - timeWidget.offsetHeight;
+
+        currentX = Math.max(0, Math.min(currentX, maxX));
+        currentY = Math.max(0, Math.min(currentY, maxY));
+
+
+        timeWidget.style.left = currentX + 'px';
+        timeWidget.style.top = currentY + 'px';
+    }
+}
+
+
 /**
  * Hàm quản lý chuyển đổi màn hình
  */
