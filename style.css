@@ -391,7 +391,7 @@ body {
 
 
 /* ==================================== */
-/* 8. MODAL STYLES & CUSTOM TIME INPUT */
+/* 7. MODAL STYLES & CUSTOM TIME INPUT */
 /* ==================================== */
 
 #modal-overlay {
@@ -580,4 +580,63 @@ body {
     background-color: #e96700;
     box-shadow: 0 2px 0 0 #e96700;
     transform: translateY(3px);
+}
+
+/* ==================================== */
+/* 8. TIME WIDGET (ĐỒNG HỒ GÓC PHẢI) */
+/* ==================================== */
+
+#time-widget {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 200px;
+    background-color: #ff8c00; /* Màu cam giống header */
+    color: white;
+    border-radius: var(--border-radius);
+    padding: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    z-index: 900;
+    text-align: center;
+    font-family: var(--font-family);
+}
+
+.time-header {
+    font-weight: bold;
+    font-size: 1.1em;
+    margin-bottom: 10px;
+}
+
+.time-content {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-bottom: 10px;
+    border-top: 1px solid rgba(255, 255, 255, 0.5);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 10px 0;
+}
+
+#current-hour-display {
+    font-size: 1.5em; 
+    line-height: 1.2;
+}
+
+#current-date-display {
+    font-size: 0.85em; 
+    opacity: 0.8;
+}
+
+.time-setting-btn {
+    background: white;
+    color: var(--color-dark-orange);
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.8em;
+    transition: background-color 0.2s;
+}
+
+.time-setting-btn:hover {
+    background-color: #eee;
 }
