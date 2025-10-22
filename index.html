@@ -43,11 +43,43 @@
 
     <section id="play-screen" class="screen">
         
-        <div class="sidebar">
-            <div class="game-info">
+        <div class="main-game-area">
+            <div class="game-header">
                 <p>Bạn (<span id="player-color-display">Trắng</span>) vs Bot <span id="bot-level-display">Level 6</span> (<span id="bot-color-display">Đen</span>)</p>
+                <h2 id="current-turn-display">Lượt đi: <strong><span class="turn-color white-turn">Trắng</span></strong></h2>
             </div>
-
+            
+            <div class="board-and-analysis">
+                <div id="chessboard">
+                    </div>
+                
+                <div class="move-analysis-panel">
+                    <div class="analysis-header">Bot Level <span id="bot-level-analysis">6</span></div>
+                    
+                    <div class="move-history-list" id="move-history-list">
+                        <p class="no-moves-message">Chưa có nước đi nào.</p>
+                    </div>
+                    
+                    <div class="move-controls">
+                        <button class="control-btn" disabled>&lt;&lt;</button>
+                        <button class="control-btn" disabled>&lt;</button>
+                        <button class="control-btn" disabled>&gt;</button>
+                        <button class="control-btn" disabled>&gt;&gt;</button>
+                    </div>
+                    
+                    <div class="online-status-indicator">
+                        <span class="status-dot online"></span>
+                        <span class="status-text">Bạn (Online)</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px;">
+                <button class="news-btn" onclick="showScreen('home')">Quay lại Trang Chủ</button>
+            </div>
+        </div>
+        
+        <div class="metrics-and-chat">
             <div class="metrics">
                 <h3>Thời Gian & Số Liệu</h3>
                 <div class="time-clocks">
@@ -76,17 +108,6 @@
                     <input type="text" placeholder="Gửi tin nhắn cho Bot..." id="chat-input">
                     <button class="send-btn">Gửi</button>
                 </div>
-            </div>
-        </div>
-        
-        <div class="game-area">
-            <div class="game-header">
-                <h2 id="current-turn-display">Lượt đi: <strong><span class="turn-color white-turn">Trắng</span></strong></h2>
-            </div>
-            <div id="chessboard">
-                </div>
-            <div style="margin-top: 15px;">
-                <button class="news-btn" onclick="showScreen('home')">Quay lại Trang Chủ</button>
             </div>
         </div>
         
