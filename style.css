@@ -599,12 +599,41 @@ body {
     z-index: 900;
     text-align: center;
     font-family: var(--font-family);
+    cursor: grab; /* Thêm con trỏ báo hiệu có thể kéo */
+    /* Thêm thuộc tính để hỗ trợ kéo thả */
+    transition: none !important; 
+    touch-action: none;
+}
+
+.draggable-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    cursor: grab; /* Đảm bảo con trỏ kéo xuất hiện */
 }
 
 .time-header {
     font-weight: bold;
     font-size: 1.1em;
-    margin-bottom: 10px;
+    margin: 0; /* Loại bỏ margin-bottom cũ */
+    flex-grow: 1;
+    text-align: left; /* Căn lề trái cho tiêu đề */
+}
+
+.close-widget-btn {
+    background: none;
+    color: white;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+    line-height: 1;
+    padding: 0 5px;
+    transition: color 0.2s;
+}
+
+.close-widget-btn:hover {
+    color: #ffd4b3; /* Màu sáng hơn khi hover */
 }
 
 .time-content {
