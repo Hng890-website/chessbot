@@ -154,7 +154,7 @@ let timerInterval = null;
 let isUnlimitedTime = false; 
 
 /**
- * CẬP NHẬT: Hàm formatTime chỉ còn nhiệm vụ chuyển đổi sang MM:SS
+ * Hàm formatTime chỉ dùng để chuyển đổi sang MM:SS cho Total Time
  */
 function formatTime(seconds) {
     if (seconds < 0) seconds = 0;
@@ -164,7 +164,7 @@ function formatTime(seconds) {
 }
 
 /**
- * CẬP NHẬT: Hàm updateClocks xử lý hiển thị "∞" riêng biệt cho đồng hồ cá nhân
+ * Hàm updateClocks xử lý hiển thị "∞" riêng biệt cho đồng hồ cá nhân
  */
 function updateClocks() {
     // Đồng hồ cá nhân: Hiển thị "∞" nếu là chế độ Vô hạn, ngược lại hiển thị thời gian
@@ -599,6 +599,37 @@ document.querySelector('.rules-btn[data-action="show-rules"]').addEventListener(
 });
 
 
+// ===========================================
+// REAL-TIME CLOCK WIDGET LOGIC
+// ===========================================
+
+function updateCurrentTime() {
+    const now = new Date();
+    
+    // Định dạng Giờ (12-hour format với AM/PM)
+    const hour = now.getHours();
+    const minutes = now.getMinutes();
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12; // Chuyển 0 thành 12
+
+    const timeString = `Giờ: ${displayHour}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
+    
+    // Định dạng Ngày (D/M/YYYY)
+    const day = now.getDate();
+    const month = now.getMonth() + 1; // getMonth() trả về 0-11
+    const year = now.getFullYear();
+    
+    const dateString = `Ngày: ${day}/${month}/${year}`;
+
+    // Cập nhật DOM
+    const hourEl = document.getElementById('current-hour-display');
+    const dateEl = document.getElementById('current-date-display');
+    
+    if (hourEl) hourEl.textContent = timeString;
+    if (dateEl) dateEl.textContent = dateString;
+}
+
+
 /**
  * Hàm quản lý chuyển đổi màn hình
  */
@@ -627,3 +658,7 @@ showScreen('home');
 setupBoard();
 setTimeControl('unlimited'); 
 updateClocks();
+
+// Kích hoạt đồng hồ thời gian thực
+updateCurrentTime();
+setInterval(updateCurrentTime, 1000);
