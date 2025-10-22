@@ -150,7 +150,11 @@
 </div>
 
 <div id="time-widget">
-    <div class="time-header">Thời gian bây giờ?</div>
+    <div class="draggable-header">
+        <div class="time-header">Thời gian bây giờ?</div>
+        <button class="close-widget-btn" onclick="document.getElementById('time-widget').style.display='none';">&times;</button>
+    </div>
+    
     <div class="time-content">
         <div id="current-hour-display">Giờ: 12:00 AM</div>
         <div id="current-date-display">Ngày: 1/1/2000</div>
