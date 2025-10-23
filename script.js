@@ -47,12 +47,14 @@ function evaluatePosition(board, color) {
 function negamax(board, depth, turn) {
     if (depth === 0 || board.game_over()) {
         const evalScore = evaluatePosition(board, turn);
-        return (turn === game.turn() ? 1 : -1) * evalScore;
+        // Trả về điểm số dựa trên người chơi đang xem xét (turn)
+        return (turn === game.turn() ? 1 : -1) * evalScore; 
     }
 
     let maxScore = -Infinity;
     const moves = board.moves({ verbose: true });
     
+    // Sắp xếp để ưu tiên nước bắt quân (giúp cắt tỉa bớt)
     moves.sort((a, b) => (b.captured ? PieceValues[b.captured] : 0) - (a.captured ? PieceValues[a.captured] : 0));
 
     for (let i = 0; i < moves.length; i++) {
@@ -112,7 +114,8 @@ function makeBotMove() {
     } else {
         searchDepth = 4; 
     }
-
+    
+    // Nếu Bot ở level thấp nhất, dùng random để tránh tính toán quá lâu
     if (searchDepth === 1) {
         const moves = game.moves({ verbose: true });
         const randomMove = moves[Math.floor(Math.random() * moves.length)];
@@ -127,12 +130,13 @@ function makeBotMove() {
                 checkGameState();
                 updateTurnDisplay();
                 updateClocks();
-                updateMoveHistory(randomMove); // Truyền nước đi mới nhất
+                updateMoveHistory(randomMove); 
             }, 500);
         }
         return;
     }
     
+    // Bot ở level cao hơn, tính toán nước đi
     setTimeout(() => {
         const bestMove = findBestMove(game, searchDepth);
         
@@ -142,7 +146,7 @@ function makeBotMove() {
             checkGameState();
             updateTurnDisplay();
             updateClocks();
-            updateMoveHistory(bestMove); // Truyền nước đi mới nhất
+            updateMoveHistory(bestMove); 
         } else {
             addChatMessage("Hệ thống", "Bot không còn nước đi nào hợp lệ. Game Over.");
         }
@@ -179,8 +183,9 @@ function updateClocks() {
     whiteClockEl.classList.toggle('active', currentTurn === 'w' && !isUnlimitedTime);
     blackClockEl.classList.toggle('active', currentTurn === 'b' && !isUnlimitedTime);
     
-    const checkLowTime = !isUnlimitedTime && (whiteTime > 0 && whiteTime < 60);
-    whiteClockEl.classList.toggle('low-time', checkLowTime);
+    // Đánh dấu thời gian thấp (dưới 1 phút)
+    const checkLowTimeWhite = !isUnlimitedTime && (whiteTime > 0 && whiteTime < 60);
+    whiteClockEl.classList.toggle('low-time', checkLowTimeWhite);
     
     const checkLowTimeBlack = !isUnlimitedTime && (blackTime > 0 && blackTime < 60);
     blackClockEl.classList.toggle('low-time', checkLowTimeBlack);
@@ -205,14 +210,14 @@ function startTimer() {
             whiteTime--;
             if (whiteTime <= 0) {
                 clearInterval(timerInterval);
-                alert("Hết giờ! Trắng thua.");
+                addChatMessage("Hệ thống", "Hết giờ! Trắng thua.");
                 checkGameState(); 
             }
         } else {
             blackTime--;
             if (blackTime <= 0) {
                 clearInterval(timerInterval);
-                alert("Hết giờ! Đen thua.");
+                addChatMessage("Hệ thống", "Hết giờ! Đen thua.");
                 checkGameState();
             }
         }
@@ -313,7 +318,7 @@ function updateTurnDisplay() {
 }
 
 /**
- * CẬP NHẬT: Đã thêm logic hỏi người chơi loại quân muốn phong cấp khi Tốt đến hàng cuối.
+ * CẬP NHẬT: Đã sửa lỗi Bot không tự động đi sau khi người chơi đi
  */
 function handleSquareClick(squareName) {
     if (game.turn() !== playerColor) {
@@ -373,23 +378,28 @@ function handleSquareClick(squareName) {
         document.querySelectorAll('.highlight-move').forEach(el => el.classList.remove('highlight-move'));
         
         if (result) {
-            if (whiteTime > 0) {
-                whiteTime += timeIncrement;
+            // --- XỬ LÝ SAU KHI NGƯỜI CHƠI ĐI ---
+            if (!isUnlimitedTime && whiteTime > 0) {
+                whiteTime += timeIncrement; 
             }
             
             selectedSquare = null;
             renderBoard();
             updateTurnDisplay();
             updateClocks();
-            updateMoveHistory(result); // Truyền nước đi mới nhất
+            updateMoveHistory(result); 
             checkGameState();
             
+            // GỌI HÀM ĐI CỦA BOT NẾU CHƯA HẾT GAME VÀ LÀ LƯỢT CỦA BOT
             if (!game.game_over() && game.turn() !== playerColor) {
-                if (blackTime > 0) {
-                    blackTime += timeIncrement;
+                if (!isUnlimitedTime && blackTime > 0) {
+                    blackTime += timeIncrement; 
                 }
-                makeBotMove();
+                
+                // addChatMessage("Hệ thống", "Bot đang tính toán nước đi..."); 
+                makeBotMove(); 
             }
+            // ----------------------------------------
         } 
         else if (piece && piece.color === playerColor) {
             // Nước đi không hợp lệ, nhưng click vào quân cờ cùng màu khác
@@ -430,7 +440,7 @@ function checkGameState() {
 }
 
 // ===========================================
-// MOVE HISTORY LOGIC (ĐÃ CẬP NHẬT STYLE)
+// MOVE HISTORY LOGIC
 // ===========================================
 
 const moveHistoryListEl = document.getElementById('move-history-list');
@@ -454,6 +464,9 @@ function createMoveDescription(move) {
 
 function updateMoveHistory(newMove = null) {
     const history = game.history({ verbose: true });
+    
+    // Đảm bảo chỉ hiển thị nước đi cuối cùng theo format chi tiết (như ảnh mẫu)
+    // Và các nước đi cũ bị xóa (để đơn giản)
     moveHistoryListEl.innerHTML = '';
     
     const noMovesMessageEl = document.querySelector('.no-moves-message');
@@ -462,57 +475,13 @@ function updateMoveHistory(newMove = null) {
     
     if (history.length === 0) return;
     
-    let movesHTML = '';
-    
-    for (let i = 0; i < history.length; i++) {
-        const move = history[i];
-        const moveNumber = Math.floor(i / 2) + 1;
-        
-        // Chỉ hiện nước đi cuối cùng theo format mới, còn lại hiện danh sách SAN
-        // (Do CSS mới chỉ thiết kế cho hiển thị 1-2 nước cuối)
-        
-        let displayMove = move.san;
-        
-        // Thêm ký hiệu đặc biệt (Chiếu, Chiếu hết, Phong cấp)
-        if (move.promotion) {
-            displayMove += `=${move.promotion.toUpperCase()}`;
-        }
-        if (move.checkmate) {
-            displayMove += '#';
-        } else if (move.check) {
-            displayMove += '+';
-        }
-        
-        // Chỉ hiển thị chi tiết (description) cho nước đi mới nhất
-        if (i === history.length - 1) {
-             const description = createMoveDescription(move);
-             movesHTML = `
-                <div class="move-item-row">
-                    <div class="move-number-col">
-                        <span class="move-number">${moveNumber}.</span>
-                    </div>
-                    <div class="move-detail-col">
-                        <span class="${move.color === 'w' ? 'move-white' : 'move-black'}">${displayMove}</span>
-                        <div class="move-description">
-                            <span class="desc-icon">${description.icon}</span>
-                            ${description.text}
-                        </div>
-                    </div>
-                </div>
-                ${movesHTML}`; // Thêm nước đi mới nhất lên đầu (prepend)
-        } else {
-            // Đối với các nước đi cũ, chỉ hiển thị danh sách SAN (Giả định đơn giản hóa)
-            // Cần có logic phức tạp hơn để xử lý toàn bộ danh sách theo format ảnh mẫu
-        }
-        
-    }
-    
-    // Tạm thời chỉ hiển thị nước đi cuối cùng theo format chi tiết để khớp với ảnh mẫu
-    // và các nước đi còn lại chỉ là SAN (trong trường hợp này, chỉ giữ lại nước cuối)
+    // Chỉ xử lý nước đi mới nhất
     if (newMove) {
         const moveNumber = Math.ceil(history.length / 2);
         const description = createMoveDescription(newMove);
         let displayMove = newMove.san;
+        
+        // Thêm ký hiệu đặc biệt (Chiếu, Chiếu hết, Phong cấp)
         if (newMove.promotion) {
             displayMove += `=${newMove.promotion.toUpperCase()}`;
         }
@@ -538,12 +507,6 @@ function updateMoveHistory(newMove = null) {
         moveHistoryListEl.insertAdjacentHTML('afterbegin', newMoveHTML);
         
     }
-    
-    // Nếu có quá nhiều nước đi, ta có thể hiển thị một danh sách cuộn lên trên (prepending)
-    // Nhưng vì style mẫu chỉ hiển thị nước gần nhất, ta sẽ giữ lại logic hiện tại.
-    // Dưới đây là cách đơn giản để hiển thị đầy đủ, nhưng nó không khớp với style ảnh mẫu:
-    // moveHistoryListEl.innerHTML = history.map((move, index) => { /* ... logic cũ ... */ }).join('');
-
 
     // Cập nhật cấp độ bot trong bảng phân tích
     document.getElementById('bot-level-analysis').textContent = botLevel;
@@ -575,7 +538,7 @@ function addChatMessage(sender, message) {
     p.appendChild(document.createTextNode(message));
     
     chatRoomEl.prepend(p); 
-    chatRoomEl.scrollTop = chatRoomEl.scrollHeight; 
+    chatRoomEl.scrollTop = 0; // Cuộn lên đầu để xem tin nhắn mới nhất
 }
 
 sendButton.addEventListener('click', () => {
@@ -715,7 +678,7 @@ startMatchBtn.addEventListener('click', () => {
     
     game.reset();
     totalGameTime = 0; 
-    playerColor = 'w'; 
+    playerColor = 'w'; // Luôn mặc định người chơi là quân Trắng
     
     showScreen('play');
     toggleModal(false);
