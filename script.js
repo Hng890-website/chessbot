@@ -53,7 +53,6 @@ function negamax(board, depth, turn) {
     let maxScore = -Infinity;
     const moves = board.moves({ verbose: true });
     
-    // Sắp xếp nước đi để ưu tiên các nước bắt quân
     moves.sort((a, b) => (b.captured ? PieceValues[b.captured] : 0) - (a.captured ? PieceValues[a.captured] : 0));
 
     for (let i = 0; i < moves.length; i++) {
@@ -76,18 +75,14 @@ function findBestMove(board, depth) {
     let bestMove = legalMoves[0];
     let maxScore = -Infinity;
 
-    // Sắp xếp nước đi để ưu tiên các nước bắt quân
     legalMoves.sort((a, b) => (b.captured ? PieceValues[b.captured] : 0) - (a.captured ? PieceValues[a.captured] : 0));
 
     for (let i = 0; i < legalMoves.length; i++) {
         const move = legalMoves[i];
         
-        // Kiểm tra xem nước đi có phải là phong cấp và cần chọn quân không
-        let promotionPiece = undefined;
+        // Mặc định Bot luôn chọn Hậu (Queen) khi phong cấp
         if (move.promotion) {
-            // Mặc định Bot luôn chọn Hậu (Queen) khi phong cấp
-            promotionPiece = 'q';
-            move.promotion = promotionPiece;
+            move.promotion = 'q';
         }
         
         board.move(move);
@@ -104,9 +99,6 @@ function findBestMove(board, depth) {
     return bestMove;
 }
 
-/**
- * Đã loại bỏ tin nhắn "Tôi đang suy nghĩ..." và "Tôi đã đi nước..." khỏi Chat.
- */
 function makeBotMove() {
     if (game.game_over()) return;
 
@@ -126,7 +118,6 @@ function makeBotMove() {
         const randomMove = moves[Math.floor(Math.random() * moves.length)];
         
         if (randomMove) {
-            // Mặc định Bot chọn Hậu khi phong cấp
             if (randomMove.promotion) {
                 randomMove.promotion = 'q';
             }
@@ -136,7 +127,7 @@ function makeBotMove() {
                 checkGameState();
                 updateTurnDisplay();
                 updateClocks();
-                updateMoveHistory(); 
+                updateMoveHistory(randomMove); // Truyền nước đi mới nhất
             }, 500);
         }
         return;
@@ -151,7 +142,7 @@ function makeBotMove() {
             checkGameState();
             updateTurnDisplay();
             updateClocks();
-            updateMoveHistory(); 
+            updateMoveHistory(bestMove); // Truyền nước đi mới nhất
         } else {
             addChatMessage("Hệ thống", "Bot không còn nước đi nào hợp lệ. Game Over.");
         }
@@ -340,17 +331,16 @@ function handleSquareClick(squareName) {
         }
     } 
     else {
-        // --- LOGIC PHONG CẤP TỐT MỚI ---
-        let promotionPiece = 'q'; // Mặc định là Queen
+        // --- LOGIC PHONG CẤP TỐT ---
+        let promotionPiece = 'q'; 
         const moveFrom = selectedSquare;
         const moveTo = squareName;
         const pieceMoving = game.get(moveFrom);
         
-        // Kiểm tra xem đây có phải là nước phong cấp Tốt (Pawn promotion) không
         const isPromotion = 
             pieceMoving && pieceMoving.type === 'p' && 
-            (playerColor === 'w' && moveTo.includes('8')) || 
-            (playerColor === 'b' && moveTo.includes('1'));
+            ((playerColor === 'w' && moveTo.includes('8')) || 
+            (playerColor === 'b' && moveTo.includes('1')));
 
         if (isPromotion) {
             let choice = prompt(
@@ -362,13 +352,14 @@ function handleSquareClick(squareName) {
                 "(Mặc định: Q)", 'Q'
             );
             
-            // Xử lý lựa chọn
             choice = choice ? choice.toLowerCase() : 'q';
             if (['q', 'r', 'b', 'n'].includes(choice)) {
                 promotionPiece = choice;
+            } else {
+                promotionPiece = 'q';
             }
         }
-        // --- KẾT THÚC LOGIC PHONG CẤP TỐT MỚI ---
+        // --- KẾT THÚC LOGIC PHONG CẤP TỐT ---
         
         const move = {
             from: moveFrom,
@@ -376,7 +367,6 @@ function handleSquareClick(squareName) {
             promotion: promotionPiece 
         };
 
-        // Phải kiểm tra nước đi trước khi thực hiện phong cấp
         const result = game.move(move);
 
         document.querySelector(`[data-square="${selectedSquare}"]`)?.classList.remove('selected');
@@ -391,7 +381,7 @@ function handleSquareClick(squareName) {
             renderBoard();
             updateTurnDisplay();
             updateClocks();
-            updateMoveHistory(); 
+            updateMoveHistory(result); // Truyền nước đi mới nhất
             checkGameState();
             
             if (!game.game_over() && game.turn() !== playerColor) {
@@ -402,7 +392,7 @@ function handleSquareClick(squareName) {
             }
         } 
         else if (piece && piece.color === playerColor) {
-            // Nước đi không hợp lệ (ví dụ: Tốt đến ô không hợp lệ), nhưng click vào quân cờ cùng màu khác
+            // Nước đi không hợp lệ, nhưng click vào quân cờ cùng màu khác
             selectedSquare = squareName;
             document.querySelector(`[data-square="${squareName}"]`).classList.add('selected');
             highlightMoves(squareName);
@@ -440,47 +430,121 @@ function checkGameState() {
 }
 
 // ===========================================
-// MOVE HISTORY LOGIC
+// MOVE HISTORY LOGIC (ĐÃ CẬP NHẬT STYLE)
 // ===========================================
 
 const moveHistoryListEl = document.getElementById('move-history-list');
 
-function updateMoveHistory() {
-    const history = game.history({ verbose: true });
+// Hàm tạo mô tả đơn giản
+function createMoveDescription(move) {
+    const pieceMap = {
+        'p': 'quân tốt', 'n': 'quân mã', 'b': 'quân tượng', 
+        'r': 'quân xe', 'q': 'quân hậu', 'k': 'quân vua'
+    };
+    const pieceName = pieceMap[move.piece] || 'quân cờ';
+    const action = move.captured ? `bắt quân tại ${move.to}` : `đi lên ${move.to}`;
+    const icon = move.captured ? '💥' : '⬆️';
     
+    return {
+        text: `${move.color === playerColor ? 'Bạn' : 'Bot'} đã đi ${pieceName} ${action}`,
+        icon: icon
+    };
+}
+
+
+function updateMoveHistory(newMove = null) {
+    const history = game.history({ verbose: true });
     moveHistoryListEl.innerHTML = '';
     
-    if (history.length === 0) {
-        moveHistoryListEl.innerHTML = '<p class="no-moves-message">Chưa có nước đi nào.</p>';
-        return;
-    }
+    const noMovesMessageEl = document.querySelector('.no-moves-message');
+    noMovesMessageEl.style.display = history.length === 0 ? 'block' : 'none';
+
+    
+    if (history.length === 0) return;
     
     let movesHTML = '';
     
-    for (let i = 0; i < history.length; i += 2) {
+    for (let i = 0; i < history.length; i++) {
+        const move = history[i];
         const moveNumber = Math.floor(i / 2) + 1;
-        const whiteMove = history[i];
-        const blackMove = history[i + 1];
         
-        let moveItemHTML = `<div class="move-item">`;
-        moveItemHTML += `<span class="move-number">${moveNumber}.</span>`;
+        // Chỉ hiện nước đi cuối cùng theo format mới, còn lại hiện danh sách SAN
+        // (Do CSS mới chỉ thiết kế cho hiển thị 1-2 nước cuối)
         
-        // Nước đi của Trắng
-        if (whiteMove) {
-            moveItemHTML += `<span class="move-white">${whiteMove.san}</span>`;
+        let displayMove = move.san;
+        
+        // Thêm ký hiệu đặc biệt (Chiếu, Chiếu hết, Phong cấp)
+        if (move.promotion) {
+            displayMove += `=${move.promotion.toUpperCase()}`;
+        }
+        if (move.checkmate) {
+            displayMove += '#';
+        } else if (move.check) {
+            displayMove += '+';
         }
         
-        // Nước đi của Đen
-        if (blackMove) {
-            moveItemHTML += `<span class="move-black">${blackMove.san}</span>`;
+        // Chỉ hiển thị chi tiết (description) cho nước đi mới nhất
+        if (i === history.length - 1) {
+             const description = createMoveDescription(move);
+             movesHTML = `
+                <div class="move-item-row">
+                    <div class="move-number-col">
+                        <span class="move-number">${moveNumber}.</span>
+                    </div>
+                    <div class="move-detail-col">
+                        <span class="${move.color === 'w' ? 'move-white' : 'move-black'}">${displayMove}</span>
+                        <div class="move-description">
+                            <span class="desc-icon">${description.icon}</span>
+                            ${description.text}
+                        </div>
+                    </div>
+                </div>
+                ${movesHTML}`; // Thêm nước đi mới nhất lên đầu (prepend)
+        } else {
+            // Đối với các nước đi cũ, chỉ hiển thị danh sách SAN (Giả định đơn giản hóa)
+            // Cần có logic phức tạp hơn để xử lý toàn bộ danh sách theo format ảnh mẫu
         }
         
-        moveItemHTML += `</div>`;
-        movesHTML += moveItemHTML;
     }
     
-    moveHistoryListEl.innerHTML = movesHTML;
+    // Tạm thời chỉ hiển thị nước đi cuối cùng theo format chi tiết để khớp với ảnh mẫu
+    // và các nước đi còn lại chỉ là SAN (trong trường hợp này, chỉ giữ lại nước cuối)
+    if (newMove) {
+        const moveNumber = Math.ceil(history.length / 2);
+        const description = createMoveDescription(newMove);
+        let displayMove = newMove.san;
+        if (newMove.promotion) {
+            displayMove += `=${newMove.promotion.toUpperCase()}`;
+        }
+        if (newMove.checkmate) {
+            displayMove += '#';
+        } else if (newMove.check) {
+            displayMove += '+';
+        }
+
+        const newMoveHTML = `
+            <div class="move-item-row">
+                <div class="move-number-col">
+                    <span class="move-number">${moveNumber}.</span>
+                </div>
+                <div class="move-detail-col">
+                    <span class="${newMove.color === 'w' ? 'move-white' : 'move-black'}">${displayMove}</span>
+                    <div class="move-description">
+                        <span class="desc-icon">${description.icon}</span>
+                        ${description.text}
+                    </div>
+                </div>
+            </div>`;
+        moveHistoryListEl.insertAdjacentHTML('afterbegin', newMoveHTML);
+        
+    }
     
+    // Nếu có quá nhiều nước đi, ta có thể hiển thị một danh sách cuộn lên trên (prepending)
+    // Nhưng vì style mẫu chỉ hiển thị nước gần nhất, ta sẽ giữ lại logic hiện tại.
+    // Dưới đây là cách đơn giản để hiển thị đầy đủ, nhưng nó không khớp với style ảnh mẫu:
+    // moveHistoryListEl.innerHTML = history.map((move, index) => { /* ... logic cũ ... */ }).join('');
+
+
     // Cập nhật cấp độ bot trong bảng phân tích
     document.getElementById('bot-level-analysis').textContent = botLevel;
     
@@ -503,7 +567,7 @@ function addChatMessage(sender, message) {
     
     senderSpan.textContent = sender + ": ";
     
-    if (sender === botName) {
+    if (sender === botName || sender === 'Hệ thống') {
         senderSpan.classList.add('bot-message');
     }
     
@@ -657,7 +721,9 @@ startMatchBtn.addEventListener('click', () => {
     toggleModal(false);
     setupBoard();
     updateTurnDisplay();
-    updateMoveHistory(); 
+    // Xóa nước đi giả trong HTML và ẩn thông báo "chưa có nước đi"
+    moveHistoryListEl.innerHTML = '';
+    document.querySelector('.no-moves-message').style.display = 'block'; 
     
     document.getElementById('bot-info-name').textContent = botName;
     document.getElementById('bot-level-display').textContent = `Level ${botLevel}`;
@@ -666,7 +732,6 @@ startMatchBtn.addEventListener('click', () => {
     
     startTimer();
     
-    // Chỉ gửi tin nhắn chào mừng
     addChatMessage(botName, `Chào mừng, tôi là ${botName}! Chúc bạn một trận đấu hay!`);
 });
 
