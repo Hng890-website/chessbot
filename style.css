@@ -13,8 +13,8 @@
     --square-size: 60px;
     --border-radius: 8px;
     --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --analysis-panel-width: 250px; /* Định nghĩa kích thước cho bảng phân tích */
-    --main-area-width: 480px; /* Kích thước bàn cờ lớn hơn một chút */
+    --analysis-panel-width: 250px; /* Kích thước cho bảng phân tích */
+    --main-area-width: 480px; /* Kích thước bàn cờ */
 }
 
 * {
@@ -64,7 +64,7 @@ body {
 }
 
 /* ==================================== */
-/* 2. SCREEN MANAGEMENT & HOME SCREEN FIX */
+/* 2. SCREEN MANAGEMENT & HOME SCREEN */
 /* ==================================== */
 
 .screen {
@@ -97,12 +97,11 @@ body {
 }
 
 /* ==================================== */
-/* 3. PLAY SCREEN LAYOUT (Hai cột chính ĐÃ ĐẢO VỊ TRÍ) */
+/* 3. PLAY SCREEN LAYOUT (Hai cột chính ĐÃ ĐẢO VỊ TRÍ CHUẨN) */
 /* ==================================== */
 
 #play-screen.active {
     /* Chia làm 2 cột: Cột 1 cho Metrics/Chat, Cột 2 cho Board/Analysis */
-    /* Đã đảo ngược thứ tự so với lần trước */
     display: grid !important; 
     grid-template-columns: 1.2fr 2fr; /* Metrics/Chat nhỏ hơn Board/Analysis */
     gap: 20px;
@@ -121,14 +120,13 @@ body {
 .main-game-area {
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start; /* Sắp xếp các thành phần con ở góc trái */
     width: 100%;
-    padding-left: 20px; /* Tạo khoảng trống nhẹ với cột bên trái */
 }
 
 .game-header {
-    width: 100%;
-    text-align: center;
+    width: var(--main-area-width); /* Giới hạn chiều rộng bằng bàn cờ */
+    text-align: left;
     margin-bottom: 15px;
 }
 .game-header h2 {
@@ -140,7 +138,7 @@ body {
 /* Bàn cờ và Bảng giải thích nước đi nằm cạnh nhau */
 .board-and-analysis {
     display: flex;
-    gap: 15px; /* Giảm khoảng cách giữa bàn cờ và bảng phân tích */
+    gap: 15px; 
     align-items: flex-start; 
 }
 
@@ -150,7 +148,6 @@ body {
 /* ==================================== */
 
 #chessboard {
-    /* Kích thước lớn hơn để chiếm nhiều không gian hơn ở cột 2 */
     width: var(--main-area-width); 
     height: var(--main-area-width);
     display: grid;
@@ -164,7 +161,6 @@ body {
 }
 
 .square {
-    /* Đảm bảo kích thước ô vuông tự động dựa trên kích thước #chessboard */
     width: auto; 
     height: auto;
     display: flex;
@@ -213,12 +209,33 @@ body {
 }
 
 
-/* HIGHLIGHTS & CHECK GLOW (GIỮ NGUYÊN) */
-/* ... (Giữ nguyên các style highlight, selected, checkmate như code cũ) ... */
+/* HIGHLIGHTS & CHECK GLOW */
+.square.selected {
+    background-color: rgba(255, 255, 0, 0.4) !important; 
+}
+
+.highlight-move {
+    /* Đánh dấu điểm đến */
+    position: relative;
+}
+.highlight-move:after {
+    content: '';
+    position: absolute;
+    width: 30%;
+    height: 30%;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+}
+
+.square.king-in-check {
+    background-color: var(--color-danger) !important;
+    box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.8);
+}
 
 
 /* ==================================== */
-/* 5. METRICS & CHAT (Cột 1) */
+/* 5. METRICS & CHAT (Cột 1: BÊN TRÁI) */
 /* ==================================== */
 
 .metrics, .chat {
@@ -235,6 +252,9 @@ body {
     padding-bottom: 5px;
     color: #333;
 }
+.metrics h3 {
+    border-bottom-color: #555; /* Đặt màu phân biệt cho tiêu đề */
+}
 
 .time-clocks {
     display: flex;
@@ -245,11 +265,15 @@ body {
 .clock {
     flex: 1;
     text-align: center;
-    padding: 10px;
+    padding: 15px 5px; /* Tăng padding để trông lớn hơn */
     border: 2px solid #ccc;
     border-radius: 4px;
     transition: border-color 0.3s, background-color 0.3s;
     margin: 0 5px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }
 #white-clock { margin-left: 0; }
 #black-clock { margin-right: 0; }
@@ -259,10 +283,20 @@ body {
     background-color: #e6f0ff;
 }
 
+.clock.low-time {
+    background-color: #ffdddd;
+    border-color: var(--color-danger);
+}
+
 .time-value {
     font-size: 1.8em;
     font-weight: bold;
     display: block;
+}
+.clock small {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 5px;
 }
 
 .stat-item {
@@ -272,7 +306,7 @@ body {
 
 /* Chat */
 .chat-room {
-    height: 250px; /* Chiều cao cố định cho Chat */
+    height: 250px; 
     overflow-y: auto;
     border: 1px solid #ddd;
     padding: 10px;
@@ -294,7 +328,6 @@ body {
 .chat-input-area {
     display: flex;
     padding-top: 10px;
-    border-top: 1px solid #eee;
 }
 .chat-input-area input {
     flex-grow: 1;
@@ -318,7 +351,7 @@ body {
 
 
 /* ==================================== */
-/* 6. MOVE ANALYSIS PANEL (ĐÃ CẬP NHẬT STYLE) */
+/* 6. MOVE ANALYSIS PANEL (ĐÃ CẬP NHẬT STYLE VÀ BỐ CỤC) */
 /* ==================================== */
 
 .move-analysis-panel {
@@ -348,7 +381,7 @@ body {
     padding: 5px;
     font-size: 0.9em;
     display: flex;
-    flex-direction: column; /* Hiển thị các nước đi theo chiều dọc */
+    flex-direction: column; 
     gap: 5px;
     align-content: flex-start;
 }
@@ -372,7 +405,7 @@ body {
 }
 
 .move-number-col {
-    flex: 0 0 30px; /* Cố định chiều rộng cho số thứ tự */
+    flex: 0 0 30px; 
     text-align: right;
     padding-right: 5px;
     font-weight: bold;
@@ -453,5 +486,255 @@ body {
 
 
 /* ==================================== */
-/* 7. MODAL & WIDGET (GIỮ NGUYÊN) */
-/* ... (Giữ nguyên các style Modal và Time Widget như code cũ) ... */
+/* 7. MODAL & WIDGET (ĐÃ FIX: MODAL LÀ HỘP THOẠI NỔI) */
+/* ==================================== */
+
+#modal-overlay {
+    position: fixed; /* Quan trọng: Giữ Modal cố định trên màn hình */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    display: none; /* Mặc định ẩn, sẽ được JS bật lên khi cần */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#modal-overlay.visible {
+    display: flex;
+    opacity: 1;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px 40px;
+    border-radius: 15px;
+    width: 90%;
+    max-width: 450px;
+    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
+    position: relative;
+    border: 3px solid var(--color-dark-orange); /* Viền màu cam nổi bật */
+}
+
+.modal-content h2 {
+    color: var(--color-dark-orange); 
+    text-align: center;
+    margin-bottom: 25px;
+    font-size: 1.8em;
+}
+
+.close-modal-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    font-size: 30px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #888;
+    transition: color 0.2s;
+}
+.close-modal-btn:hover {
+    color: var(--color-danger);
+}
+
+.setting-group {
+    margin-bottom: 20px;
+}
+
+.setting-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.modal-content input[type="text"], 
+.modal-content .custom-select-wrapper select {
+    width: 100%;
+    padding: 10px;
+    border: 2px solid var(--color-dark-orange);
+    border-radius: 6px;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.2s;
+}
+.modal-content input[type="text"]:focus,
+.modal-content .custom-select-wrapper select:focus {
+    border-color: var(--color-modal-accent);
+}
+
+.hidden-input {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
+}
+.hidden-input.visible {
+    max-height: 100px; 
+    opacity: 1;
+    margin-top: 10px;
+}
+
+/* Kiểu Dropdown tùy chỉnh */
+.custom-select-wrapper {
+    position: relative;
+}
+.custom-select-wrapper select {
+    appearance: none;
+    -webkit-appearance: none;
+    background-color: #fff;
+    cursor: pointer;
+    padding-right: 30px; 
+}
+.custom-arrow {
+    position: absolute;
+    top: 50%;
+    right: 15px;
+    transform: translateY(-50%);
+    width: 0; 
+    height: 0; 
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid var(--color-dark-orange);
+    pointer-events: none;
+}
+
+/* Nút Cấp độ */
+.selection-buttons {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.level-btn {
+    flex-grow: 1;
+    min-width: 35px;
+    padding: 8px 5px;
+    border: 2px solid var(--color-dark-orange);
+    background-color: transparent;
+    color: var(--color-dark-orange);
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s, color 0.2s, transform 0.1s;
+}
+.level-btn.active, .level-btn:hover {
+    background-color: var(--color-dark-orange);
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Nút Bắt đầu */
+#start-match-btn {
+    display: block;
+    width: 100%;
+    padding: 15px;
+    margin-top: 30px;
+    background-color: var(--color-dark-orange);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.4em;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+#start-match-btn:hover {
+    background-color: var(--color-modal-accent);
+    transform: translateY(-2px);
+}
+
+/* 8. TIME WIDGET */
+
+#time-widget {
+    position: fixed;
+    right: 20px; 
+    bottom: 20px; 
+    width: 200px;
+    background-color: #ffe0b2; /* Màu cam nhạt */
+    border: 1px solid var(--color-dark-orange);
+    border-radius: var(--border-radius);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    padding: 10px;
+    font-size: 0.9em;
+    cursor: grab;
+    z-index: 900;
+}
+
+.draggable-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    padding-bottom: 5px;
+    border-bottom: 1px solid var(--color-dark-orange);
+    margin-bottom: 8px;
+}
+
+.close-widget-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: #555;
+}
+
+.time-content div {
+    margin-bottom: 5px;
+}
+
+.time-setting-btn {
+    width: 100%;
+    padding: 5px;
+    margin-top: 8px;
+    background-color: var(--color-dark-orange);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.time-setting-btn:hover {
+    background-color: var(--color-modal-accent);
+}
+
+/* BUTTONS CHUNG */
+button {
+    font-family: var(--font-family);
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+.play-btn, .rules-btn, .news-btn {
+    background-color: #f8f9fa;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 8px 15px;
+    border-radius: 4px;
+}
+.play-btn:hover, .rules-btn:hover {
+    background-color: #e2e6ea;
+}
+
+/* UTILITY CLASSES */
+.white-turn {
+    color: white;
+    background-color: var(--color-primary);
+    padding: 2px 8px;
+    border-radius: 3px;
+}
+
+.black-turn {
+    color: black;
+    background-color: #333;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+}
