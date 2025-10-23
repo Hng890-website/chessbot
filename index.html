@@ -43,42 +43,6 @@
 
     <section id="play-screen" class="screen">
         
-        <div class="main-game-area">
-            <div class="game-header">
-                <p>Bạn (<span id="player-color-display">Trắng</span>) vs Bot <span id="bot-level-display">Level 6</span> (<span id="bot-color-display">Đen</span>)</p>
-                <h2 id="current-turn-display">Lượt đi: <strong><span class="turn-color white-turn">Trắng</span></strong></h2>
-            </div>
-            
-            <div class="board-and-analysis">
-                <div id="chessboard">
-                    </div>
-                
-                <div class="move-analysis-panel">
-                    <div class="analysis-header">Bot Level <span id="bot-level-analysis">6</span></div>
-                    
-                    <div class="move-history-list" id="move-history-list">
-                        <p class="no-moves-message">Chưa có nước đi nào.</p>
-                    </div>
-                    
-                    <div class="move-controls">
-                        <button class="control-btn" disabled>&lt;&lt;</button>
-                        <button class="control-btn" disabled>&lt;</button>
-                        <button class="control-btn" disabled>&gt;</button>
-                        <button class="control-btn" disabled>&gt;&gt;</button>
-                    </div>
-                    
-                    <div class="online-status-indicator">
-                        <span class="status-dot online"></span>
-                        <span class="status-text">Bạn (Online)</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="margin-top: 15px;">
-                <button class="news-btn" onclick="showScreen('home')">Quay lại Trang Chủ</button>
-            </div>
-        </div>
-        
         <div class="metrics-and-chat">
             <div class="metrics">
                 <h3>Thời Gian & Số Liệu</h3>
@@ -109,6 +73,54 @@
                     <button class="send-btn">Gửi</button>
                 </div>
             </div>
+            
+            <button class="news-btn" onclick="showScreen('home')">Quay lại Trang Chủ</button>
+        </div>
+
+        
+        <div class="main-game-area">
+            <div class="game-header">
+                <p>Bạn (<span id="player-color-display">Trắng</span>) vs Bot <span id="bot-level-display">Level 6</span> (<span id="bot-color-display">Đen</span>)</p>
+                <h2 id="current-turn-display">Lượt đi: <strong><span class="turn-color white-turn">Trắng</span></strong></h2>
+            </div>
+            
+            <div class="board-and-analysis">
+                <div id="chessboard">
+                    </div>
+                
+                <div class="move-analysis-panel">
+                    <div class="analysis-header">Bot Level <span id="bot-level-analysis">6</span></div>
+                    
+                    <div class="move-history-list" id="move-history-list">
+                        <div class="move-item-row">
+                            <div class="move-number-col">
+                                <span class="move-number">1.</span>
+                            </div>
+                            <div class="move-detail-col">
+                                <span class="move-white">e4</span>
+                                <div class="move-description">
+                                    <span class="desc-icon">⬆️</span>
+                                    Người chơi đã đi quân tốt lên e4
+                                </div>
+                            </div>
+                        </div>
+                        <p class="no-moves-message" style="display: none;">Chưa có nước đi nào.</p>
+                    </div>
+                    
+                    <div class="move-controls">
+                        <button class="control-btn" disabled>&lt;&lt;</button>
+                        <button class="control-btn" disabled>&lt;</button>
+                        <button class="control-btn" disabled>&gt;</button>
+                        <button class="control-btn" disabled>&gt;&gt;</button>
+                    </div>
+                    
+                    <div class="online-status-indicator">
+                        <span class="status-dot online"></span>
+                        <span class="status-text">Bạn (Online)</span>
+                    </div>
+                </div>
+            </div>
+            
         </div>
         
     </section>
@@ -140,7 +152,8 @@
                     <option value="5+0">5 phút (Blitz)</option>
                     <option value="10+0">10 phút (Rapid)</option>
                     <option value="3+2">3 phút + 2 giây</option>
-                    <option value="custom">Thời gian khác</option> </select>
+                    <option value="custom">Thời gian khác</option>
+                </select>
                 <span class="custom-arrow"></span>
             </div>
             
@@ -159,7 +172,8 @@
                 <button class="level-btn" data-level="3">3</button>
                 <button class="level-btn" data-level="4">4</button>
                 <button class="level-btn" data-level="5">5</button>
-                <button class="level-btn active" data-level="6">6</button> <button class="level-btn" data-level="7">7</button>
+                <button class="level-btn active" data-level="6">6</button>
+                <button class="level-btn" data-level="7">7</button>
                 <button class="level-btn" data-level="8">8</button>
                 <button class="level-btn" data-level="9">9</button>
                 <button class="level-btn" data-level="10">10</button>
