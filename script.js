@@ -155,7 +155,7 @@ function makeBotMove() {
 }
 
 // ===========================================
-// TIMER LOGIC (ĐÃ SỬA LỖI TỔNG THỜI GIAN)
+// TIMER LOGIC
 // ===========================================
 
 let whiteTime = 0;
@@ -381,8 +381,8 @@ function handleSquareClick(squareName) {
         
         if (result) {
             // --- XỬ LÝ SAU KHI NGƯỜI CHƠI ĐI ---
-            if (!isUnlimitedTime && whiteTime > 0) {
-                whiteTime += timeIncrement; // Cộng thời gian cho người chơi
+            if (!isUnlimitedTime && whiteTime > 0 && game.turn() === 'b') {
+                whiteTime += timeIncrement; // Cộng thời gian cho người chơi (chỉ Trắng nếu người chơi là Trắng)
             }
             
             selectedSquare = null;
@@ -472,7 +472,12 @@ function updateMoveHistory(newMove = null) {
     moveHistoryListEl.innerHTML = '';
     
     const noMovesMessageEl = document.querySelector('.no-moves-message');
-    noMovesMessageEl.style.display = history.length === 0 ? 'block' : 'none';
+    
+    // SỬA LỖI: Kiểm tra noMovesMessageEl trước khi truy cập style
+    if (noMovesMessageEl) {
+        noMovesMessageEl.style.display = history.length === 0 ? 'block' : 'none';
+    }
+
 
     
     if (history.length === 0) return;
@@ -511,7 +516,10 @@ function updateMoveHistory(newMove = null) {
     }
 
     // Cập nhật cấp độ bot trong bảng phân tích
-    document.getElementById('bot-level-analysis').textContent = botLevel;
+    const botLevelAnalysisEl = document.getElementById('bot-level-analysis');
+    if (botLevelAnalysisEl) {
+        botLevelAnalysisEl.textContent = botLevel;
+    }
     
     // Cuộn xuống cuối
     moveHistoryListEl.scrollTop = moveHistoryListEl.scrollHeight;
@@ -527,6 +535,8 @@ const chatInput = document.getElementById('chat-input');
 const sendButton = document.querySelector('.send-btn');
 
 function addChatMessage(sender, message) {
+    if (!chatRoomEl) return;
+    
     const p = document.createElement('p');
     const senderSpan = document.createElement('span');
     
@@ -543,24 +553,27 @@ function addChatMessage(sender, message) {
     chatRoomEl.scrollTop = 0; // Cuộn lên đầu để xem tin nhắn mới nhất
 }
 
-sendButton.addEventListener('click', () => {
-    const message = chatInput.value.trim();
-    if (message !== "") {
-        addChatMessage("Bạn", message);
-        chatInput.value = '';
-        
-        setTimeout(() => {
-            const botResponse = simpleBotResponse(message);
-            addChatMessage(botName, botResponse);
-        }, 800);
-    }
-});
+if (sendButton && chatInput) {
+    sendButton.addEventListener('click', () => {
+        const message = chatInput.value.trim();
+        if (message !== "") {
+            addChatMessage("Bạn", message);
+            chatInput.value = '';
+            
+            setTimeout(() => {
+                const botResponse = simpleBotResponse(message);
+                addChatMessage(botName, botResponse);
+            }, 800);
+        }
+    });
 
-chatInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        sendButton.click();
-    }
-});
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendButton.click();
+        }
+    });
+}
+
 
 function simpleBotResponse(message) {
     message = message.toLowerCase();
@@ -591,17 +604,20 @@ const customTimeInput = document.getElementById('custom-time-input');
 
 
 function toggleModal(show) {
-    modalOverlay.classList.toggle('visible', show);
+    if (modalOverlay) {
+        modalOverlay.classList.toggle('visible', show);
+    }
 }
 
-timeControlSelect.addEventListener('change', (e) => {
-    if (e.target.value === 'custom') {
-        customTimeInputGroup.classList.add('visible');
-    } else {
-        customTimeInputGroup.classList.remove('visible');
-    }
-});
-
+if (timeControlSelect) {
+    timeControlSelect.addEventListener('change', (e) => {
+        if (e.target.value === 'custom' && customTimeInputGroup) {
+            customTimeInputGroup.classList.add('visible');
+        } else if (customTimeInputGroup) {
+            customTimeInputGroup.classList.remove('visible');
+        }
+    });
+}
 
 levelButtons.forEach(btn => {
     btn.addEventListener('click', () => {
@@ -611,7 +627,7 @@ levelButtons.forEach(btn => {
     });
 });
 
-document.querySelector('.play-btn[data-action="open-bot-selection"]').addEventListener('click', () => {
+document.querySelector('.play-btn[data-action="open-bot-selection"]')?.addEventListener('click', () => {
     toggleModal(true);
 });
 
@@ -628,7 +644,7 @@ function setTimeControl(value) {
     } 
     
     if (value === 'custom') {
-        timeString = customTimeInput.value.trim();
+        timeString = customTimeInput?.value.trim() || '';
         if (!timeString) {
              alert("Vui lòng nhập thời gian tùy chỉnh (ví dụ: 15+10) hoặc chọn một kiểu thời gian khác.");
              return false;
@@ -664,44 +680,50 @@ function setTimeControl(value) {
 }
 
 
-startMatchBtn.addEventListener('click', () => {
-    stopTimer();
-    
-    const activeLevelBtn = document.querySelector('#level-selection .level-btn.active');
-    botLevel = activeLevelBtn ? parseInt(activeLevelBtn.dataset.level) : 6;
-    
-    const inputName = botNameInput.value.trim();
-    botName = inputName !== "" ? inputName : `Bot Level ${botLevel}`;
-    
-    const timeControlValue = timeControlSelect.value;
-    if (!setTimeControl(timeControlValue)) {
-        return; 
-    }
-    
-    game.reset();
-    totalGameTime = 0; 
-    playerColor = 'w'; // Luôn mặc định người chơi là quân Trắng
-    
-    showScreen('play');
-    toggleModal(false);
-    setupBoard();
-    updateTurnDisplay();
-    // Xóa nước đi giả trong HTML và ẩn thông báo "chưa có nước đi"
-    moveHistoryListEl.innerHTML = '';
-    document.querySelector('.no-moves-message').style.display = 'block'; 
-    
-    document.getElementById('bot-info-name').textContent = botName;
-    document.getElementById('bot-level-display').textContent = `Level ${botLevel}`;
-    document.getElementById('player-color-display').textContent = 'Trắng';
-    document.getElementById('bot-color-display').textContent = 'Đen';
-    
-    startTimer();
-    
-    addChatMessage(botName, `Chào mừng, tôi là ${botName}! Chúc bạn một trận đấu hay!`);
-});
+if (startMatchBtn) {
+    startMatchBtn.addEventListener('click', () => {
+        stopTimer();
+        
+        const activeLevelBtn = document.querySelector('#level-selection .level-btn.active');
+        botLevel = activeLevelBtn ? parseInt(activeLevelBtn.dataset.level) : 6;
+        
+        const inputName = botNameInput?.value.trim() || '';
+        botName = inputName !== "" ? inputName : `Bot Level ${botLevel}`;
+        
+        const timeControlValue = timeControlSelect?.value || 'unlimited';
+        if (!setTimeControl(timeControlValue)) {
+            return; 
+        }
+        
+        game.reset();
+        totalGameTime = 0; 
+        playerColor = 'w'; // Luôn mặc định người chơi là quân Trắng
+        
+        showScreen('play');
+        toggleModal(false);
+        setupBoard();
+        updateTurnDisplay();
+        
+        // SỬA LỖI: Kiểm tra .no-moves-message trước khi truy cập style
+        const noMovesMessageEl = document.querySelector('.no-moves-message');
+        if (noMovesMessageEl) {
+            noMovesMessageEl.style.display = 'block'; 
+        }
+
+        
+        document.getElementById('bot-info-name').textContent = botName;
+        document.getElementById('bot-level-display').textContent = `Level ${botLevel}`;
+        document.getElementById('player-color-display').textContent = 'Trắng';
+        document.getElementById('bot-color-display').textContent = 'Đen';
+        
+        startTimer();
+        
+        addChatMessage(botName, `Chào mừng, tôi là ${botName}! Chúc bạn một trận đấu hay!`);
+    });
+}
 
 
-document.querySelector('.close-modal-btn').addEventListener('click', () => {
+document.querySelector('.close-modal-btn')?.addEventListener('click', () => {
     toggleModal(false);
 });
 
@@ -712,7 +734,7 @@ document.querySelectorAll('#play-screen .news-btn, #rules-screen .play-btn').for
     });
 });
 
-document.querySelector('.rules-btn[data-action="show-rules"]').addEventListener('click', () => {
+document.querySelector('.rules-btn[data-action="show-rules"]')?.addEventListener('click', () => {
     showScreen('rules');
 });
 
@@ -758,7 +780,7 @@ let currentY;
 let initialX;
 let initialY;
 
-
+// SỬA LỖI: Chỉ đăng ký sự kiện nếu các phần tử tồn tại
 if (timeWidget && draggableHeader) {
     draggableHeader.addEventListener("mousedown", dragStart);
     document.addEventListener("mouseup", dragEnd);
@@ -768,7 +790,7 @@ if (timeWidget && draggableHeader) {
     document.addEventListener("touchend", dragEnd);
     document.addEventListener("touchmove", drag);
     
-    document.querySelector('.close-widget-btn').addEventListener('click', () => {
+    document.querySelector('.close-widget-btn')?.addEventListener('click', () => {
         timeWidget.style.display = 'none';
     });
 }
