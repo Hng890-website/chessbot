@@ -21,17 +21,115 @@ const PieceValues = {
     'P': 100, 'N': 320, 'B': 330, 'R': 500, 'Q': 900, 'K': 20000
 };
 
+// --- Bảng Điểm Vị Trí Quân Cờ (Piece-Square Tables - PST) ---
+// Giá trị dựa trên ô mà quân cờ đang đứng (hàng 8 là hàng đầu tiên)
+
+const PST = {
+    p: [
+        0,  0,  0,  0,  0,  0,  0,  0,
+        50, 50, 50, 50, 50, 50, 50, 50,
+        10, 10, 20, 30, 30, 20, 10, 10,
+        5,  5, 10, 25, 25, 10,  5,  5,
+        0,  0,  0, 20, 20,  0,  0,  0,
+        5, -5,-10,  0,  0,-10, -5,  5,
+        5, 10, 10,-20,-20, 10, 10,  5,
+        0,  0,  0,  0,  0,  0,  0,  0
+    ].reverse(), // Tốt Trắng được đánh giá từ hàng 1 lên 8
+    
+    n: [
+        -50,-40,-30,-30,-30,-30,-40,-50,
+        -40,-20,  0,  0,  0,  0,-20,-40,
+        -30,  0, 10, 15, 15, 10,  0,-30,
+        -30,  5, 15, 20, 20, 15,  5,-30,
+        -30,  0, 15, 20, 20, 15,  0,-30,
+        -30,  5, 10, 15, 15, 10,  5,-30,
+        -40,-20,  0,  5,  5,  0,-20,-40,
+        -50,-40,-30,-30,-30,-30,-40,-50
+    ].reverse(),
+
+    b: [
+        -20,-10,-10,-10,-10,-10,-10,-20,
+        -10,  0,  0,  0,  0,  0,  0,-10,
+        -10,  0,  5, 10, 10,  5,  0,-10,
+        -10,  5,  5, 10, 10,  5,  5,-10,
+        -10,  0, 10, 10, 10, 10,  0,-10,
+        -10, 10, 10, 10, 10, 10, 10,-10,
+        -10,  5,  0,  0,  0,  0,  5,-10,
+        -20,-10,-10,-10,-10,-10,-10,-20
+    ].reverse(),
+
+    // Tăng điểm thưởng ở các cột trung tâm (d, e) và hàng 7/2 (hoạt động)
+    r: [
+        0,  0,  0,  0,  0,  0,  0,  0,
+        5, 10, 10, 10, 10, 10, 10,  5,
+        -5, 0,  0,  0,  0,  0,  0, -5,
+        -5, 0,  0,  0,  0,  0,  0, -5,
+        -5, 0,  0,  0,  0,  0,  0, -5,
+        -5, 0,  0,  0,  0,  0,  0, -5,
+        -5, 0,  0,  0,  0,  0,  0, -5,
+        0,  0,  0,  5,  5,  0,  0,  0
+    ].reverse(),
+
+    q: [
+        -20,-10,-10, -5, -5,-10,-10,-20,
+        -10,  0,  0,  0,  0,  0,  0,-10,
+        -10,  0,  5,  5,  5,  5,  0,-10,
+        -5,  0,  5,  5,  5,  5,  0, -5,
+        0,  0,  5,  5,  5,  5,  0, -5,
+        -10,  5,  5,  5,  5,  5,  0,-10,
+        -10,  0,  5,  0,  0,  0,  0,-10,
+        -20,-10,-10, -5, -5,-10,-10,-20
+    ].reverse(),
+
+    k: [ // Giữa ván: Vua nên ở vị trí an toàn (góc)
+        -30,-40,-40,-50,-50,-40,-40,-30,
+        -30,-40,-40,-50,-50,-40,-40,-30,
+        -30,-40,-40,-50,-50,-40,-40,-30,
+        -30,-40,-40,-50,-50,-40,-40,-30,
+        -20,-30,-30,-40,-40,-30,-30,-20,
+        -10,-20,-20,-20,-20,-20,-20,-10,
+        20, 20,  0,  0,  0,  0, 20, 20,
+        20, 30, 10,  0,  0, 10, 30, 20
+    ].reverse()
+};
+
+/**
+ * QUAN TRỌNG: Cập nhật hàm đánh giá để bao gồm PST.
+ */
 function evaluatePosition(board, color) {
     let score = 0;
     
-    board.board().forEach(row => {
-        row.forEach(piece => {
+    board.board().forEach((row, rIndex) => {
+        row.forEach((piece, cIndex) => {
             if (piece) {
-                const value = PieceValues[piece.type.toLowerCase()];
+                const pieceType = piece.type.toLowerCase();
+                const materialValue = PieceValues[pieceType];
+                
+                // Tính index trong PST (từ 0 đến 63)
+                // cIndex: 0-7 (a-h)
+                // rIndex: 0-7 (8-1)
+                const squareIndex = rIndex * 8 + cIndex;
+                
+                // Lấy điểm PST cho quân cờ
+                let pstValue = 0;
+                if (PST[pieceType]) {
+                    // Quân Trắng: PST được định nghĩa cho hàng 1 đến 8
+                    // Quân Đen: Lật ngược PST (hàng 8 của Trắng là hàng 1 của Đen)
+                    if (piece.color === 'w') {
+                        // Tốt Trắng được định nghĩa từ hàng 1 lên 8 (đã reverse trong PST)
+                        // Nên dùng rIndex * 8 + cIndex
+                        pstValue = PST[pieceType][squareIndex];
+                    } else {
+                        // Lật ngược bảng PST cho quân Đen
+                        pstValue = PST[pieceType][63 - squareIndex];
+                    }
+                }
+                
+                // Cộng/trừ điểm
                 if (piece.color === 'w') {
-                    score += value;
+                    score += materialValue + pstValue;
                 } else {
-                    score -= value;
+                    score -= (materialValue + pstValue);
                 }
             }
         });
@@ -469,7 +567,10 @@ function updateMoveHistory(newMove = null) {
     
     // Đảm bảo chỉ hiển thị nước đi cuối cùng theo format chi tiết (như ảnh mẫu)
     // Và các nước đi cũ bị xóa (để đơn giản)
-    moveHistoryListEl.innerHTML = '';
+    if (moveHistoryListEl) {
+         moveHistoryListEl.innerHTML = '';
+    }
+   
     
     const noMovesMessageEl = document.querySelector('.no-moves-message');
     
@@ -480,7 +581,7 @@ function updateMoveHistory(newMove = null) {
 
 
     
-    if (history.length === 0) return;
+    if (history.length === 0 || !moveHistoryListEl) return;
     
     // Chỉ xử lý nước đi mới nhất
     if (newMove) {
