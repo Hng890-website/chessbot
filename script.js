@@ -115,7 +115,7 @@ function makeBotMove() {
         searchDepth = 4; 
     }
     
-    // Nếu Bot ở level thấp nhất, dùng random để tránh tính toán quá lâu
+    // Nếu Bot ở level thấp nhất, dùng random
     if (searchDepth === 1) {
         const moves = game.moves({ verbose: true });
         const randomMove = moves[Math.floor(Math.random() * moves.length)];
@@ -131,6 +131,11 @@ function makeBotMove() {
                 updateTurnDisplay();
                 updateClocks();
                 updateMoveHistory(randomMove); 
+                // Kiểm tra lại lượt sau khi Bot đi (đảm bảo dừng bot)
+                if (game.turn() === playerColor) {
+                    stopTimer(); 
+                    startTimer(); 
+                }
             }, 500);
         }
         return;
@@ -147,6 +152,11 @@ function makeBotMove() {
             updateTurnDisplay();
             updateClocks();
             updateMoveHistory(bestMove); 
+            // Kiểm tra lại lượt sau khi Bot đi
+            if (game.turn() === playerColor) {
+                stopTimer(); 
+                startTimer(); 
+            }
         } else {
             addChatMessage("Hệ thống", "Bot không còn nước đi nào hợp lệ. Game Over.");
         }
@@ -154,7 +164,7 @@ function makeBotMove() {
 }
 
 // ===========================================
-// TIMER LOGIC
+// TIMER LOGIC (ĐÃ SỬA LỖI TỔNG THỜI GIAN)
 // ===========================================
 
 let whiteTime = 0;
@@ -194,36 +204,36 @@ function updateClocks() {
 function startTimer() {
     if (timerInterval) clearInterval(timerInterval);
     
-    if (isUnlimitedTime) {
-        timerInterval = setInterval(() => {
-            totalGameTime++;
-            updateClocks();
-        }, 1000);
-        return;
-    }
-    
-    if (whiteTime <= 0 && blackTime <= 0) return; 
+    // Kiểm tra điều kiện có cần tính giờ (chỉ cần 1 bên > 0)
+    if (!isUnlimitedTime && whiteTime <= 0 && blackTime <= 0) return; 
 
+    // Logic chung: Tăng tổng thời gian game (LUÔN CHẠY)
     timerInterval = setInterval(() => {
         totalGameTime++;
-        if (currentTurn === 'w') {
-            whiteTime--;
-            if (whiteTime <= 0) {
-                clearInterval(timerInterval);
-                addChatMessage("Hệ thống", "Hết giờ! Trắng thua.");
-                checkGameState(); 
-            }
-        } else {
-            blackTime--;
-            if (blackTime <= 0) {
-                clearInterval(timerInterval);
-                addChatMessage("Hệ thống", "Hết giờ! Đen thua.");
-                checkGameState();
+        
+        // Logic riêng: Chỉ trừ thời gian nếu KHÔNG phải chế độ không giới hạn
+        if (!isUnlimitedTime) {
+            if (currentTurn === 'w') {
+                whiteTime--;
+                if (whiteTime <= 0) {
+                    clearInterval(timerInterval);
+                    addChatMessage("Hệ thống", "Hết giờ! Trắng thua.");
+                    checkGameState(); 
+                }
+            } else {
+                blackTime--;
+                if (blackTime <= 0) {
+                    clearInterval(timerInterval);
+                    addChatMessage("Hệ thống", "Hết giờ! Đen thua.");
+                    checkGameState();
+                }
             }
         }
+        
         updateClocks();
     }, 1000);
 }
+
 
 function stopTimer() {
     if (timerInterval) clearInterval(timerInterval);
@@ -318,7 +328,7 @@ function updateTurnDisplay() {
 }
 
 /**
- * CẬP NHẬT: Đã sửa lỗi Bot không tự động đi sau khi người chơi đi
+ * ĐÃ SỬA LỖI BOT KHÔNG TỰ ĐỘNG ĐI VÀ LỖI TIMER KHÔNG DỪNG/KHỞI ĐỘNG LẠI
  */
 function handleSquareClick(squareName) {
     if (game.turn() !== playerColor) {
@@ -390,13 +400,16 @@ function handleSquareClick(squareName) {
             updateMoveHistory(result); 
             checkGameState();
             
+            // Dừng timer của người chơi và khởi động timer của bot
+            stopTimer(); 
+            startTimer();
+            
             // GỌI HÀM ĐI CỦA BOT NẾU CHƯA HẾT GAME VÀ LÀ LƯỢT CỦA BOT
             if (!game.game_over() && game.turn() !== playerColor) {
                 if (!isUnlimitedTime && blackTime > 0) {
                     blackTime += timeIncrement; 
                 }
                 
-                // addChatMessage("Hệ thống", "Bot đang tính toán nước đi..."); 
                 makeBotMove(); 
             }
             // ----------------------------------------
@@ -699,6 +712,10 @@ startMatchBtn.addEventListener('click', () => {
 });
 
 
+document.querySelector('.close-modal-btn').addEventListener('click', () => {
+    toggleModal(false);
+});
+
 document.querySelectorAll('#play-screen .news-btn, #rules-screen .play-btn').forEach(btn => {
     btn.addEventListener('click', () => {
         showScreen('home');
@@ -761,6 +778,10 @@ if (timeWidget && draggableHeader) {
     draggableHeader.addEventListener("touchstart", dragStart);
     document.addEventListener("touchend", dragEnd);
     document.addEventListener("touchmove", drag);
+    
+    document.querySelector('.close-widget-btn').addEventListener('click', () => {
+        timeWidget.style.display = 'none';
+    });
 }
 
 function dragStart(e) {
