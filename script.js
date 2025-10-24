@@ -101,8 +101,14 @@ function findBestMove(board, depth) {
     return bestMove;
 }
 
+/**
+ * QUAN TRỌNG: Cập nhật makeBotMove để đảm bảo timer được khởi động lại cho người chơi.
+ */
 function makeBotMove() {
     if (game.game_over()) return;
+    
+    // 1. Dừng timer ngay khi Bot bắt đầu tính toán
+    stopTimer();
 
     let searchDepth;
     if (botLevel <= 3) {
@@ -115,46 +121,31 @@ function makeBotMove() {
         searchDepth = 4; 
     }
     
-    // Nếu Bot ở level thấp nhất, dùng random
-    if (searchDepth === 1) {
-        const moves = game.moves({ verbose: true });
-        const randomMove = moves[Math.floor(Math.random() * moves.length)];
-        
-        if (randomMove) {
-            if (randomMove.promotion) {
-                randomMove.promotion = 'q';
-            }
-            setTimeout(() => {
-                game.move(randomMove);
-                renderBoard();
-                checkGameState();
-                updateTurnDisplay();
-                updateClocks();
-                updateMoveHistory(randomMove); 
-                // Kiểm tra lại lượt sau khi Bot đi (đảm bảo dừng bot)
-                if (game.turn() === playerColor) {
-                    stopTimer(); 
-                    startTimer(); 
-                }
-            }, 500);
+    const botCalculation = searchDepth === 1 
+        ? () => { // Random move cho Level 1
+            const moves = game.moves({ verbose: true });
+            const randomMove = moves[Math.floor(Math.random() * moves.length)];
+            return randomMove;
         }
-        return;
-    }
-    
-    // Bot ở level cao hơn, tính toán nước đi
+        : () => findBestMove(game, searchDepth); // Negamax cho Level cao hơn
+
     setTimeout(() => {
-        const bestMove = findBestMove(game, searchDepth);
+        const bestMove = botCalculation();
         
         if (bestMove) {
+            if (!isUnlimitedTime && game.turn() !== playerColor) {
+                blackTime += timeIncrement; // Cộng thời gian cho bot trước khi đi
+            }
+            
             game.move(bestMove);
             renderBoard();
             checkGameState();
             updateTurnDisplay();
             updateClocks();
             updateMoveHistory(bestMove); 
-            // Kiểm tra lại lượt sau khi Bot đi
-            if (game.turn() === playerColor) {
-                stopTimer(); 
+            
+            // 2. Khởi động lại timer cho người chơi (sau khi Bot đi xong)
+            if (!game.game_over()) {
                 startTimer(); 
             }
         } else {
@@ -328,7 +319,8 @@ function updateTurnDisplay() {
 }
 
 /**
- * ĐÃ SỬA LỖI BOT KHÔNG TỰ ĐỘNG ĐI VÀ LỖI TIMER KHÔNG DỪNG/KHỞI ĐỘNG LẠI
+ * QUAN TRỌNG: Đã sửa lỗi Bot và Timer.
+ * Timer được dừng và khởi động lại sau mỗi nước đi hợp lệ.
  */
 function handleSquareClick(squareName) {
     if (game.turn() !== playerColor) {
@@ -390,7 +382,7 @@ function handleSquareClick(squareName) {
         if (result) {
             // --- XỬ LÝ SAU KHI NGƯỜI CHƠI ĐI ---
             if (!isUnlimitedTime && whiteTime > 0) {
-                whiteTime += timeIncrement; 
+                whiteTime += timeIncrement; // Cộng thời gian cho người chơi
             }
             
             selectedSquare = null;
@@ -400,16 +392,13 @@ function handleSquareClick(squareName) {
             updateMoveHistory(result); 
             checkGameState();
             
-            // Dừng timer của người chơi và khởi động timer của bot
+            // 1. DỪNG TIMER CỦA NGƯỜI CHƠI
             stopTimer(); 
-            startTimer();
             
-            // GỌI HÀM ĐI CỦA BOT NẾU CHƯA HẾT GAME VÀ LÀ LƯỢT CỦA BOT
+            // 2. GỌI HÀM ĐI CỦA BOT NẾU LÀ LƯỢT CỦA BOT
             if (!game.game_over() && game.turn() !== playerColor) {
-                if (!isUnlimitedTime && blackTime > 0) {
-                    blackTime += timeIncrement; 
-                }
-                
+                // Khởi động timer cho Bot (nếu có)
+                startTimer();
                 makeBotMove(); 
             }
             // ----------------------------------------
