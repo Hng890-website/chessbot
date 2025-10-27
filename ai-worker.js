@@ -2,7 +2,7 @@
 
 // --- 1. Import chess.js thư viện
 // Dùng đường dẫn CDN để đảm bảo Worker có thể truy cập
-importScripts('https://unpkg.com/chess.js@1.0.0-beta.8/dist/chess.js');
+importScripts('https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js');
 
 // --- 2. Hằng số và PST (Giống như trong script.js)
 const PieceValues = {
