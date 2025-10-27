@@ -30,25 +30,34 @@ function makeBotMoveWorker() {
     
     stopTimer();
 
-    // Xác định độ sâu tìm kiếm
+    // 1. Xác định độ sâu tìm kiếm và thời gian chờ (KHẮC PHỤC LỖI CHỜ 1 GIÂY)
     let searchDepth;
+    let delayTime; 
+    
     if (botLevel <= 3) {
         searchDepth = 1; 
+        delayTime = 100; // Phản hồi gần như ngay lập tức
     } else if (botLevel <= 6) {
         searchDepth = 2; 
+        delayTime = 300; // Độ trễ nhỏ cho hiệu ứng suy nghĩ nhẹ
     } else if (botLevel <= 9) {
         searchDepth = 3; 
+        delayTime = 500; // Độ trễ trung bình cho cảm giác suy nghĩ
     } else {
-        searchDepth = 4; // Độ sâu 4 sẽ không treo nhờ Web Worker
+        searchDepth = 4; // Độ sâu 4 (Level 10)
+        delayTime = 1000; // Giữ 1 giây chờ cho Bot "suy nghĩ sâu"
     }
-    
-    // Gửi thông tin cần thiết đến Worker
-    aiWorker.postMessage({
-        fen: game.fen(),        // Trạng thái bàn cờ hiện tại
-        depth: searchDepth,     // Độ sâu tìm kiếm
-        turn: game.turn(),      // Lượt đi
-        level: botLevel         // Cấp độ bot
-    });
+
+    // 2. Sử dụng setTimeout với thời gian chờ đã tính toán
+    setTimeout(() => {
+        // Gửi thông tin cần thiết đến Worker
+        aiWorker.postMessage({
+            fen: game.fen(),        // Trạng thái bàn cờ hiện tại
+            depth: searchDepth,     // Độ sâu tìm kiếm
+            turn: game.turn(),      // Lượt đi
+            level: botLevel         // Cấp độ bot
+        });
+    }, delayTime); 
 }
 
 // --- Logic Lắng nghe từ Worker ---
@@ -313,8 +322,8 @@ function handleSquareClick(squareName) {
         
         if (result) {
             // --- XỬ LÝ SAU KHI NGƯỜI CHƠI ĐI ---
-            if (!isUnlimitedTime && game.turn() === 'b') { // Giả định người chơi là Trắng
-                whiteTime += timeIncrement; // Cộng thời gian cho người chơi (Trắng)
+            if (!isUnlimitedTime && game.turn() === 'b') { 
+                whiteTime += timeIncrement; 
             }
             
             selectedSquare = null;
@@ -331,7 +340,7 @@ function handleSquareClick(squareName) {
             if (!game.game_over() && game.turn() !== playerColor) {
                 // Khởi động timer cho Bot (nếu có)
                 startTimer();
-                makeBotMoveWorker(); // ĐÃ THAY ĐỔI
+                makeBotMoveWorker(); 
             }
             // ----------------------------------------
         } 
@@ -690,7 +699,7 @@ if (startMatchBtn) {
 
         // Thêm kiểm tra nếu Bot đi trước (người chơi là Đen)
         if (playerColor === 'b' || game.turn() !== playerColor) {
-             makeBotMoveWorker(); // ĐÃ THAY ĐỔI
+             makeBotMoveWorker(); 
         }
     });
 }
