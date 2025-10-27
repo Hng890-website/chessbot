@@ -1,9 +1,7 @@
 // ai-worker.js
 
 // --- 1. Import chess.js thư viện
-// Web Workers không có quyền truy cập vào biến toàn cục như 'Chess()' 
-// nên chúng ta phải import thư viện.
-// Cần đảm bảo file chess.js nằm cùng thư mục hoặc đường dẫn đúng.
+// Dùng đường dẫn CDN để đảm bảo Worker có thể truy cập
 importScripts('https://unpkg.com/chess.js@1.0.0-beta.8/dist/chess.js');
 
 // --- 2. Hằng số và PST (Giống như trong script.js)
@@ -182,13 +180,12 @@ onmessage = function(e) {
     // Xử lý nước đi ngẫu nhiên cho level thấp (Độ sâu 1)
     if (level <= 3) {
         const moves = board.moves({ verbose: true });
-        bestMove = moves[Math.floor(Math.random() * moves.length)];
+        const randomMove = moves[Math.floor(Math.random() * moves.length)];
         
-        // Cần đảm bảo bestMove là đối tượng, không chỉ chuỗi SAN
-        if (typeof bestMove === 'string') {
-             const sanMove = bestMove;
-             bestMove = board.move(sanMove, { verbose: true });
-             board.undo(); // Undo để board trở lại trạng thái ban đầu
+        if (randomMove) {
+             // Cần chuyển từ SAN sang đối tượng move để gửi về
+             bestMove = board.move(randomMove, { verbose: true });
+             board.undo(); 
         }
         
     } else {
