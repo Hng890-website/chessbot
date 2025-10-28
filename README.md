@@ -1,4 +1,4 @@
-Find a world chess with mychess.org! - This is just a test. Uncomplete, but I'm sure it's completed soon.
+Find a world chess with Chess Bot! - This is just a test. Uncomplete, but I'm sure it's completed soon.
 This document outlines the features, architecture, and recent significant enhancements of the Chess Bot application. This project is a single-page web application designed to allow users to engage in a fully functional game of chess against a competitive Bot AI. The core objective of the latest version was to significantly improve the user experience (UX) through a major layout overhaul and the introduction of advanced, user-friendly game analysis tools. The foundation of the Chess Bot lies in its logic and AI capability. The game state is managed robustly using the chess.js library, ensuring adherence to standard chess rules, including complex moves like castling and en passant.
 
 The opposing player is a computer opponent powered by the Negamax search algorithm. Users can customize the opponent's strength by selecting a level between 1 and 10, which corresponds to the AI's search depth, offering a progressively challenging experience.
