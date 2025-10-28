@@ -1,7 +1,7 @@
 // ai-worker.js
 
 // --- 1. Import chess.js thư viện
-// Dùng đường dẫn CDN để đảm bảo Worker có thể truy cập
+// Đã chuyển sang CDN ổn định hơn (cdnjs) để tránh lỗi NetworkError
 importScripts('https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js');
 
 // --- 2. Hằng số và PST (Giống như trong script.js)
