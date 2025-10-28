@@ -17,6 +17,7 @@ let botName = "Bot Level 6";
 // ===========================================
 
 // Khởi tạo Web Worker để chạy logic AI trên luồng nền
+// Đảm bảo file ai-worker.js nằm cùng thư mục
 const aiWorker = new Worker('ai-worker.js'); 
 
 const PieceValues = {
@@ -30,7 +31,7 @@ function makeBotMoveWorker() {
     
     stopTimer();
 
-    // 1. Xác định độ sâu tìm kiếm và thời gian chờ (KHẮC PHỤC LỖI CHỜ 1 GIÂY)
+    // 1. Xác định độ sâu tìm kiếm và thời gian chờ (Đã điều chỉnh theo Level)
     let searchDepth;
     let delayTime; 
     
