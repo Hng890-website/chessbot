@@ -1,204 +1,144 @@
 <!DOCTYPE html>
-<html lang="vi">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chess Bot</title>
+    <title>Chess Bot Game</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.js"></script>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
-<header id="main-header">
-    <h1>Chess Bot</h1>
-</header>
 
-<div class="container">
-    
-    <section id="home-screen" class="screen active">
-        <div class="home-content">
-            <h1>Chào mừng đến với Chess Bot!</h1>
-            <p>Chọn chế độ chơi và sẵn sàng thách đấu với Bot hoặc bạn bè. Bắt đầu ngay!</p>
-            
-            <h2>Chế Độ Đấu Cờ</h2>
-            <div class="menu-options">
-                <button class="play-btn" data-action="open-bot-selection">
-                    Chơi với BOT
-                </button>
-                <button class="rules-btn" data-action="show-rules">
-                    Luật chơi
-                </button>
+    <div class="main-container">
+
+        <header>
+            <h1 id="home-title">Chess Game</h1>
+            <div class="language-selector">
+                <button onclick="switchLanguage('en')" class="lang-btn" data-lang="en">EN</button>
+                <button onclick="switchLanguage('vi')" class="lang-btn" data-lang="vi">VN</button>
             </div>
-            
-            <div class="news">
-                <h2>Tin tức cờ vua mới nhất</h2>
-                <ul>
-                    <li>20/05/2024: Magnus Carlsen thắng giải Norway Chess với phong độ đỉnh cao.</li>
-                    <li>15/05/2024: Giải vô địch cờ vua trẻ Quốc tế khời tranh tại Hà Nội.</li>
-                    <li>10/05/2024: Phân tích nước đi bất ngờ của Garry Kasparov.</li>
-                </ul>
-                <button class="news-btn">Xem thêm</button>
+        </header>
+
+        <div id="home-screen" class="screen active">
+            <h2>Welcome!</h2>
+            <div class="button-group">
+                <button class="play-btn" data-action="open-bot-selection" id="home-play-btn">Play Against Bot</button>
+                <button class="rules-btn" data-action="show-rules" id="home-rules-btn">Rules</button>
+                <button class="news-btn" data-action="show-news" id="home-news-btn">Latest News</button>
             </div>
         </div>
-    </section>
 
-    <section id="play-screen" class="screen">
-        
-        <div class="metrics-and-chat">
-            <div class="metrics">
-                <h3>Thời Gian & Số Liệu</h3>
-                <div class="time-clocks">
-                    <div id="white-clock" class="clock active">
-                        <span class="time-value" id="white-time">00:00</span>
-                        <small>Trắng</small>
-                    </div>
-                    <div id="black-clock" class="clock">
-                        <span class="time-value" id="black-time">00:00</span>
-                        <small>Đen</small>
-                    </div>
-                </div>
-                <div class="stat-item">
-                    <strong>Tổng thời gian:</strong> <span id="total-game-time">00:00</span>
-                </div>
-                <div class="stat-item">
-                    <strong>Tên Bot:</strong> <span id="bot-info-name">Bot Level 6</span>
-                </div>
-            </div>
-            
-            <div class="chat">
-                <h3>Chat Room</h3>
-                <div class="chat-room">
-                    </div>
-                <div class="chat-input-area">
-                    <input type="text" placeholder="Gửi tin nhắn cho Bot..." id="chat-input">
-                    <button class="send-btn">Gửi</button>
-                </div>
-            </div>
-            
-            <button class="news-btn" onclick="showScreen('home')">Quay lại Trang Chủ</button>
+        <div id="rules-screen" class="screen">
+            <h2>Chess Rules</h2>
+            <p>Content about chess rules...</p>
+            <button class="play-btn">Back to Home</button>
         </div>
 
-        
-        <div class="main-game-area">
-            <div class="game-header">
-                <p>Bạn (<span id="player-color-display">Trắng</span>) vs Bot <span id="bot-level-display">Level 6</span> (<span id="bot-color-display">Đen</span>)</p>
-                <h2 id="current-turn-display">Lượt đi: <strong><span class="turn-color white-turn">Trắng</span></strong></h2>
-            </div>
-            
-            <div class="board-and-analysis">
-                <div id="chessboard">
-                    </div>
+        <div id="play-screen" class="screen">
+            <div class="game-area">
                 
-                <div class="move-analysis-panel">
-                    <div class="analysis-header">Bot Level <span id="bot-level-analysis">6</span></div>
-                    
-                    <div class="move-history-list" id="move-history-list">
-                        <div class="move-item-row">
-                            <div class="move-number-col">
-                                <span class="move-number">1.</span>
-                            </div>
-                            <div class="move-detail-col">
-                                <span class="move-white">e4</span>
-                                <div class="move-description">
-                                    <span class="desc-icon">⬆️</span>
-                                    Người chơi đã đi quân tốt lên e4
-                                </div>
-                            </div>
+                <div class="board-wrapper">
+                    <div id="chessboard" class="chessboard">
                         </div>
-                        <p class="no-moves-message" style="display: none;">Chưa có nước đi nào.</p>
+                </div>
+
+                <div class="info-sidebar">
+
+                    <div class="match-info-box">
+                        <div class="player-info bot-side">
+                            <span id="bot-info-name">Bot Level 6</span> 
+                            <span id="bot-level-display">Level 6</span>
+                        </div>
+                        <div id="black-clock" class="clock-display">
+                            <span id="black-time">00:00</span>
+                            (<span id="bot-color-display">Black</span>)
+                        </div>
+                        
+                        <div id="current-turn-display" class="turn-indicator">
+                            Lượt đi: <strong><span class="turn-color white-turn">Trắng</span></strong>
+                        </div>
+                        
+                        <div id="white-clock" class="clock-display active">
+                            <span id="white-time">00:00</span>
+                            (<span id="player-color-display">White</span>)
+                        </div>
+                        <div class="player-info player-side">
+                            <span>You</span>
+                            <span class="bot-level-analysis">Player</span>
+                        </div>
+                    </div>
+
+                    <div class="history-box">
+                        <h3 id="move-history-title">Move History</h3>
+                        <p class="no-moves-message">No moves recorded yet.</p>
+                        <div id="move-history-list" class="move-history-list">
+                            </div>
+                    </div>
+
+                    <div class="chat-box">
+                        <h3 id="chat-title">Chat</h3>
+                        <div class="chat-room">
+                            </div>
+                        <div class="chat-input-area">
+                            <input type="text" id="chat-input" placeholder="Type message...">
+                            <button class="send-btn">Send</button>
+                        </div>
                     </div>
                     
-                    <div class="move-controls">
-                        <button class="control-btn" disabled>&lt;&lt;</button>
-                        <button class="control-btn" disabled>&lt;</button>
-                        <button class="control-btn" disabled>&gt;</button>
-                        <button class="control-btn" disabled>&gt;&gt;</button>
-                    </div>
-                    
-                    <div class="online-status-indicator">
-                        <span class="status-dot online"></span>
-                        <span class="status-text">Bạn (Online)</span>
-                    </div>
+                    <button class="news-btn">Back to Home</button>
                 </div>
             </div>
-            
         </div>
         
-    </section>
+    </div>
 
-    <section id="rules-screen" class="screen">
-        <h2>Luật Chơi Cờ Vua</h2>
-        <p>Cờ vua (tiếng Anh: Chess) là một môn thể thao trí tuệ dành cho hai người chơi, được chơi trên một bàn cờ 8x8 ô vuông xen kẽ. Mỗi người chơi bắt đầu với 16 quân cờ khác nhau (bao gồm Vua, Hậu, Tượng, Mã, Xe, Tốt) và mục tiêu là chiếu hết Vua của đối phương. </p>
-        <p>Vui lòng tham khảo các hướng dẫn cụ thể trên Wikipedia để biết thêm chi tiết về luật cờ vua.</p>
-        <button class="play-btn">Quay lại Trang Chủ</button>
-    </section>
-    
-</div>
-
-<div id="modal-overlay">
-    <div class="modal-content">
-        <button class="close-modal-btn" onclick="toggleModal(false)">&times;</button>
-        <h2>Thiết Lập Trận Đấu (Bot)</h2>
-        
-        <div class="setting-group">
-            <label for="bot-name-new">Đặt tên Bot:</label>
-            <input type="text" id="bot-name-new" placeholder="Tên Bot (Tùy chọn)">
-        </div>
-
-        <div class="setting-group">
-            <label for="time-control-select">Kiểu thời gian:</label>
-            <div class="custom-select-wrapper">
-                 <select id="time-control-select" class="custom-select">
-                    <option value="unlimited" selected>Vô hạn</option>
-                    <option value="5+0">5 phút (Blitz)</option>
-                    <option value="10+0">10 phút (Rapid)</option>
-                    <option value="3+2">3 phút + 2 giây</option>
-                    <option value="custom">Thời gian khác</option>
-                </select>
-                <span class="custom-arrow"></span>
-            </div>
+    <div id="modal-overlay" class="modal-overlay">
+        <div class="modal-content">
+            <h2 id="modal-title">Setup Match</h2>
             
-            <div id="custom-time-input-group" class="setting-group hidden-input">
-                <label for="custom-time-input">Hãy nhập một thời gian tùy chỉnh (phút+giây):</label>
-                <input type="text" id="custom-time-input" placeholder="Ví dụ: 15+10 (15 phút, 10 giây cộng thêm)">
-                <small class="help-text">Định dạng: **Phút+Giây** (ví dụ: 5+3) hoặc **Chỉ Phút** (ví dụ: 15+0)</small>
-            </div>
-        </div>
+            <label id="bot-name-label" for="bot-name-new">Bot Name:</label>
+            <input type="text" id="bot-name-new" value="ChessBot" maxlength="20">
 
-        <div class="setting-group level-selection-group">
-            <label>Cấp độ:</label>
-            <div class="selection-buttons level-1-10-grid" id="level-selection">
+            <label id="bot-level-label">Bot Level:</label>
+            <div id="level-selection" class="level-selection">
                 <button class="level-btn" data-level="1">1</button>
-                <button class="level-btn" data-level="2">2</button>
                 <button class="level-btn" data-level="3">3</button>
-                <button class="level-btn" data-level="4">4</button>
-                <button class="level-btn" data-level="5">5</button>
                 <button class="level-btn active" data-level="6">6</button>
-                <button class="level-btn" data-level="7">7</button>
                 <button class="level-btn" data-level="8">8</button>
-                <button class="level-btn" data-level="9">9</button>
-                <button class="level-btn" data-level="10">10</button>
+                <button class="level-btn" data-level="10">10 (Hard)</button>
+            </div>
+            
+            <label id="time-control-label" for="time-control-select">Time Control:</label>
+            <select id="time-control-select">
+                <option value="unlimited" id="unlimited-option">Unlimited</option>
+                <option value="10+0">10 min</option>
+                <option value="5+3">5 min + 3 sec</option>
+                <option value="3+0">3 min</option>
+                <option value="custom" id="custom-option">Custom (Min + Inc)</option>
+            </select>
+            
+            <div id="custom-time-input-group" class="custom-time-input-group">
+                <input type="text" id="custom-time-input" placeholder="e.g., 15+10">
+            </div>
+
+            <div class="modal-actions">
+                <button id="start-match-btn">Start Match</button>
+                <button class="close-modal-btn">Close</button>
             </div>
         </div>
-        
-        <button id="start-match-btn">Bắt đầu!</button>
     </div>
-</div>
 
-<div id="time-widget">
-    <div class="draggable-header">
-        <div class="time-header">Thời gian bây giờ?</div>
-        <button class="close-widget-btn" onclick="document.getElementById('time-widget').style.display='none';">&times;</button>
+    <div id="time-widget" class="time-widget">
+        <div class="draggable-header">
+            <span class="close-widget-btn">&times;</span>
+        </div>
+        <div class="time-content">
+            <p id="current-hour-display">Time: 10:25 PM</p>
+            <p id="current-date-display">Date: 28/10/2025</p>
+            <p>Total Game Time: <span id="total-game-time">00:00</span></p>
+        </div>
     </div>
-    
-    <div class="time-content">
-        <div id="current-hour-display">Giờ: 12:00 AM</div>
-        <div id="current-date-display">Ngày: 1/1/2000</div>
-    </div>
-    <button class="time-setting-btn" onclick="alert('Chức năng chỉnh sửa định dạng đang được phát triển.')">Chỉnh sửa định dạng ngày</button>
-</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
-<script src="script.js"></script>
-
+    <script src="script.js"></script>
 </body>
 </html>
