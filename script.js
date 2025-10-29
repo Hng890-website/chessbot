@@ -1,4 +1,187 @@
 // ===========================================
+// NGÔN NGỮ & DỊCH THUẬT
+// ===========================================
+
+let currentLanguage = 'en'; // Mặc định là Tiếng Anh
+
+const translations = {
+    en: {
+        // HOME SCREEN
+        'home.title': 'Chess Game',
+        'home.play_btn': 'Play Against Bot',
+        'home.rules_btn': 'Rules',
+        'home.news_btn': 'Latest News',
+        
+        // MODAL/SETUP
+        'modal.title': 'Setup Match',
+        'modal.bot_name': 'Bot Name:',
+        'modal.level': 'Bot Level:',
+        'modal.time_control': 'Time Control:',
+        'modal.unlimited': 'Unlimited',
+        'modal.custom': 'Custom (Min + Inc)',
+        'modal.start': 'Start Match',
+        'modal.close': 'Close',
+        'modal.alert_time_format': 'Invalid time format. Use MIN+INC (e.g., 10+5).',
+        'modal.alert_time_required': 'Invalid time. Please enter time > 0.',
+        'modal.color_player': 'You Play:',
+        'modal.color_bot': 'Bot Plays:',
+
+        // GAME SCREEN
+        'game.turn': 'Turn:',
+        'game.white': 'White',
+        'game.black': 'Black',
+        'game.moves': 'Move History',
+        'game.no_moves': 'No moves recorded yet.',
+        'game.chat_title': 'Chat',
+        'game.chat_input': 'Type message...',
+        'game.chat_send': 'Send',
+        'game.system': 'System',
+        'game.checkmate_win': 'Checkmate! {winner} wins.',
+        'game.draw': 'Draw!',
+        'game.timeout_loss': 'Time out! {loser} loses.',
+        'game.not_your_turn': 'Not your turn.',
+        'game.invalid_move': 'Invalid move.',
+        'game.bot_thinking_error': 'Bot failed to find a valid move. Game Over.',
+        'game.promo_prompt': "Pawn promotion! Choose piece:\nQ - Queen\nR - Rook\nB - Bishop\nN - Knight\n(Default: Q)",
+        'chat.welcome': 'Welcome, I am {name}! Have a good game!',
+        'chat.response_learning': 'I appreciate your feedback. I am still learning!',
+        'chat.response_greeting': 'Hello! Wish you a good match.',
+        'chat.response_lose': 'I will try harder next time!',
+        'chat.response_focus': 'I apologize, I am focused on the game right now.',
+        
+        // WIDGET
+        'widget.hour': 'Time:',
+        'widget.date': 'Date:',
+        
+        // MOVE DESCRIPTION (Sử dụng trong createMoveDescription)
+        'move.p': 'Pawn', 'move.n': 'Knight', 'move.b': 'Bishop', 
+        'move.r': 'Rook', 'move.q': 'Queen', 'move.k': 'King',
+        'move.you': 'You', 'move.bot': 'Bot',
+        'move.action_capture': 'captured piece at {to}',
+        'move.action_move': 'moved to {to}',
+        'move.desc_template': '{player} moved {piece} {action}',
+    },
+    
+    vi: {
+        // HOME SCREEN
+        'home.title': 'Game Cờ Vua',
+        'home.play_btn': 'Chơi với Bot',
+        'home.rules_btn': 'Luật chơi',
+        'home.news_btn': 'Tin tức mới',
+        
+        // MODAL/SETUP
+        'modal.title': 'Thiết lập trận đấu',
+        'modal.bot_name': 'Tên Bot:',
+        'modal.level': 'Cấp độ Bot:',
+        'modal.time_control': 'Kiểm soát thời gian:',
+        'modal.unlimited': 'Không giới hạn',
+        'modal.custom': 'Tùy chỉnh (Phút + Giây)',
+        'modal.start': 'Bắt đầu',
+        'modal.close': 'Đóng',
+        'modal.alert_time_format': 'Định dạng thời gian không hợp lệ. Vui lòng sử dụng PHÚT+GIÂY (ví dụ: 10+5).',
+        'modal.alert_time_required': 'Thời gian không hợp lệ. Vui lòng nhập thời gian lớn hơn 0.',
+        'modal.color_player': 'Bạn chơi:',
+        'modal.color_bot': 'Bot chơi:',
+        
+        // GAME SCREEN
+        'game.turn': 'Lượt đi:',
+        'game.white': 'Trắng',
+        'game.black': 'Đen',
+        'game.moves': 'Lịch sử nước đi',
+        'game.no_moves': 'Chưa có nước đi nào được ghi lại.',
+        'game.chat_title': 'Phòng Chat',
+        'game.chat_input': 'Nhập tin nhắn...',
+        'game.chat_send': 'Gửi',
+        'game.system': 'Hệ thống',
+        'game.checkmate_win': 'Chiếu hết! {winner} thắng.',
+        'game.draw': 'Hòa!',
+        'game.timeout_loss': 'Hết giờ! {loser} thua.',
+        'game.not_your_turn': 'Không phải lượt của bạn.',
+        'game.invalid_move': 'Nước đi không hợp lệ.',
+        'game.bot_thinking_error': 'Bot không tìm thấy nước đi hợp lệ. Game Over.',
+        'game.promo_prompt': "Tốt được phong cấp! Hãy chọn loại quân:\nQ - Hậu\nR - Xe\nB - Tượng\nN - Mã\n(Mặc định: Q)",
+        'chat.welcome': 'Chào mừng, tôi là {name}! Chúc bạn một trận đấu hay!',
+        'chat.response_learning': 'Tôi biết ơn những phản hồi của bạn. Tôi vẫn đang học hỏi!',
+        'chat.response_greeting': 'Xin chào! Chúc bạn một trận đấu tốt.',
+        'chat.response_lose': 'Tôi sẽ cố gắng hơn trong trận sau!',
+        'chat.response_focus': 'Tôi xin lỗi, tôi chỉ tập trung vào ván cờ lúc này.',
+
+        // WIDGET
+        'widget.hour': 'Giờ:',
+        'widget.date': 'Ngày:',
+        
+        // MOVE DESCRIPTION (Sử dụng trong createMoveDescription)
+        'move.p': 'quân tốt', 'move.n': 'quân mã', 'move.b': 'quân tượng', 
+        'move.r': 'quân xe', 'move.q': 'quân hậu', 'move.k': 'quân vua',
+        'move.you': 'Bạn', 'move.bot': 'Bot',
+        'move.action_capture': 'bắt quân tại {to}',
+        'move.action_move': 'đi lên {to}',
+        'move.desc_template': '{player} đã đi {piece} {action}',
+    }
+};
+
+// Hàm dịch thuật chính
+function translate(key, replacements = {}) {
+    let text = translations[currentLanguage][key] || translations['en'][key] || `MISSING_KEY:${key}`;
+    
+    // Thay thế placeholders (ví dụ: {winner})
+    for (const [placeholder, value] of Object.entries(replacements)) {
+        text = text.replace(new RegExp(`\\{${placeholder}\\}`, 'g'), value);
+    }
+    
+    return text;
+}
+
+function switchLanguage(lang) {
+    if (!translations[lang]) return;
+    currentLanguage = lang;
+    
+    // Lưu ngôn ngữ vào localStorage 
+    localStorage.setItem('gameLanguage', lang);
+    
+    applyTranslations();
+    
+    // Đánh dấu nút ngôn ngữ đang hoạt động
+    document.querySelectorAll('.lang-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.lang === lang);
+    });
+}
+
+function applyTranslations() {
+    // HOME SCREEN
+    document.getElementById('home-title')?.textContent = translate('home.title');
+    document.getElementById('home-play-btn')?.textContent = translate('home.play_btn');
+    document.getElementById('home-rules-btn')?.textContent = translate('home.rules_btn');
+    document.getElementById('home-news-btn')?.textContent = translate('home.news_btn');
+
+    // MODAL
+    document.getElementById('modal-title')?.textContent = translate('modal.title');
+    document.getElementById('bot-name-label')?.textContent = translate('modal.bot_name');
+    document.getElementById('bot-level-label')?.textContent = translate('modal.level');
+    document.getElementById('time-control-label')?.textContent = translate('modal.time_control');
+    document.getElementById('unlimited-option')?.textContent = translate('modal.unlimited');
+    document.getElementById('custom-option')?.textContent = translate('modal.custom');
+    document.getElementById('start-match-btn')?.textContent = translate('modal.start');
+    document.querySelector('.close-modal-btn')?.textContent = translate('modal.close');
+    document.getElementById('player-color-label')?.textContent = translate('modal.color_player');
+    document.getElementById('bot-color-label')?.textContent = translate('modal.color_bot');
+
+    // PLAY SCREEN
+    document.getElementById('move-history-title')?.textContent = translate('game.moves');
+    document.querySelector('.no-moves-message')?.textContent = translate('game.no_moves');
+    document.getElementById('chat-title')?.textContent = translate('game.chat_title');
+    document.getElementById('chat-input')?.setAttribute('placeholder', translate('game.chat_input'));
+    document.querySelector('.send-btn')?.textContent = translate('game.chat_send');
+    document.querySelector('#play-screen .news-btn')?.textContent = translate('home.play_btn'); // Nút "Back to Home"
+    
+    // WIDGET
+    updateCurrentTime(); 
+    
+    // Cập nhật các hiển thị động
+    updateTurnDisplay();
+}
+
+// ===========================================
 // SETUP CƠ BẢN
 // ===========================================
 
@@ -17,7 +200,6 @@ let botName = "Bot Level 6";
 // ===========================================
 
 // Khởi tạo Web Worker để chạy logic AI trên luồng nền
-// Đảm bảo file ai-worker.js nằm cùng thư mục
 const aiWorker = new Worker('ai-worker.js'); 
 
 const PieceValues = {
@@ -53,10 +235,10 @@ function makeBotMoveWorker() {
     setTimeout(() => {
         // Gửi thông tin cần thiết đến Worker
         aiWorker.postMessage({
-            fen: game.fen(),        // Trạng thái bàn cờ hiện tại
-            depth: searchDepth,     // Độ sâu tìm kiếm
-            turn: game.turn(),      // Lượt đi
-            level: botLevel         // Cấp độ bot
+            fen: game.fen(),        
+            depth: searchDepth,     
+            turn: game.turn(),      
+            level: botLevel         
         });
     }, delayTime); 
 }
@@ -87,11 +269,10 @@ aiWorker.onmessage = function(e) {
             }
         }
     } else {
-        addChatMessage("Hệ thống", "Bot không tìm thấy nước đi hợp lệ. Game Over.");
+        addChatMessage(translate('game.system'), translate('game.bot_thinking_error'));
     }
 };
 
-// Hàm makeBotMove() chỉ là một wrapper để giữ lại các lời gọi cũ
 function makeBotMove() {
     makeBotMoveWorker();
 }
@@ -150,14 +331,16 @@ function startTimer() {
                 whiteTime--;
                 if (whiteTime <= 0) {
                     clearInterval(timerInterval);
-                    addChatMessage("Hệ thống", "Hết giờ! Trắng thua.");
+                    const whiteText = translate('game.white');
+                    addChatMessage(translate('game.system'), translate('game.timeout_loss', { loser: whiteText }));
                     checkGameState(); 
                 }
             } else {
                 blackTime--;
                 if (blackTime <= 0) {
                     clearInterval(timerInterval);
-                    addChatMessage("Hệ thống", "Hết giờ! Đen thua.");
+                    const blackText = translate('game.black');
+                    addChatMessage(translate('game.system'), translate('game.timeout_loss', { loser: blackText }));
                     checkGameState();
                 }
             }
@@ -255,18 +438,19 @@ function findKingSquare(color) {
 
 function updateTurnDisplay() {
     currentTurn = game.turn();
-    const turnColor = currentTurn === 'w' ? 'Trắng' : 'Đen';
+    const turnColorKey = currentTurn === 'w' ? 'game.white' : 'game.black';
+    const turnColorText = translate(turnColorKey);
     const turnClass = currentTurn === 'w' ? 'white-turn' : 'black-turn';
     
     if (currentTurnDisplay) {
-        currentTurnDisplay.innerHTML = `Lượt đi: <strong><span class="turn-color ${turnClass}">${turnColor}</span></strong>`;
+        currentTurnDisplay.innerHTML = `${translate('game.turn')} <strong><span class="turn-color ${turnClass}">${turnColorText}</span></strong>`;
     }
 }
 
 
 function handleSquareClick(squareName) {
     if (game.turn() !== playerColor) {
-        addChatMessage("Hệ thống", "Không phải lượt của bạn.");
+        addChatMessage(translate('game.system'), translate('game.not_your_turn'));
         return;
     }
     
@@ -292,14 +476,7 @@ function handleSquareClick(squareName) {
             (playerColor === 'b' && moveTo.includes('1')));
 
         if (isPromotion) {
-            let choice = prompt(
-                "Tốt được phong cấp! Hãy chọn loại quân:\n" +
-                "Q - Hậu (Queen)\n" +
-                "R - Xe (Rook)\n" +
-                "B - Tượng (Bishop)\n" +
-                "N - Mã (Knight)\n" +
-                "(Mặc định: Q)", 'Q'
-            );
+            let choice = prompt(translate('game.promo_prompt'), 'Q');
             
             choice = choice ? choice.toLowerCase() : 'q';
             if (['q', 'r', 'b', 'n'].includes(choice)) {
@@ -334,7 +511,7 @@ function handleSquareClick(squareName) {
             updateMoveHistory(result); 
             checkGameState();
             
-            // 1. DỪNG TIMER CỦA NGƯỜI CHƠI
+            // 1. DỪNG TIMER CỦA NGƯỜI CHƠY
             stopTimer(); 
             
             // 2. GỌI HÀM ĐI CỦA BOT NẾU LÀ LƯỢT CỦA BOT
@@ -355,7 +532,7 @@ function handleSquareClick(squareName) {
             // Nước đi không hợp lệ và không click vào quân cờ cùng màu
             selectedSquare = null;
             renderBoard(); 
-            addChatMessage("Hệ thống", "Nước đi không hợp lệ.");
+            addChatMessage(translate('game.system'), translate('game.invalid_move'));
         }
     }
 }
@@ -375,10 +552,11 @@ function checkGameState() {
     if (game.game_over()) {
         stopTimer();
         if (game.in_checkmate()) {
-            const winner = game.turn() === 'w' ? 'Đen' : 'Trắng';
-            addChatMessage("Hệ thống", `Chiếu hết! ${winner} thắng.`);
+            const winnerKey = game.turn() === 'w' ? 'game.black' : 'game.white';
+            const winnerText = translate(winnerKey);
+            addChatMessage(translate('game.system'), translate('game.checkmate_win', { winner: winnerText }));
         } else {
-            addChatMessage("Hệ thống", "Hòa!");
+            addChatMessage(translate('game.system'), translate('game.draw'));
         }
     }
 }
@@ -392,15 +570,25 @@ const moveHistoryListEl = document.getElementById('move-history-list');
 // Hàm tạo mô tả đơn giản
 function createMoveDescription(move) {
     const pieceMap = {
-        'p': 'quân tốt', 'n': 'quân mã', 'b': 'quân tượng', 
-        'r': 'quân xe', 'q': 'quân hậu', 'k': 'quân vua'
+        'p': translate('move.p'), 'n': translate('move.n'), 'b': translate('move.b'), 
+        'r': translate('move.r'), 'q': translate('move.q'), 'k': translate('move.k')
     };
-    const pieceName = pieceMap[move.piece] || 'quân cờ';
-    const action = move.captured ? `bắt quân tại ${move.to}` : `đi lên ${move.to}`;
+    
+    const playerText = move.color === playerColor ? translate('move.you') : translate('move.bot');
+    const pieceName = pieceMap[move.piece] || translate('move.p'); // Fallback to pawn
+    
+    const actionKey = move.captured ? 'move.action_capture' : 'move.action_move';
+    const actionText = translate(actionKey, { to: move.to });
     const icon = move.captured ? '💥' : '⬆️';
     
+    const text = translate('move.desc_template', {
+        player: playerText,
+        piece: pieceName,
+        action: actionText
+    });
+    
     return {
-        text: `${move.color === playerColor ? 'Bạn' : 'Bot'} đã đi ${pieceName} ${action}`,
+        text: text,
         icon: icon
     };
 }
@@ -417,8 +605,8 @@ function updateMoveHistory(newMove = null) {
     
     if (noMovesMessageEl) {
         noMovesMessageEl.style.display = history.length === 0 ? 'block' : 'none';
+        noMovesMessageEl.textContent = translate('game.no_moves');
     }
-
 
     if (history.length === 0 || !moveHistoryListEl) return;
 
@@ -516,7 +704,7 @@ function addChatMessage(sender, message) {
     
     senderSpan.textContent = sender + ": ";
     
-    if (sender === botName || sender === 'Hệ thống') {
+    if (sender === botName || sender === translate('game.system')) {
         senderSpan.classList.add('bot-message');
     }
     
@@ -531,7 +719,7 @@ if (sendButton && chatInput) {
     sendButton.addEventListener('click', () => {
         const message = chatInput.value.trim();
         if (message !== "") {
-            addChatMessage("Bạn", message);
+            addChatMessage(translate('move.you'), message);
             chatInput.value = '';
             
             setTimeout(() => {
@@ -551,16 +739,16 @@ if (sendButton && chatInput) {
 
 function simpleBotResponse(message) {
     message = message.toLowerCase();
-    if (message.includes('thông minh') || message.includes('ngốc')) {
-        return "Tôi biết ơn những phản hồi của bạn. Tôi vẫn đang học hỏi!";
+    if (message.includes('thông minh') || message.includes('ngốc') || message.includes('smart') || message.includes('dumb')) {
+        return translate('chat.response_learning');
     }
-    if (message.includes('xin chào')) {
-        return "Xin chào! Chúc bạn một trận đấu tốt.";
+    if (message.includes('xin chào') || message.includes('hello') || message.includes('hi')) {
+        return translate('chat.response_greeting');
     }
-    if (message.includes('thua')) {
-        return "Tôi sẽ cố gắng hơn trong trận sau!";
+    if (message.includes('thua') || message.includes('lose') || message.includes('chắc') || message.includes('sure')) {
+        return translate('chat.response_lose');
     }
-    return "Tôi xin lỗi, tôi chỉ tập trung vào ván cờ lúc này.";
+    return translate('chat.response_focus');
 }
 
 
@@ -620,7 +808,7 @@ function setTimeControl(value) {
     if (value === 'custom') {
         timeString = customTimeInput?.value.trim() || '';
         if (!timeString) {
-             alert("Vui lòng nhập thời gian tùy chỉnh (ví dụ: 15+10) hoặc chọn một kiểu thời gian khác.");
+             alert(translate('modal.alert_time_format'));
              return false;
         }
     }
@@ -637,7 +825,7 @@ function setTimeControl(value) {
     }
 
     if (isNaN(minutes) || isNaN(increment) || minutes < 0 || increment < 0) {
-        alert("Định dạng thời gian không hợp lệ. Vui lòng sử dụng định dạng PHÚT+GIÂY (ví dụ: 10+5).");
+        alert(translate('modal.alert_time_format'));
         return false;
     }
 
@@ -646,7 +834,7 @@ function setTimeControl(value) {
     timeIncrement = increment;
     
     if (whiteTime === 0 && timeIncrement === 0 && !isUnlimitedTime) {
-        alert("Thời gian không hợp lệ. Vui lòng nhập thời gian lớn hơn 0.");
+        alert(translate('modal.alert_time_required'));
         return false;
     }
     
@@ -691,12 +879,12 @@ if (startMatchBtn) {
 
         if (botInfoNameEl) botInfoNameEl.textContent = botName;
         if (botLevelDisplayEl) botLevelDisplayEl.textContent = `Level ${botLevel}`;
-        if (playerColorDisplayEl) playerColorDisplayEl.textContent = 'Trắng';
-        if (botColorDisplayEl) botColorDisplayEl.textContent = 'Đen';
+        if (playerColorDisplayEl) playerColorDisplayEl.textContent = translate('game.white');
+        if (botColorDisplayEl) botColorDisplayEl.textContent = translate('game.black');
         
         startTimer();
         
-        addChatMessage(botName, `Chào mừng, tôi là ${botName}! Chúc bạn một trận đấu hay!`);
+        addChatMessage(botName, translate('chat.welcome', { name: botName }));
 
         // Thêm kiểm tra nếu Bot đi trước (người chơi là Đen)
         if (playerColor === 'b' || game.turn() !== playerColor) {
@@ -734,13 +922,13 @@ function updateCurrentTime() {
     const ampm = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour % 12 || 12; 
 
-    const timeString = `Giờ: ${displayHour}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
+    const timeString = `${translate('widget.hour')} ${displayHour}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
     
     const day = now.getDate();
     const month = now.getMonth() + 1; 
     const year = now.getFullYear();
     
-    const dateString = `Ngày: ${day}/${month}/${year}`;
+    const dateString = `${translate('widget.date')} ${day}/${month}/${year}`;
 
     const hourEl = document.getElementById('current-hour-display');
     const dateEl = document.getElementById('current-date-display');
@@ -851,6 +1039,9 @@ function showScreen(screenId) {
 }
 
 // Khởi tạo trạng thái ban đầu
+const savedLang = localStorage.getItem('gameLanguage') || 'en';
+switchLanguage(savedLang); 
+
 showScreen('home');
 setupBoard();
 setTimeControl('unlimited'); 
