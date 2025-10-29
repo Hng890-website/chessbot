@@ -1,740 +1,523 @@
-/* ==================================== */
-/* 1. GLOBAL RESET & LAYOUT */
-/* ==================================== */
-
-:root {
-    --color-dark-orange: #ff8c00; 
-    --color-modal-accent: #e96700; 
-    --color-light-square: #f0d9b5;
-    --color-dark-square: #b58863;
-    --color-board-border: #4a4a4a;
-    --color-primary: #007bff;
-    --color-danger: #dc3545;
-    --square-size: 60px;
-    --border-radius: 8px;
-    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    --analysis-panel-width: 250px; /* Kích thước cho bảng phân tích */
-    --main-area-width: 480px; /* Kích thước bàn cờ */
-}
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
+/* =========================================== */
+/* CẤU TRÚC CHUNG VÀ FONT */
+/* =========================================== */
 
 body {
-    font-family: var(--font-family);
-    background-color: #e9e9e9;
-    color: #333;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #2e2e2e;
+    color: #f0f0f0;
     display: flex;
     flex-direction: column;
-    align-items: center; 
+    align-items: center;
     min-height: 100vh;
-    overflow-x: hidden;
 }
 
-#main-header {
-    width: 100%;
-    background-color: var(--color-dark-orange); 
-    color: white;
-    padding: 15px 0;
-    text-align: center;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    margin-bottom: 20px; 
-}
-
-#main-header h1 {
-    font-size: 1.8em;
-    font-weight: bold;
-    margin: 0;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
-}
-
-.container {
+header {
+    width: 90%;
+    max-width: 1200px;
     display: flex;
-    max-width: 1400px;
-    width: 95%;
-    background-color: white;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    border-radius: var(--border-radius);
-    overflow: hidden;
-    min-height: 500px; 
-    flex-grow: 1; 
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 2px solid #444;
 }
 
-/* ==================================== */
-/* 2. SCREEN MANAGEMENT & HOME SCREEN */
-/* ==================================== */
+h1 {
+    font-size: 2.5em;
+    color: #4CAF50;
+    margin: 0;
+}
+
+.main-container {
+    width: 90%;
+    max-width: 1200px;
+    padding: 20px 0;
+    flex-grow: 1;
+}
+
+/* =========================================== */
+/* BỐ CỤC MÀN HÌNH (SCREEN MANAGEMENT) */
+/* =========================================== */
 
 .screen {
-    width: 100%;
-    display: none !important; 
+    display: none;
     padding: 20px;
-    flex-direction: column; 
-    align-items: flex-start;
+    border-radius: 8px;
+    background-color: #383838;
+    margin-top: 20px;
 }
 
 .screen.active {
-    display: flex !important;
+    display: block;
 }
 
 #home-screen, #rules-screen {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
     text-align: center;
-    padding: 20px;
-}
-.home-content {
-    max-width: 600px;
-    padding: 20px;
-}
-.menu-options button {
-    margin: 10px;
-    padding: 10px 20px;
-    font-size: 1.1em;
 }
 
-/* ==================================== */
-/* 3. PLAY SCREEN LAYOUT (Hai cột chính ĐÃ ĐẢO VỊ TRÍ CHUẨN) */
-/* ==================================== */
-
-#play-screen.active {
-    /* Chia làm 2 cột: Cột 1 cho Metrics/Chat, Cột 2 cho Board/Analysis */
-    display: grid !important; 
-    grid-template-columns: 1.2fr 2fr; /* Metrics/Chat nhỏ hơn Board/Analysis */
+#play-screen {
+    display: flex;
     gap: 20px;
-    align-items: flex-start; 
-    padding: 20px; 
+    align-items: flex-start;
 }
 
-/* Container Metrics và Chat (Cột 1: BÊN TRÁI) */
-.metrics-and-chat {
+.game-area {
+    display: flex;
     width: 100%;
-    display: flex;
-    flex-direction: column;
+    gap: 20px;
+    justify-content: center;
+    align-items: flex-start;
 }
 
-/* Container mới cho Bàn cờ và Bảng phân tích (Cột 2: BÊN PHẢI) */
-.main-game-area {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start; /* Sắp xếp các thành phần con ở góc trái */
+/* =========================================== */
+/* BÀN CỜ VUA (CHESSBOARD) */
+/* =========================================== */
+
+.board-wrapper {
+    flex-shrink: 0;
     width: 100%;
+    max-width: 600px; 
+    aspect-ratio: 1 / 1; 
 }
 
-.game-header {
-    width: var(--main-area-width); /* Giới hạn chiều rộng bằng bàn cờ */
-    text-align: left;
-    margin-bottom: 15px;
-}
-.game-header h2 {
-    font-size: 1.5em;
-    margin-top: 5px;
-}
-
-
-/* Bàn cờ và Bảng giải thích nước đi nằm cạnh nhau */
-.board-and-analysis {
-    display: flex;
-    gap: 15px; 
-    align-items: flex-start; 
-}
-
-
-/* ==================================== */
-/* 4. CHESSBOARD STYLES */
-/* ==================================== */
-
-#chessboard {
-    width: var(--main-area-width); 
-    height: var(--main-area-width);
+.chessboard {
     display: grid;
-    grid-template-columns: repeat(8, 1fr); 
+    grid-template-columns: repeat(8, 1fr);
     grid-template-rows: repeat(8, 1fr);
-    border: 5px solid var(--color-board-border);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-    position: relative;
-    font-family: 'Arial Unicode MS', 'Segoe UI Symbol', 'Noto Sans Symbols', sans-serif;
-    line-height: 1; 
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    border: 5px solid #444;
 }
 
 .square {
-    width: auto; 
-    height: auto;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 55px; 
+    font-size: 3em; 
     cursor: pointer;
     user-select: none;
-    position: relative;
-    transition: background-color 0.1s;
 }
 
-.square.light {
-    background-color: var(--color-light-square);
+.light {
+    background-color: #b3c2d4; 
 }
 
-.square.dark {
-    background-color: var(--color-dark-square);
+.dark {
+    background-color: #7792b0; 
 }
 
+/* Hiệu ứng quân cờ và nước đi */
 .piece-white {
-    color: white;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
+    color: #fff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 .piece-black {
-    color: black;
-    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.4);
+    color: #000;
+    text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.7);
 }
 
-.square span {
-    line-height: 1; 
-    transition: transform 0.2s ease-out, box-shadow 0.2s, filter 0.2s; 
-    position: relative;
-    z-index: 2;
-    pointer-events: none; 
-}
-
-
-.board-flipped {
-    transform: rotate(180deg);
-}
-
-.board-flipped .square span {
-    transform: rotate(180deg);
-}
-
-
-/* HIGHLIGHTS & CHECK GLOW */
 .square.selected {
-    background-color: rgba(255, 255, 0, 0.4) !important; 
+    box-shadow: inset 0 0 0 4px #FFD700; 
 }
 
-.highlight-move {
-    /* Đánh dấu điểm đến */
-    position: relative;
-}
-.highlight-move:after {
-    content: '';
-    position: absolute;
-    width: 30%;
-    height: 30%;
-    border-radius: 50%;
-    background-color: rgba(0, 0, 0, 0.3);
-    pointer-events: none;
+.square.highlight-move {
+    background-color: rgba(255, 255, 0, 0.5);
+    box-shadow: inset 0 0 0 3px #1E90FF;
 }
 
 .square.king-in-check {
-    background-color: var(--color-danger) !important;
-    box-shadow: inset 0 0 15px rgba(255, 0, 0, 0.8);
+    background-color: #f44336 !important; 
 }
 
+/* =========================================== */
+/* CỘT THÔNG TIN BÊN (SIDEBAR) */
+/* =========================================== */
 
-/* ==================================== */
-/* 5. METRICS & CHAT (Cột 1: BÊN TRÁI) */
-/* ==================================== */
-
-.metrics, .chat {
-    margin-bottom: 20px;
-    padding: 15px;
-    border: 1px solid #e0e0e0;
-    border-radius: var(--border-radius);
-    background-color: white;
-}
-
-.metrics h3, .chat h3 {
-    margin-bottom: 15px;
-    border-bottom: 2px solid var(--color-primary);
-    padding-bottom: 5px;
-    color: #333;
-}
-.metrics h3 {
-    border-bottom-color: #555; /* Đặt màu phân biệt cho tiêu đề */
-}
-
-.time-clocks {
+.info-sidebar {
+    width: 350px; 
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.clock {
-    flex: 1;
+.match-info-box {
+    background-color: #444;
+    padding: 10px;
+    border-radius: 6px;
     text-align: center;
-    padding: 15px 5px; /* Tăng padding để trông lớn hơn */
-    border: 2px solid #ccc;
-    border-radius: 4px;
-    transition: border-color 0.3s, background-color 0.3s;
-    margin: 0 5px;
-    min-height: 80px;
     display: flex;
     flex-direction: column;
-    justify-content: center;
-}
-#white-clock { margin-left: 0; }
-#black-clock { margin-right: 0; }
-
-.clock.active {
-    border-color: var(--color-primary);
-    background-color: #e6f0ff;
+    border: 1px solid #555;
 }
 
-.clock.low-time {
-    background-color: #ffdddd;
-    border-color: var(--color-danger);
-}
-
-.time-value {
-    font-size: 1.8em;
-    font-weight: bold;
-    display: block;
-}
-.clock small {
-    font-size: 0.9em;
-    color: #666;
-    margin-top: 5px;
-}
-
-.stat-item {
-    margin-bottom: 8px;
-    font-size: 1em;
-}
-
-/* Chat */
-.chat-room {
-    height: 250px; 
-    overflow-y: auto;
-    border: 1px solid #ddd;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 4px;
-    background-color: #fcfcfc;
-    display: flex;
-    flex-direction: column-reverse; 
-}
-.chat-room p {
-    margin-bottom: 5px;
-    line-height: 1.4;
-    font-size: 0.9em;
-}
-.bot-message {
-    color: #007bff;
-    font-weight: bold;
-}
-.chat-input-area {
-    display: flex;
-    padding-top: 10px;
-}
-.chat-input-area input {
-    flex-grow: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px 0 0 4px;
-    font-size: 1em;
-}
-.chat-input-area .send-btn {
-    background-color: var(--color-primary);
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    border-radius: 0 4px 4px 0;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-.chat-input-area .send-btn:hover {
-    background-color: #0056b3;
-}
-
-
-/* ==================================== */
-/* 6. MOVE ANALYSIS PANEL (ĐÃ CẬP NHẬT STYLE VÀ BỐ CỤC) */
-/* ==================================== */
-
-.move-analysis-panel {
-    width: var(--analysis-panel-width); 
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: var(--border-radius);
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    height: var(--main-area-width); /* Cố định chiều cao bằng bàn cờ */
-}
-
-.analysis-header {
+.player-info {
     font-weight: bold;
     font-size: 1.1em;
-    text-align: center;
-    padding-bottom: 5px;
-    margin-bottom: 10px;
-    border-bottom: 2px solid var(--color-dark-orange);
+    padding: 5px 0;
+}
+
+.clock-display {
+    padding: 5px;
+    font-size: 1.2em;
+    font-weight: bold;
+    background-color: #555;
+    margin: 5px 0;
+    border-radius: 4px;
+    transition: background-color 0.3s;
+}
+
+.clock-display.active {
+    background-color: #66bb6a;
+    color: #1a1a1a;
+}
+
+.turn-indicator {
+    padding: 10px 0;
+    font-size: 1.1em;
+    margin: 10px 0;
+    border-top: 1px solid #555;
+    border-bottom: 1px solid #555;
+}
+
+.turn-color.white-turn { color: #fff; }
+.turn-color.black-turn { color: #000; }
+
+.clock-display.low-time {
+    background-color: #ff9800 !important;
+    animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+    50% { opacity: 0.5; }
+}
+
+/* =========================================== */
+/* LỊCH SỬ NƯỚC ĐI (MOVE HISTORY) */
+/* =========================================== */
+
+.history-box {
+    background-color: #444;
+    padding: 10px;
+    border-radius: 6px;
+    height: 250px;
+    overflow-y: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .move-history-list {
     flex-grow: 1;
     overflow-y: auto;
-    padding: 5px;
-    font-size: 0.9em;
-    display: flex;
-    flex-direction: column; 
-    gap: 5px;
-    align-content: flex-start;
+    padding-right: 5px; /* Khoảng cách cho scrollbar */
 }
 
-.no-moves-message {
-    color: #999;
-    text-align: center;
-    margin: 20px auto;
-    width: 100%;
-}
-
-/* Style cho từng hàng nước đi */
 .move-item-row {
-    display: flex;
-    align-items: flex-start;
-    border: 1px solid #e0e0e0;
-    border-radius: 5px;
-    padding: 5px;
-    background-color: white;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    display: grid;
+    grid-template-columns: 1fr 3fr 3fr;
+    gap: 10px;
+    padding: 5px 0;
+    border-bottom: 1px dashed #555;
+    font-size: 0.9em;
 }
 
 .move-number-col {
-    flex: 0 0 30px; 
-    text-align: right;
-    padding-right: 5px;
     font-weight: bold;
-    color: #555;
-    border-right: 1px solid #eee;
+    color: #aaa;
 }
 
 .move-detail-col {
-    flex-grow: 1;
-    padding-left: 10px;
     display: flex;
     flex-direction: column;
+    justify-content: center;
 }
 
 .move-white, .move-black {
-    font-weight: bold;
-    font-size: 1.1em;
-    color: #333;
+    padding: 2px 5px;
+    border-radius: 3px;
+    text-align: center;
 }
+
+.move-white { background-color: #666; color: #fff; }
+.move-black { background-color: #333; color: #ccc; }
 
 .move-description {
-    font-size: 0.8em;
-    color: #666;
-    margin-top: 3px;
-    display: flex;
-    align-items: center;
-    font-style: italic;
-}
-.desc-icon {
-    margin-right: 5px;
-    font-size: 1.1em;
+    font-size: 0.75em;
+    color: #ccc;
+    margin-top: 2px;
 }
 
-.move-controls {
+/* =========================================== */
+/* CHAT BOX */
+/* =========================================== */
+
+.chat-box {
+    background-color: #444;
+    padding: 10px;
+    border-radius: 6px;
     display: flex;
-    justify-content: center;
-    padding: 10px 0;
-    border-top: 1px solid #eee;
+    flex-direction: column;
+    flex-grow: 1;
+    min-height: 200px;
 }
 
-.control-btn {
-    background: #e0e0e0;
-    border: 1px solid #ccc;
-    padding: 5px 10px;
-    margin: 0 3px;
-    cursor: pointer;
-    border-radius: 4px;
-    font-weight: bold;
-    transition: background-color 0.2s;
-}
-.control-btn:hover:not(:disabled) {
-    background: #ccc;
-}
-.control-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
+.chat-room {
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column-reverse; /* Tin nhắn mới nhất lên trên */
+    padding: 5px;
+    border: 1px solid #555;
+    margin-bottom: 10px;
 }
 
-.online-status-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding-top: 10px;
-    border-top: 1px solid #eee;
+.chat-room p {
+    margin: 2px 0;
     font-size: 0.9em;
-    color: #333;
-}
-.status-dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 8px;
-}
-.status-dot.online {
-    background-color: #28a745; 
-    box-shadow: 0 0 5px #28a745;
+    word-wrap: break-word;
 }
 
+.chat-room p span {
+    font-weight: bold;
+    color: #66bb6a;
+}
 
-/* ==================================== */
-/* 7. MODAL & WIDGET (ĐÃ FIX: MODAL LÀ HỘP THOẠI NỔI) */
-/* ==================================== */
+.chat-room .bot-message {
+    color: #ff9800;
+}
 
-#modal-overlay {
-    position: fixed; /* Quan trọng: Giữ Modal cố định trên màn hình */
+.chat-input-area {
+    display: flex;
+    gap: 5px;
+}
+
+#chat-input {
+    flex-grow: 1;
+    padding: 8px;
+    border: none;
+    border-radius: 4px;
+    background-color: #555;
+    color: #fff;
+}
+
+.send-btn {
+    padding: 8px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.send-btn:hover {
+    background-color: #45a049;
+}
+
+/* =========================================== */
+/* MODAL & BUTTONS */
+/* =========================================== */
+
+.modal-overlay {
+    position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0, 0, 0, 0.6);
-    display: none; /* Mặc định ẩn, sẽ được JS bật lên khi cần */
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    visibility: hidden;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: visibility 0s, opacity 0.3s;
 }
 
-#modal-overlay.visible {
-    display: flex;
+.modal-overlay.visible {
+    visibility: visible;
     opacity: 1;
 }
 
 .modal-content {
-    background-color: white;
-    padding: 30px 40px;
-    border-radius: 15px;
+    background-color: #383838;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.8);
     width: 90%;
-    max-width: 450px;
-    box-shadow: 0 5px 25px rgba(0, 0, 0, 0.4);
-    position: relative;
-    border: 3px solid var(--color-dark-orange); /* Viền màu cam nổi bật */
+    max-width: 400px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.modal-content h2 {
-    color: var(--color-dark-orange); 
-    text-align: center;
-    margin-bottom: 25px;
-    font-size: 1.8em;
-}
-
-.close-modal-btn {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 30px;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    color: #888;
-    transition: color 0.2s;
-}
-.close-modal-btn:hover {
-    color: var(--color-danger);
-}
-
-.setting-group {
-    margin-bottom: 20px;
-}
-
-.setting-group label {
-    display: block;
+.modal-content label {
     font-weight: bold;
-    margin-bottom: 8px;
-    color: #555;
-}
-
-.modal-content input[type="text"], 
-.modal-content .custom-select-wrapper select {
-    width: 100%;
-    padding: 10px;
-    border: 2px solid var(--color-dark-orange);
-    border-radius: 6px;
-    font-size: 1em;
-    outline: none;
-    transition: border-color 0.2s;
-}
-.modal-content input[type="text"]:focus,
-.modal-content .custom-select-wrapper select:focus {
-    border-color: var(--color-modal-accent);
-}
-
-.hidden-input {
-    max-height: 0;
-    opacity: 0;
-    overflow: hidden;
-    transition: max-height 0.4s ease-out, opacity 0.4s ease-out;
-}
-.hidden-input.visible {
-    max-height: 100px; 
-    opacity: 1;
     margin-top: 10px;
+    color: #aaa;
 }
 
-/* Kiểu Dropdown tùy chỉnh */
-.custom-select-wrapper {
-    position: relative;
-}
-.custom-select-wrapper select {
-    appearance: none;
-    -webkit-appearance: none;
-    background-color: #fff;
-    cursor: pointer;
-    padding-right: 30px; 
-}
-.custom-arrow {
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    transform: translateY(-50%);
-    width: 0; 
-    height: 0; 
-    border-left: 5px solid transparent;
-    border-right: 5px solid transparent;
-    border-top: 5px solid var(--color-dark-orange);
-    pointer-events: none;
+.modal-content input[type="text"], .modal-content select {
+    padding: 10px;
+    border: 1px solid #555;
+    border-radius: 5px;
+    background-color: #444;
+    color: #f0f0f0;
+    font-size: 1em;
 }
 
-/* Nút Cấp độ */
-.selection-buttons {
+.level-selection {
     display: flex;
     gap: 5px;
     flex-wrap: wrap;
-    justify-content: center;
 }
 
 .level-btn {
     flex-grow: 1;
-    min-width: 35px;
-    padding: 8px 5px;
-    border: 2px solid var(--color-dark-orange);
-    background-color: transparent;
-    color: var(--color-dark-orange);
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.2s, color 0.2s, transform 0.1s;
-}
-.level-btn.active, .level-btn:hover {
-    background-color: var(--color-dark-orange);
+    padding: 10px;
+    border: 1px solid #555;
+    background-color: #555;
     color: white;
-    transform: scale(1.05);
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.2s;
 }
 
-/* Nút Bắt đầu */
+.level-btn.active {
+    background-color: #4CAF50;
+    border-color: #4CAF50;
+}
+
+.level-btn:hover:not(.active) {
+    background-color: #666;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
 #start-match-btn {
-    display: block;
-    width: 100%;
-    padding: 15px;
-    margin-top: 30px;
-    background-color: var(--color-dark-orange);
+    background-color: #4CAF50;
+}
+
+.close-modal-btn {
+    background-color: #f44336;
+}
+
+.modal-actions button {
+    padding: 10px 20px;
     color: white;
     border: none;
-    border-radius: 8px;
-    font-size: 1.4em;
-    font-weight: bold;
+    border-radius: 5px;
     cursor: pointer;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    transition: background-color 0.2s, transform 0.1s;
+    transition: background-color 0.3s;
 }
 
-#start-match-btn:hover {
-    background-color: var(--color-modal-accent);
-    transform: translateY(-2px);
-}
+/* =========================================== */
+/* CLOCK WIDGET (KÉO THẢ) */
+/* =========================================== */
 
-/* 8. TIME WIDGET */
-
-#time-widget {
+.time-widget {
     position: fixed;
-    right: 20px; 
-    bottom: 20px; 
+    bottom: 20px;
+    right: 20px;
     width: 200px;
-    background-color: #ffe0b2; /* Màu cam nhạt */
-    border: 1px solid var(--color-dark-orange);
-    border-radius: var(--border-radius);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    padding: 10px;
-    font-size: 0.9em;
+    background-color: #1a1a1a;
+    border: 1px solid #4CAF50;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6);
+    z-index: 999;
     cursor: grab;
-    z-index: 900;
+    transition: transform 0.1s;
 }
 
 .draggable-header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 5px 10px;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-    padding-bottom: 5px;
-    border-bottom: 1px solid var(--color-dark-orange);
-    margin-bottom: 8px;
+    justify-content: flex-end;
 }
 
 .close-widget-btn {
-    background: none;
-    border: none;
-    font-size: 18px;
+    font-size: 1.2em;
     cursor: pointer;
-    color: #555;
+    font-weight: bold;
 }
 
-.time-content div {
-    margin-bottom: 5px;
+.time-content {
+    padding: 10px;
+    font-size: 0.9em;
 }
 
-.time-setting-btn {
-    width: 100%;
-    padding: 5px;
-    margin-top: 8px;
-    background-color: var(--color-dark-orange);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-}
-.time-setting-btn:hover {
-    background-color: var(--color-modal-accent);
-}
+/* =========================================== */
+/* LANGUAGE SELECTOR */
+/* =========================================== */
 
-/* BUTTONS CHUNG */
-button {
-    font-family: var(--font-family);
+.language-selector .lang-btn {
+    background: #333;
+    color: #ccc;
+    border: 1px solid #555;
+    padding: 5px 8px;
     cursor: pointer;
-    transition: background-color 0.2s;
-}
-.play-btn, .rules-btn, .news-btn {
-    background-color: #f8f9fa;
-    color: #333;
-    border: 1px solid #ccc;
-    padding: 8px 15px;
+    margin-left: 5px;
     border-radius: 4px;
 }
-.play-btn:hover, .rules-btn:hover {
-    background-color: #e2e6ea;
+
+.language-selector .lang-btn.active {
+    background: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
 }
 
-/* UTILITY CLASSES */
-.white-turn {
-    color: white;
-    background-color: var(--color-primary);
-    padding: 2px 8px;
-    border-radius: 3px;
+/* =========================================== */
+/* RESPONSIVENESS */
+/* =========================================== */
+
+@media (max-width: 992px) {
+    #play-screen {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .game-area {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .info-sidebar {
+        width: 100%;
+        max-width: 600px; /* Giới hạn chiều rộng Sidebar trên màn hình nhỏ */
+    }
+
+    .board-wrapper {
+        width: 90%;
+        max-width: 450px; 
+    }
 }
 
-.black-turn {
-    color: black;
-    background-color: #333;
-    color: white;
-    padding: 2px 8px;
-    border-radius: 3px;
+@media (max-width: 480px) {
+    h1 {
+        font-size: 2em;
+    }
+
+    .square {
+        font-size: 2em;
+    }
+    
+    .modal-content {
+        padding: 20px;
+    }
+    
+    .time-widget {
+        width: 150px;
+        font-size: 0.8em;
+    }
 }
